@@ -1,0 +1,247 @@
+// prisma/schema.prisma
+// Adega Express - Schema completo
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CLIENTE
+  ATENDENTE
+  ADMINISTRADOR
+  ENTREGADOR
+}
+
+enum OrderStatus {
+  PENDENTE
+  CONFIRMADO
+  SEPARADO
+  EM_ROTA
+  ENTREGUE
+  CANCELADO
+}
+
+enum PaymentMethod {
+  PIX
+  CARTAO
+}
+
+enum PaymentStatus {
+  PENDENTE
+  PAGO
+  ESTORNO_PENDENTE
+  ESTORNADO
+}
+
+enum DiscountType {
+  PERCENTUAL
+  FIXO
+}
+
+enum DeliveryStatus {
+  AGUARDANDO
+  SAIU_PARA_ENTREGA
+  ENTREGUE
+}
+
+enum StockMovementType {
+  ENTRADA
+  SAIDA
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  name          String    @db.VarChar(150)
+  email         String    @unique @db.VarChar(200)
+  cpf           String?   @unique @db.VarChar(14)
+  password_hash String    @db.VarChar(255)
+  role          Role      @default(CLIENTE)
+  birth_date    DateTime? @db.Date
+  created_at    DateTime  @default(now())
+  active        Boolean   @default(true)
+  token_version Int       @default(0)
+
+  addresses  Address[]
+  orders     Order[]
+  deliveries Delivery[]
+
+  @@map("users")
+}
+
+model Address {
+  id           Int     @id @default(autoincrement())
+  user_id      Int
+  street       String  @db.VarChar(200)
+  number       String  @db.VarChar(20)
+  complement   String? @db.VarChar(100)
+  neighborhood String  @db.VarChar(100)
+  city         String  @db.VarChar(100)
+  state        String  @db.Char(2)
+  zip          String  @db.VarChar(9)
+  is_default   Boolean @default(false)
+  archived     Boolean @default(false)
+
+  user   User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([user_id])
+  @@map("addresses")
+}
+
+model Category {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique @db.VarChar(100)
+  description String? @db.Text
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id             Int     @id @default(autoincrement())
+  name           String  @db.VarChar(200)
+  description    String? @db.Text
+  category_id    Int
+  price          Decimal @db.Decimal(10, 2)
+  volume_ml      Int
+  abv_percent    Decimal @db.Decimal(5, 2)
+  brand          String  @db.VarChar(150)
+  stock_quantity Int     @default(0)
+  image_url      String? @db.VarChar(500)
+  active         Boolean @default(true)
+
+  category        Category        @relation(fields: [category_id], references: [id])
+  order_items     OrderItem[]
+  stock_movements StockMovement[]
+
+  @@index([category_id])
+  @@map("products")
+}
+
+model Coupon {
+  id             Int          @id @default(autoincrement())
+  code           String       @unique @db.VarChar(50)
+  discount_type  DiscountType
+  discount_value Decimal      @db.Decimal(10, 2)
+  valid_from     DateTime     @db.Date
+  valid_until    DateTime     @db.Date
+  active         Boolean      @default(true)
+
+  orders Order[]
+
+  @@map("coupons")
+}
+
+model Order {
+  id             Int           @id @default(autoincrement())
+  user_id        Int
+  address_id     Int
+  status         OrderStatus   @default(PENDENTE)
+  total          Decimal       @db.Decimal(10, 2)
+  payment_method PaymentMethod
+  coupon_id      Int?
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @updatedAt
+  subtotal       Decimal       @default(0) @db.Decimal(10, 2)
+  discount       Decimal       @default(0) @db.Decimal(10, 2)
+  shipping_fee   Decimal       @default(0) @db.Decimal(10, 2)
+  address_snapshot Json?
+  payment_status PaymentStatus @default(PENDENTE)
+  paid_at        DateTime?
+  idempotency_key String?       @db.VarChar(100)
+  request_hash   String?        @db.Char(64)
+  cancellation_reason String?  @db.VarChar(300)
+
+  user     User        @relation(fields: [user_id], references: [id])
+  address  Address     @relation(fields: [address_id], references: [id])
+  coupon   Coupon?     @relation(fields: [coupon_id], references: [id])
+  items    OrderItem[]
+  delivery Delivery?
+  history  OrderHistory[]
+  payments PaymentRecord[]
+
+  @@index([user_id])
+  @@index([address_id])
+  @@index([coupon_id])
+  @@index([status])
+  @@index([created_at])
+  @@unique([user_id, idempotency_key])
+  @@map("orders")
+}
+
+model OrderItem {
+  id         Int     @id @default(autoincrement())
+  order_id   Int
+  product_id Int
+  quantity   Int
+  unit_price Decimal @db.Decimal(10, 2)
+  product_name String @default("") @db.VarChar(200)
+
+  order   Order   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@index([order_id])
+  @@index([product_id])
+  @@map("order_items")
+}
+
+model Delivery {
+  id           Int            @id @default(autoincrement())
+  order_id     Int            @unique
+  deliverer_id Int?
+  status       DeliveryStatus @default(AGUARDANDO)
+  updated_at   DateTime       @updatedAt
+
+  order     Order  @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  deliverer User?  @relation(fields: [deliverer_id], references: [id])
+
+  @@index([deliverer_id])
+  @@map("deliveries")
+}
+
+model StockMovement {
+  id         Int               @id @default(autoincrement())
+  product_id Int
+  type       StockMovementType
+  quantity   Int
+  reason     String?           @db.VarChar(300)
+  created_at DateTime          @default(now())
+  actor_id   Int?
+
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@index([product_id])
+  @@map("stock_movements")
+}
+
+model OrderHistory {
+  id         Int @id @default(autoincrement())
+  order_id   Int
+  status     OrderStatus
+  actor_id   Int
+  reason     String? @db.VarChar(300)
+  created_at DateTime @default(now())
+  order      Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id, created_at])
+  @@map("order_history")
+}
+
+model PaymentRecord {
+  id         Int @id @default(autoincrement())
+  order_id   Int
+  status     PaymentStatus
+  actor_id   Int
+  reference  String @db.VarChar(150)
+  created_at DateTime @default(now())
+  order      Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id])
+  @@map("payment_records")
+}

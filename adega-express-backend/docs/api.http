@@ -1,0 +1,122 @@
+# Exemplos para REST Client (VS Code) ou adaptação para Postman.
+# Substitua os valores. Não versione senhas ou tokens reais.
+@baseUrl = http://localhost:3001
+@adminEmail = admin@example.com
+@adminPassword = SUBSTITUA_LOCALMENTE
+@clientEmail = cliente@example.com
+@clientPassword = SUBSTITUA_LOCALMENTE
+@addressId = 1
+@productId = 1
+@orderId = 1
+@deliveryId = 1
+@delivererId = 1
+
+### Saúde
+GET {{baseUrl}}/health/ready
+
+### Login administrador
+# @name adminLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{"email":"{{adminEmail}}","password":"{{adminPassword}}"}
+
+### Criar categoria
+POST {{baseUrl}}/categories
+Authorization: Bearer {{adminLogin.response.body.data.token}}
+Content-Type: application/json
+
+{"name":"Cervejas","description":"Cervejas em lata e garrafa"}
+
+### Criar cliente
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{"name":"Cliente de Demonstração","email":"{{clientEmail}}","password":"{{clientPassword}}","birth_date":"2000-01-01"}
+
+### Login cliente
+# @name clientLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{"email":"{{clientEmail}}","password":"{{clientPassword}}"}
+
+### Endereço do cliente (copie o ID da resposta para addressId)
+POST {{baseUrl}}/addresses
+Authorization: Bearer {{clientLogin.response.body.data.token}}
+Content-Type: application/json
+
+{"street":"Rua Exemplo","number":"10","neighborhood":"Centro","city":"São Paulo","state":"SP","zip":"01001-000","is_default":true}
+
+### Catálogo (copie um ID para productId)
+GET {{baseUrl}}/products?page=1&limit=20
+
+### Cotação; não reserva estoque
+POST {{baseUrl}}/orders/quote
+Authorization: Bearer {{clientLogin.response.body.data.token}}
+Content-Type: application/json
+
+{"address_id":{{addressId}},"payment_method":"PIX","items":[{"product_id":{{productId}},"quantity":1}]}
+
+### Compra; mesma chave + mesmo corpo = mesmo pedido
+POST {{baseUrl}}/orders
+Authorization: Bearer {{clientLogin.response.body.data.token}}
+Idempotency-Key: demonstracao-compra-001
+Content-Type: application/json
+
+{"address_id":{{addressId}},"payment_method":"PIX","items":[{"product_id":{{productId}},"quantity":1}]}
+
+### Pedidos do cliente
+GET {{baseUrl}}/orders/me
+Authorization: Bearer {{clientLogin.response.body.data.token}}
+
+### Confirmar
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{adminLogin.response.body.data.token}}
+Content-Type: application/json
+
+{"status":"CONFIRMADO"}
+
+### Separar (cria a entrega)
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{adminLogin.response.body.data.token}}
+Content-Type: application/json
+
+{"status":"SEPARADO"}
+
+### Consultar entregas
+GET {{baseUrl}}/deliveries
+Authorization: Bearer {{adminLogin.response.body.data.token}}
+
+### Atribuir entregador existente (cadastre-o antes em POST /staff)
+PATCH {{baseUrl}}/deliveries/{{deliveryId}}/assign
+Authorization: Bearer {{adminLogin.response.body.data.token}}
+Content-Type: application/json
+
+{"deliverer_id":{{delivererId}}}
+
+### Confirmar pagamento somente depois da conferência externa
+PATCH {{baseUrl}}/orders/{{orderId}}/payment
+Authorization: Bearer {{adminLogin.response.body.data.token}}
+Content-Type: application/json
+
+{"status":"PAGO","reference":"DEMONSTRAÇÃO ACADÊMICA - recebimento simulado"}
+
+### Entrada manual de estoque
+POST {{baseUrl}}/products/{{productId}}/stock
+Authorization: Bearer {{adminLogin.response.body.data.token}}
+Content-Type: application/json
+
+{"type":"ENTRADA","quantity":12,"reason":"Reposição de demonstração"}
+
+### Relatório (ajuste o período)
+GET {{baseUrl}}/reports/sales?from=2026-09-01&to=2026-09-30
+Authorization: Bearer {{adminLogin.response.body.data.token}}
+
+### Histórico do pedido
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{adminLogin.response.body.data.token}}
+
+### Logout: revoga todas as sessões do cliente
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{clientLogin.response.body.data.token}}
