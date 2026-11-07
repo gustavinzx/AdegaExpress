@@ -196,6 +196,7 @@ async function seedDemo() {
       volume_ml: 500,
       abv_percent: '0.00',
       stock_quantity: 80,
+      image_url: '/products/agua-minalba-500ml.jpg',
       description: 'Água mineral natural pura de fonte montanhosa, embalagem 500ml prática.',
     },
     {
@@ -206,6 +207,7 @@ async function seedDemo() {
       volume_ml: 500,
       abv_percent: '0.00',
       stock_quantity: 65,
+      image_url: '/products/agua-sao-lourenco-500ml.jpg',
       description: 'Água mineral naturalmente gaseificada com borbulhas finas e equilíbrio mineral.',
     },
     {
@@ -216,6 +218,7 @@ async function seedDemo() {
       volume_ml: 1500,
       abv_percent: '0.00',
       stock_quantity: 40,
+      image_url: '/products/agua-prata-1500ml.jpg',
       description: 'Embalagem familiar de 1,5L com baixa mineralidade ideal para a mesa diária.',
     },
     {
@@ -226,6 +229,7 @@ async function seedDemo() {
       volume_ml: 350,
       abv_percent: '0.00',
       stock_quantity: 0, // ESTOQUE ZERO (Em Falta)
+      image_url: '/products/agua-tonica-antarctica-350ml.jpg',
       description: 'Refrigerante de água tônica com quinino e toques cítricos, zero açúcar.',
     },
 
@@ -238,6 +242,7 @@ async function seedDemo() {
       volume_ml: 1000,
       abv_percent: '0.00',
       stock_quantity: 35,
+      image_url: '/products/suco-aurora-uva-1000ml.jpg',
       description: 'Suco de uva integral 100% fruta, sem conservantes e rico em polifenóis.',
     },
     {
@@ -248,6 +253,7 @@ async function seedDemo() {
       volume_ml: 900,
       abv_percent: '0.00',
       stock_quantity: 50,
+      image_url: '/products/suco-natural-one-laranja-900ml.jpg',
       description: 'Laranja fresca espremida a frio, sabor doce natural e alto teor de Vitamina C.',
     },
     {
@@ -258,6 +264,7 @@ async function seedDemo() {
       volume_ml: 1000,
       abv_percent: '0.00',
       stock_quantity: 28,
+      image_url: '/products/suco-campo-largo-maca-1000ml.jpg',
       description: 'Suco de maçã clarificado 100% puro, sabor suave e equilibrado.',
     },
     {
@@ -268,6 +275,7 @@ async function seedDemo() {
       volume_ml: 1000,
       abv_percent: '0.00',
       stock_quantity: 30,
+      image_url: '/products/nectar-maguary-maracuja-1000ml.jpg',
       description: 'Polpa selecionada de maracujá, sabor marcante e refrescância cítrica.',
     },
 
@@ -280,6 +288,7 @@ async function seedDemo() {
       volume_ml: 350,
       abv_percent: '0.00',
       stock_quantity: 90,
+      image_url: '/products/refri-guarana-antarctica-350ml.jpg',
       description: 'O clássico refrigerante nacional produzido com sementes legítimas de guaraná da Amazônia.',
     },
     {
@@ -290,6 +299,7 @@ async function seedDemo() {
       volume_ml: 350,
       abv_percent: '0.00',
       stock_quantity: 120,
+      image_url: '/products/refri-coca-cola-350ml.jpg',
       description: 'Refrigerante de cola tradicional em lata de 350ml gelada.',
     },
     {
@@ -300,6 +310,7 @@ async function seedDemo() {
       volume_ml: 500,
       abv_percent: '0.00',
       stock_quantity: 45,
+      image_url: '/products/refri-sprite-lemon-500ml.jpg',
       description: 'Levemente gaseificada com suco de limão natural, refrescância instantânea.',
     },
     {
@@ -310,6 +321,7 @@ async function seedDemo() {
       volume_ml: 350,
       abv_percent: '0.00',
       stock_quantity: 25,
+      image_url: '/products/refri-ginger-ale-350ml.jpg',
       description: 'Mixer e refrigerante botânico de gengibre aromático e toques cítricos.',
     },
 
@@ -322,6 +334,7 @@ async function seedDemo() {
       volume_ml: 1500,
       abv_percent: '0.00',
       stock_quantity: 40,
+      image_url: '/products/cha-matte-leao-1500ml.jpg',
       description: 'Tostado de erva-mate enriquecido com suco de limão natural, formato 1,5L.',
     },
     {
@@ -332,6 +345,7 @@ async function seedDemo() {
       volume_ml: 450,
       abv_percent: '0.00',
       stock_quantity: 55,
+      image_url: '/products/cha-fuze-pessego-450ml.jpg',
       description: 'Folhas de chá preto infusionadas com sabor envolvente de pêssego.',
     },
     {
@@ -342,6 +356,7 @@ async function seedDemo() {
       volume_ml: 1000,
       abv_percent: '0.00',
       stock_quantity: 32,
+      image_url: '/products/cha-feel-good-verde-1000ml.jpg',
       description: 'Chá verde antioxidante aromatizado com limão e hortelã fresca, zero calorias.',
     },
     {
@@ -352,6 +367,7 @@ async function seedDemo() {
       volume_ml: 450,
       abv_percent: '0.00',
       stock_quantity: 0, // ESTOQUE ZERO (Em Falta)
+      image_url: '/products/cha-wewi-hibisco-450ml.jpg',
       description: 'Infusão orgânica botânica de flores de hibisco com notas de frutas vermelhas.',
     },
   ];
