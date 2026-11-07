@@ -17,7 +17,8 @@ const schema = z.object({
   SHIPPING_FEE: z
     .string()
     .regex(/^\d{1,5}(\.\d{1,2})?$/)
-    .default('0.00'),
+    .default('7.90'),
+  ORDER_EXPIRATION_MINUTES: z.coerce.number().int().min(1).default(30),
   DELIVERY_CITIES: z.string().default(''),
   DELIVERY_STATE: z
     .string()

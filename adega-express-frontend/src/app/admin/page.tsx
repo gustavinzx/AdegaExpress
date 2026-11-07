@@ -572,7 +572,7 @@ export default function AdminDashboard() {
                 : 'text-zinc-400 hover:bg-zinc-900 hover:text-amber-500'
             }`}
           >
-            <ShoppingBag size={16} /> Pedidos & Pagamentos
+            <ShoppingBag size={16} /> Pedidos &amp; Entregas
           </button>
 
           {isAdmin && (

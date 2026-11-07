@@ -22,7 +22,7 @@ export default function Footer() {
                   ADEGA <span className="text-[#c9a256] italic font-normal">Express</span>
                 </span>
                 <span className="text-[9px] uppercase tracking-[0.26em] text-[#9e9589] mt-1">
-                  Maison de Bebidas Não Alcoólicas
+                  bebidas não alcoólicas
                 </span>
               </div>
             </Link>

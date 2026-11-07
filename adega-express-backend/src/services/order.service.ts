@@ -6,8 +6,7 @@ import { transaction } from '../lib/transaction';
 import { AppError } from '../lib/errors';
 import {
   ALLOWED_CATEGORIES,
-  ORDER_EXPIRATION_MS,
-  businessDate,
+    businessDate,
   startBusinessDay,
   discountedTotal,
   assertOrderTransition,
@@ -29,8 +28,11 @@ const detail = {
   payments: { orderBy: { id: 'asc' as const } },
 } satisfies Prisma.OrderInclude;
 
-export async function expirePendingOrders(now = new Date()): Promise<number> {
-  const cutoff = new Date(now.getTime() - ORDER_EXPIRATION_MS);
+export async function expirePendingOrders(
+  now = new Date(),
+  expirationMs = config.ORDER_EXPIRATION_MINUTES * 60 * 1000,
+): Promise<number> {
+  const cutoff = new Date(now.getTime() - expirationMs);
   const expiredCandidates = await prisma.order.findMany({
     where: {
       status: 'PENDENTE',

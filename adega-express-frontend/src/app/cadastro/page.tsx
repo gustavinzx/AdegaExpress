@@ -58,7 +58,7 @@ export default function Cadastro() {
                 ADEGA <span className="text-[#c9a256] italic font-normal">Express</span>
               </span>
               <span className="text-[9px] uppercase tracking-[0.24em] text-[#9e9589]">
-                Maison Não Alcoólica
+                bebidas não alcoólicas
               </span>
             </div>
           </Link>

@@ -3,6 +3,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Product } from '../types';
+import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
 
 export interface CartItem {
@@ -23,37 +24,49 @@ interface CartContextType {
 const CartContext = createContext<CartContextType>({} as CartContextType);
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    const loadStoredCart = async () => {
-      await Promise.resolve();
-      const stored = localStorage.getItem('cart');
-      if (stored) {
-        try {
-          const parsed: CartItem[] = JSON.parse(stored);
-          setItems(
-            parsed.filter(
-              (i) => i.product && i.product.stock_quantity > 0 && i.quantity > 0,
-            ),
-          );
-        } catch {
-          setItems([]);
-        }
-      }
-      setIsLoaded(true);
-    };
-    void loadStoredCart();
-  }, []);
+  // Cart belongs only to visitors or CLIENTE users; internal staff does not have a cart
+  const isClientOrGuest = !user || user.role === 'CLIENTE';
+  const storageKey = user?.id ? `cart_user_${user.id}` : 'cart_guest';
 
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('cart', JSON.stringify(items));
+    if (!isClientOrGuest) {
+      setItems([]);
+      setIsLoaded(true);
+      return;
     }
-  }, [items, isLoaded]);
+
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        const parsed: CartItem[] = JSON.parse(stored);
+        setItems(
+          parsed.filter((i) => i.product && i.product.stock_quantity > 0 && i.quantity > 0),
+        );
+      } else {
+        setItems([]);
+      }
+    } catch {
+      setItems([]);
+    }
+    setIsLoaded(true);
+  }, [user?.id, user?.role, isClientOrGuest, storageKey]);
+
+  useEffect(() => {
+    if (isLoaded && isClientOrGuest) {
+      localStorage.setItem(storageKey, JSON.stringify(items));
+    }
+  }, [items, isLoaded, isClientOrGuest, storageKey]);
 
   const addItem = (product: Product, quantity = 1): boolean => {
+    if (!isClientOrGuest) {
+      toast.error('Perfis internos operacionais não possuem sacola de compras.');
+      return false;
+    }
+
     if (!product.in_stock || product.stock_quantity <= 0) {
       toast.error('Este produto está em falta e não pode ser adicionado ao carrinho.');
       return false;
@@ -115,13 +128,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = () => {
     setItems([]);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(storageKey);
+    }
   };
 
   const total = items.reduce(
     (acc, item) => acc + parseFloat(item.product.price) * item.quantity,
     0,
   );
-  const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
+  const itemCount = isClientOrGuest ? items.reduce((acc, item) => acc + item.quantity, 0) : 0;
 
   return (
     <CartContext.Provider

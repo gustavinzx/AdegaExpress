@@ -70,7 +70,7 @@ export default function Navbar() {
                 ADEGA <span className="text-[#c9a256] italic font-normal">Express</span>
               </span>
               <span className="text-[9px] uppercase tracking-[0.28em] text-[#9e9589] mt-1">
-                Boutique de Bebidas Sem Álcool
+                bebidas não alcoólicas
               </span>
             </div>
           </Link>
@@ -104,20 +104,22 @@ export default function Navbar() {
               <span className="hidden lg:inline">Ajuda</span>
             </Link>
 
-            {/* Cart Trigger */}
-            <Link
-              href="/carrinho"
-              className="relative inline-flex items-center gap-2.5 h-11 px-4 rounded-full bg-[#181411] hover:bg-[#221c17] border border-[#c9a256]/25 text-[#f4efe6] transition-all"
-              title="Sacola de Compras"
-            >
-              <ShoppingBag size={17} className="text-[#c9a256]" />
-              <span className="hidden sm:inline text-xs font-medium tracking-wider uppercase">
-                Sacola
-              </span>
-              <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#c9a256] text-[#0e0c0a] text-[11px] font-bold font-mono">
-                {itemCount}
-              </span>
-            </Link>
+            {/* Cart Trigger (Apenas clientes e visitantes) */}
+            {(!isAuthenticated || user?.role === 'CLIENTE') && (
+              <Link
+                href="/carrinho"
+                className="relative inline-flex items-center gap-2.5 h-11 px-4 rounded-full bg-[#181411] hover:bg-[#221c17] border border-[#c9a256]/25 text-[#f4efe6] transition-all"
+                title="Sacola de Compras"
+              >
+                <ShoppingBag size={17} className="text-[#c9a256]" />
+                <span className="hidden sm:inline text-xs font-medium tracking-wider uppercase">
+                  Sacola
+                </span>
+                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#c9a256] text-[#0e0c0a] text-[11px] font-bold font-mono">
+                  {itemCount}
+                </span>
+              </Link>
+            )}
 
             {isAuthenticated ? (
               <div className="flex items-center gap-2 pl-2 border-l border-[#c9a256]/15">
