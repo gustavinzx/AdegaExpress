@@ -16,6 +16,10 @@ import {
   ChevronRight,
   Info,
   ArrowRight,
+  History,
+  MapPin,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -50,10 +54,11 @@ export default function Pedidos() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 5;
+  const limit = 10;
 
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
@@ -123,7 +128,7 @@ export default function Pedidos() {
         <div className="mb-10 border-b border-[#c9a256]/15 pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#c9a256]">
-              Histórico &amp; Rastreabilidade • UC05
+              Histórico &amp; Rastreabilidade
             </span>
             <h1 className="font-serif text-3xl sm:text-5xl font-semibold text-[#f4efe6] mt-1">
               Meus Pedidos
@@ -141,9 +146,9 @@ export default function Pedidos() {
           <Info size={16} className="text-[#c9a256] shrink-0 mt-0.5" />
           <span>
             Pedidos em status <strong className="text-[#f4efe6]">PENDENTE</strong> aguardam a
-            confirmação manual do pagamento demonstrativo por um Atendente ou Administrador (RN08).
+            confirmação manual do pagamento demonstrativo por um Atendente ou Administrador.
             Caso não sejam confirmados em até <strong className="text-[#f4efe6]">30 minutos</strong>
-            , expiram automaticamente devolvendo os itens ao estoque (RN07).
+            , expiram automaticamente devolvendo os itens ao estoque.
           </span>
         </div>
 
@@ -179,6 +184,7 @@ export default function Pedidos() {
           <div className="space-y-6">
             {orders.map((order) => {
               const stepIdx = ORDER_STEPS.findIndex((s) => s.key === order.status);
+              const isExpanded = expandedOrderId === order.id;
 
               return (
                 <article
@@ -289,19 +295,45 @@ export default function Pedidos() {
                     </div>
 
                     <div className="border-t border-[#c9a256]/15 pt-4 flex flex-wrap justify-between items-end gap-4">
-                      <div className="text-xs text-[#9e9589] space-y-1 font-mono">
-                        {order.subtotal && (
-                          <p>
-                            Subtotal: R$ {parseFloat(order.subtotal).toFixed(2).replace('.', ',')}
-                            {order.discount && parseFloat(order.discount) > 0
-                              ? ` • Desconto: -R$ ${parseFloat(order.discount).toFixed(2).replace('.', ',')}`
-                              : ''}
-                            {order.shipping_fee
-                              ? ` • Entrega: R$ ${parseFloat(order.shipping_fee).toFixed(2).replace('.', ',')}`
-                              : ''}
-                          </p>
-                        )}
+                      <div className="space-y-2">
+                        <div className="text-xs text-[#9e9589] font-mono">
+                          {order.subtotal && (
+                            <p>
+                              Subtotal: R$ {parseFloat(order.subtotal).toFixed(2).replace('.', ',')}
+                              {order.discount && parseFloat(order.discount) > 0
+                                ? ` • Desconto: -R$ ${parseFloat(order.discount).toFixed(2).replace('.', ',')}`
+                                : ''}
+                              {order.shipping_fee
+                                ? ` • Entrega: R$ ${parseFloat(order.shipping_fee).toFixed(2).replace('.', ',')}`
+                                : ''}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 pt-1">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedOrderId(isExpanded ? null : order.id)
+                            }
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-[#c9a256] hover:text-[#e0be74] transition-colors cursor-pointer"
+                          >
+                            <History size={14} />
+                            <span>
+                              {isExpanded ? 'Ocultar Histórico' : 'Ver Histórico & Detalhes'}
+                            </span>
+                            {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                          </button>
+
+                          <Link
+                            href={`/pedidos/${order.id}`}
+                            className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#f4efe6]/80 hover:text-[#c9a256] transition-colors"
+                          >
+                            <span>Abrir Página de Detalhes</span>
+                            <ArrowRight size={13} />
+                          </Link>
+                        </div>
                       </div>
+
                       <div className="text-right">
                         <span className="block text-[10px] uppercase tracking-[0.18em] text-[#9e9589]">
                           Total Demonstrativo
@@ -311,6 +343,90 @@ export default function Pedidos() {
                         </span>
                       </div>
                     </div>
+
+                    {/* Expanded Order History & Delivery Details */}
+                    {isExpanded && (
+                      <div className="mt-6 pt-6 border-t border-[#c9a256]/15 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Address & Payment Confirmation */}
+                        <div className="space-y-4">
+                          {order.address_snapshot && (
+                            <div className="rounded-2xl border border-[#c9a256]/15 bg-[#0e0c0a] p-4 space-y-1.5">
+                              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.18em] text-[#c9a256]">
+                                <MapPin size={13} /> Endereço Registrado no Pedido
+                              </span>
+                              <p className="text-sm font-semibold text-[#f4efe6]">
+                                {order.address_snapshot.street}, {order.address_snapshot.number}
+                                {order.address_snapshot.complement
+                                  ? ` — ${order.address_snapshot.complement}`
+                                  : ''}
+                              </p>
+                              <p className="text-xs text-[#9e9589]">
+                                {order.address_snapshot.neighborhood} •{' '}
+                                {order.address_snapshot.city}/{order.address_snapshot.state} (CEP{' '}
+                                {order.address_snapshot.zip})
+                              </p>
+                            </div>
+                          )}
+
+                          {order.payments && order.payments.length > 0 && (
+                            <div className="rounded-2xl border border-[#c9a256]/15 bg-[#0e0c0a] p-4 space-y-2">
+                              <span className="block text-[10px] font-mono uppercase tracking-[0.18em] text-[#c9a256]">
+                                Registros de Pagamento Demonstrativo
+                              </span>
+                              <ul className="space-y-2 text-xs">
+                                {order.payments.map((pay) => (
+                                  <li
+                                    key={pay.id}
+                                    className="flex justify-between items-start gap-2 border-b border-[#c9a256]/10 last:border-0 pb-1.5 last:pb-0"
+                                  >
+                                    <div>
+                                      <span className="font-semibold text-[#f4efe6]">
+                                        {pay.status} ({pay.method})
+                                      </span>
+                                      <p className="text-[#9e9589] text-[11px]">{pay.reference}</p>
+                                    </div>
+                                    <span className="font-mono text-[10px] text-[#9e9589] shrink-0">
+                                      {new Date(pay.created_at).toLocaleString('pt-BR')}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Order Status History Timeline */}
+                        <div className="rounded-2xl border border-[#c9a256]/15 bg-[#0e0c0a] p-4 space-y-3">
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.18em] text-[#c9a256]">
+                            <History size={13} /> Histórico de Status do Pedido
+                          </span>
+                          {order.history && order.history.length > 0 ? (
+                            <ol className="space-y-2.5 border-l border-[#c9a256]/30 ml-2 pl-4">
+                              {order.history.map((h) => (
+                                <li key={h.id} className="relative text-xs">
+                                  <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full bg-[#c9a256]" />
+                                  <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <strong className="font-mono text-[#f4efe6] uppercase">
+                                      {h.status}
+                                    </strong>
+                                    <span className="font-mono text-[10px] text-[#9e9589]">
+                                      {new Date(h.created_at).toLocaleString('pt-BR')}
+                                    </span>
+                                  </div>
+                                  {h.reason && (
+                                    <p className="text-[#9e9589] text-[11px] mt-0.5">{h.reason}</p>
+                                  )}
+                                </li>
+                              ))}
+                            </ol>
+                          ) : (
+                            <p className="text-xs text-[#9e9589]">
+                              Pedido criado em {new Date(order.created_at).toLocaleString('pt-BR')}.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </article>
               );
