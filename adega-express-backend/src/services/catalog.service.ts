@@ -24,13 +24,14 @@ const includeCategory = {
 } as const;
 export async function listProducts(input: z.infer<typeof schemas.productQuery>, admin = false) {
   const where: Prisma.ProductWhereInput = {
+    abv_percent: 0,
     ...(admin
-      ? input.active
-        ? { active: input.active === 'true' }
-        : {}
+      ? {
+          ...(input.active ? { active: input.active === 'true' } : {}),
+          category: { name: { in: [...ALLOWED_CATEGORIES] } },
+        }
       : {
           active: true,
-          abv_percent: 0,
           category: { active: true, name: { in: [...ALLOWED_CATEGORIES] } },
         }),
     category_id: input.category_id,
@@ -183,7 +184,7 @@ export async function stockHistory(product_id: number, page: schemas.Page) {
 export async function listCategories(input: z.infer<typeof schemas.categoryQuery>, admin = false) {
   const where: Prisma.CategoryWhereInput =
     admin && input.include_inactive === 'true'
-      ? {}
+      ? { name: { in: [...ALLOWED_CATEGORIES] } }
       : { active: true, name: { in: [...ALLOWED_CATEGORIES] } };
   const [items, count] = await prisma.$transaction([
     prisma.category.findMany({ where, ...pageArgs(input), orderBy: { name: 'asc' } }),

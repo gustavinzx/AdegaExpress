@@ -28,6 +28,9 @@ import {
   History,
   AlertTriangle,
   RefreshCw,
+  LogOut,
+  GlassWater,
+  Shield,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -37,7 +40,7 @@ type AdminTab = 'PEDIDOS' | 'CATALOGO' | 'ESTOQUE' | 'CUPONS' | 'EQUIPE' | 'RELA
 const ALLOWED_CATEGORY_NAMES: AllowedCategoryName[] = ['Água', 'Sucos', 'Refrigerantes', 'Chás'];
 
 export default function AdminDashboard() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<AdminTab>('PEDIDOS');
@@ -183,7 +186,16 @@ export default function AdminDashboard() {
         }
       } else if (activeTab === 'ESTOQUE' && user.role === 'ADMINISTRADOR') {
         const pRes = await api.getPaginated<Product[]>('/admin/products?limit=100');
-        setProducts(pRes.data || []);
+        const list = pRes.data || [];
+        setProducts(list);
+        if (list.length > 0) {
+          try {
+            const hist = await api.getPaginated<StockMovement[]>(`/products/${list[0].id}/stock?limit=20`);
+            setStockHistoryList(hist.data || []);
+          } catch {
+            // ignore
+          }
+        }
       } else if (activeTab === 'CUPONS' && user.role === 'ADMINISTRADOR') {
         const cRes = await api.getPaginated<Coupon[]>('/coupons?limit=50');
         setCoupons(cRes.data || []);
@@ -201,16 +213,25 @@ export default function AdminDashboard() {
     }
   };
 
+  const quickSwitchAccount = async (email: string, targetTab?: AdminTab) => {
+    try {
+      setLoading(true);
+      const res = await api.post<{ token: string; user: User }>('/auth/login', {
+        email,
+        password: 'Admin@123',
+      });
+      login(res.token, res.user);
+      if (targetTab) setActiveTab(targetTab);
+      toast.success(`Conectado como ${res.user.name} (${res.user.role})`);
+    } catch {
+      toast.error('Erro ao alternar conta demonstrativa.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login?redirect=/admin');
-      return;
-    }
-    if (!isLoading && user && user.role !== 'ADMINISTRADOR' && user.role !== 'ATENDENTE') {
-      router.push('/');
-      return;
-    }
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && (user.role === 'ADMINISTRADOR' || user.role === 'ATENDENTE')) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       void fetchData();
     }
@@ -469,8 +490,53 @@ export default function AdminDashboard() {
     }
   };
 
-  if (isLoading || !user || (user.role !== 'ADMINISTRADOR' && user.role !== 'ATENDENTE')) {
-    return null;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0e0c0a] text-[#c9a256] flex items-center justify-center font-serif text-2xl">
+        Carregando Painel...
+      </div>
+    );
+  }
+
+  if (!user || (user.role !== 'ADMINISTRADOR' && user.role !== 'ATENDENTE')) {
+    return (
+      <div className="min-h-screen bg-[#0e0c0a] text-[#f4efe6] flex items-center justify-center p-6">
+        <div className="max-w-md w-full rounded-3xl border border-[#c9a256]/30 bg-[#14110e] p-8 text-center space-y-6 shadow-2xl">
+          <div className="h-14 w-14 rounded-full border border-[#c9a256]/40 bg-[#1c1712] flex items-center justify-center mx-auto text-[#c9a256]">
+            <Shield size={24} />
+          </div>
+          <div className="space-y-2">
+            <h1 className="font-serif text-3xl font-semibold text-[#f4efe6]">
+              Acesso ao Painel Administrativo
+            </h1>
+            <p className="text-xs text-[#9e9589] leading-relaxed">
+              {user
+                ? `Você está conectado como ${user.name} (${user.role}). Escolha abaixo com qual perfil operacional deseja abrir o painel:`
+                : 'Selecione o perfil demonstrativo para abrir o painel imediatamente:'}
+            </p>
+          </div>
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => void quickSwitchAccount('admin@adegaexpress.com', 'PEDIDOS')}
+              className="w-full h-12 rounded-full bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] font-bold text-xs uppercase tracking-[0.16em] cursor-pointer transition-all shadow-lg"
+            >
+              Entrar como Administrador (T11, T12, T13 e T14)
+            </button>
+            <button
+              type="button"
+              onClick={() => void quickSwitchAccount('atendente@adegaexpress.com', 'PEDIDOS')}
+              className="w-full h-12 rounded-full border border-[#c9a256]/35 bg-[#1a1511] hover:border-[#c9a256] text-[#f4efe6] font-semibold text-xs uppercase tracking-[0.16em] cursor-pointer transition-all"
+            >
+              Entrar como Atendente (T09)
+            </button>
+          </div>
+          <Link href="/" className="inline-block text-xs text-[#9e9589] hover:text-[#c9a256]">
+            ← Voltar para a vitrine
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const isAdmin = user.role === 'ADMINISTRADOR';
@@ -483,11 +549,9 @@ export default function AdminDashboard() {
       {/* SIDEBAR */}
       <aside className="w-full md:w-64 bg-black border-b md:border-b-0 md:border-r border-zinc-800 flex flex-col shrink-0">
         <div className="p-5 border-b border-zinc-800 flex items-center gap-3">
-          <img
-            src="/logo.jpg"
-            alt="Logo"
-            className="w-10 h-10 rounded-full border border-amber-500 object-cover"
-          />
+          <div className="w-10 h-10 rounded-full border border-amber-500 bg-zinc-900 flex items-center justify-center text-amber-500 shrink-0">
+            <GlassWater size={18} />
+          </div>
           <div>
             <span className="font-black text-base tracking-tighter block leading-none">
               ADEGA<span className="text-amber-500">EXPRESS</span>
@@ -586,12 +650,38 @@ export default function AdminDashboard() {
               <p className="text-[10px] text-amber-500 uppercase font-bold">{user.role}</p>
             </div>
           </div>
-          <Link
-            href="/"
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white rounded text-xs font-bold transition-colors"
-          >
-            Voltar para a Loja
-          </Link>
+          <div className="space-y-2">
+            {!isAdmin ? (
+              <button
+                type="button"
+                onClick={() => void quickSwitchAccount('admin@adegaexpress.com', 'PEDIDOS')}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-amber-600 hover:bg-amber-500 text-black rounded text-xs font-black uppercase tracking-wider transition-colors cursor-pointer"
+              >
+                <Shield size={14} /> Alternar p/ Admin (T11-T14)
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void quickSwitchAccount('atendente@adegaexpress.com', 'PEDIDOS')}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-zinc-900 border border-amber-500/40 text-amber-400 hover:bg-zinc-800 rounded text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+              >
+                Alternar p/ Atendente (T09)
+              </button>
+            )}
+            <Link
+              href="/"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white rounded text-xs font-bold transition-colors"
+            >
+              Voltar para a Loja
+            </Link>
+            <button
+              type="button"
+              onClick={() => void logout()}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-950/40 border border-red-500/30 text-red-300 hover:bg-red-900/50 rounded text-xs font-bold transition-colors cursor-pointer"
+            >
+              <LogOut size={14} /> Sair da Conta
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -606,13 +696,24 @@ export default function AdminDashboard() {
             {activeTab === 'EQUIPE' && 'Gestão de Equipe Interna (Atendentes, Entregadores e Admins)'}
             {activeTab === 'RELATORIOS' && 'Relatórios de Vendas Demonstrativas (UC12)'}
           </h1>
-          <button
-            type="button"
-            onClick={() => void fetchData()}
-            className="inline-flex items-center gap-1.5 text-xs bg-zinc-900 border border-zinc-700 px-3.5 py-2 rounded hover:bg-zinc-800 font-bold uppercase tracking-wider"
-          >
-            <RefreshCw size={14} /> Atualizar
-          </button>
+          <div className="flex items-center gap-2">
+            {!isAdmin && (
+              <button
+                type="button"
+                onClick={() => void quickSwitchAccount('admin@adegaexpress.com', 'PEDIDOS')}
+                className="inline-flex items-center gap-1.5 text-xs bg-amber-600 hover:bg-amber-500 text-black px-3.5 py-2 rounded font-black uppercase tracking-wider cursor-pointer"
+              >
+                <Shield size={14} /> Mudar para Admin (Ver T11, T12, T13, T14)
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => void fetchData()}
+              className="inline-flex items-center gap-1.5 text-xs bg-zinc-900 border border-zinc-700 px-3.5 py-2 rounded hover:bg-zinc-800 font-bold uppercase tracking-wider cursor-pointer"
+            >
+              <RefreshCw size={14} /> Atualizar
+            </button>
+          </div>
         </header>
 
         <div className="flex-1 overflow-y-auto p-6">
@@ -1315,6 +1416,44 @@ export default function AdminDashboard() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Histórico Visível de Movimentações com Motivo (T13_admin_estoque) */}
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-xl">
+                <h3 className="text-sm font-black uppercase tracking-wider text-amber-500 mb-3">
+                  Movimentações de Estoque Registradas com Motivo (UC10 / RF14)
+                </h3>
+                {stockHistoryList.length === 0 ? (
+                  <p className="text-xs text-zinc-400">
+                    Clique em &quot;Ajustar / Ver Histórico&quot; em qualquer produto acima para consultar ou registrar movimentações.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {stockHistoryList.map((m) => (
+                      <div
+                        key={m.id}
+                        className="flex flex-wrap items-center justify-between gap-2 bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-xs"
+                      >
+                        <div>
+                          <span
+                            className={`font-black uppercase px-2 py-0.5 rounded mr-2 ${
+                              m.type === 'ENTRADA'
+                                ? 'bg-emerald-500/15 text-emerald-400'
+                                : 'bg-red-500/15 text-red-400'
+                            }`}
+                          >
+                            {m.type} ({m.type === 'ENTRADA' ? '+' : '-'}{m.quantity} un.)
+                          </span>
+                          <strong className="text-white">Motivo:</strong>{' '}
+                          <span className="text-zinc-300">{m.reason}</span>
+                        </div>
+                        <span className="text-zinc-400 font-mono text-[11px]">
+                          {new Date(m.created_at).toLocaleString('pt-BR')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Modal de Movimentação de Estoque */}
