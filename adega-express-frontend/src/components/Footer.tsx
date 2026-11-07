@@ -1,147 +1,129 @@
 'use client';
 
 import Link from 'next/link';
-import { ShieldCheck, Mail, MapPin, Phone, Info } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePathname } from 'next/navigation';
+import { GlassWater, Shield, Truck, ArrowUpRight, Sparkles } from 'lucide-react';
 
 export default function Footer() {
-  const { user } = useAuth();
-  const pathname = usePathname();
-
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/entregador')) {
-    return null;
-  }
+  const { user, isAuthenticated } = useAuth();
 
   return (
-    <footer className="bg-zinc-950 border-t border-zinc-900 pt-14 pb-8 mt-auto text-zinc-400">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
-          {/* Brand */}
-          <div className="col-span-1">
-            <div className="flex items-center gap-3 mb-4">
-              <img
-                src="/logo.jpg"
-                alt="Adega Express Logo"
-                className="w-11 h-11 rounded-full border border-amber-600 object-cover"
-              />
-              <div>
-                <span className="font-black text-white text-lg tracking-tighter block leading-none">
-                  ADEGA<span className="text-amber-500">EXPRESS</span>
+    <footer className="bg-[#0b0908] border-t border-[#c9a256]/15 text-[#9e9589] mt-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-12 border-b border-[#c9a256]/10">
+          {/* Col 1: Brand Manifesto */}
+          <div className="md:col-span-5 space-y-5">
+            <Link href="/" className="inline-flex items-center gap-3.5">
+              <div className="h-10 w-10 rounded-full border border-[#c9a256]/40 bg-[#161310] flex items-center justify-center">
+                <GlassWater size={18} className="text-[#c9a256]" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-serif text-2xl font-bold tracking-[0.08em] text-[#f4efe6] leading-none">
+                  ADEGA <span className="text-[#c9a256] italic font-normal">Express</span>
                 </span>
-                <span className="text-[10px] text-amber-500 font-bold uppercase tracking-widest">
-                  Bebidas Não Alcoólicas
+                <span className="text-[9px] uppercase tracking-[0.26em] text-[#9e9589] mt-1">
+                  Maison de Bebidas Não Alcoólicas
                 </span>
               </div>
-            </div>
-            <p className="text-zinc-400 text-xs leading-relaxed mb-4">
-              Loja virtual demonstrativa de bebidas não alcoólicas (Água, Sucos, Refrigerantes e Chás), com controle de estoque em tempo real e gestão de entregas.
+            </Link>
+            <p className="text-sm text-[#9e9589] leading-relaxed max-w-md">
+              Curadoria especializada em águas minerais de fonte, sucos 100% integrais,
+              refrigerantes tradicionais e infusões botânicas prontas para o consumo doméstico e
+              recepções.
             </p>
-            <div className="bg-zinc-900/90 border border-zinc-800 rounded p-2.5 text-[11px] text-zinc-300 flex items-start gap-2">
-              <Info size={14} className="text-amber-500 shrink-0 mt-0.5" />
-              <span>
-                Ambiente acadêmico demonstrativo (v4.3): nenhuma cobrança ou transação financeira real é realizada.
-              </span>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#c9a256]/20 bg-[#151210] px-3.5 py-1.5 text-[11px] text-[#c9a256]">
+              <Sparkles size={13} />
+              <span>Escopo 100% Não Alcoólico • Documento de Visão v4.3</span>
             </div>
           </div>
 
-          {/* Categorias Permitidas */}
-          <div>
-            <h4 className="text-white font-black uppercase tracking-widest text-xs mb-4">
-              Categorias
+          {/* Col 2: Curated Categories */}
+          <div className="md:col-span-3 space-y-4">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.22em] text-[#f4efe6]">
+              Coleções da Casa
             </h4>
-            <ul className="space-y-2 text-sm text-zinc-400">
-              <li>
-                <Link href="/?category=%C3%81gua#catalogo" className="hover:text-amber-500 transition-colors">
-                  Água Mineral & Com Gás
-                </Link>
-              </li>
-              <li>
-                <Link href="/?category=Sucos#catalogo" className="hover:text-amber-500 transition-colors">
-                  Sucos Integrais & Néctares
-                </Link>
-              </li>
-              <li>
-                <Link href="/?category=Refrigerantes#catalogo" className="hover:text-amber-500 transition-colors">
-                  Refrigerantes
-                </Link>
-              </li>
-              <li>
-                <Link href="/?category=Ch%C3%A1s#catalogo" className="hover:text-amber-500 transition-colors">
-                  Chás Gelados
-                </Link>
-              </li>
+            <ul className="space-y-2.5 text-sm">
+              {['Água', 'Sucos', 'Refrigerantes', 'Chás'].map((cat) => (
+                <li key={cat}>
+                  <Link
+                    href={`/?category=${encodeURIComponent(cat)}#catalogo`}
+                    className="inline-flex items-center gap-1.5 text-[#9e9589] hover:text-[#c9a256] transition-colors"
+                  >
+                    <span>{cat}</span>
+                    <ArrowUpRight size={13} className="opacity-60" />
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Área do Cliente e Ajuda */}
-          <div>
-            <h4 className="text-white font-black uppercase tracking-widest text-xs mb-4">
-              Acesso Rápido & Ajuda
+          {/* Col 3: Navigation & Support */}
+          <div className="md:col-span-4 space-y-4">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.22em] text-[#f4efe6]">
+              Atendimento &amp; Acesso
             </h4>
-            <ul className="space-y-2 text-sm text-zinc-400">
+            <ul className="space-y-2.5 text-sm">
               <li>
-                <Link href="/perfil" className="hover:text-amber-500 transition-colors">
-                  Minha Conta e Endereços
+                <Link href="/#catalogo" className="hover:text-[#c9a256] transition-colors">
+                  Explorar Catálogo Completo
                 </Link>
               </li>
               <li>
-                <Link href="/pedidos" className="hover:text-amber-500 transition-colors">
-                  Acompanhar Meus Pedidos
+                <Link href="/carrinho" className="hover:text-[#c9a256] transition-colors">
+                  Sacola &amp; Cotação de Entrega
                 </Link>
               </li>
               <li>
-                <Link href="/carrinho" className="hover:text-amber-500 transition-colors">
-                  Carrinho e Checkout Simulado
+                <Link href="/#ajuda" className="hover:text-[#c9a256] transition-colors">
+                  Central de Ajuda &amp; Perguntas Frequentes
                 </Link>
               </li>
-              <li>
-                <Link href="/#ajuda" className="hover:text-amber-500 transition-colors">
-                  Ajuda On-line / Perguntas Frequentes
-                </Link>
-              </li>
+              {!isAuthenticated && (
+                <li>
+                  <Link href="/login" className="hover:text-[#c9a256] transition-colors">
+                    Acessar Conta ou Cadastrar-se
+                  </Link>
+                </li>
+              )}
             </ul>
-          </div>
 
-          {/* Contato */}
-          <div>
-            <h4 className="text-white font-black uppercase tracking-widest text-xs mb-4">
-              Atendimento e Suporte
-            </h4>
-            <ul className="space-y-3 text-xs text-zinc-400">
-              <li className="flex items-start gap-2.5">
-                <MapPin size={16} className="text-amber-500 shrink-0 mt-0.5" />
-                <span>Distribuidora Adega Express — Atendimento Regional Configurável</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Phone size={16} className="text-amber-500 shrink-0" />
-                <span>(11) 4000-0000 (Canal Demonstrativo)</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Mail size={16} className="text-amber-500 shrink-0" />
-                <span>contato@adegaexpress.example.com</span>
-              </li>
-            </ul>
+            {isAuthenticated &&
+              (user?.role === 'ADMINISTRADOR' ||
+                user?.role === 'ATENDENTE' ||
+                user?.role === 'ENTREGADOR') && (
+                <div className="pt-3 flex flex-wrap gap-2">
+                  {(user.role === 'ADMINISTRADOR' || user.role === 'ATENDENTE') && (
+                    <Link
+                      href="/admin"
+                      className="inline-flex items-center gap-2 rounded-full border border-[#c9a256]/30 bg-[#161310] px-3.5 py-2 text-xs font-medium text-[#c9a256] hover:bg-[#c9a256] hover:text-[#0e0c0a] transition-all"
+                    >
+                      <Shield size={14} />
+                      <span>Mesa Operacional ({user.role})</span>
+                    </Link>
+                  )}
+                  {user.role === 'ENTREGADOR' && (
+                    <Link
+                      href="/entregador"
+                      className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-950/30 px-3.5 py-2 text-xs font-medium text-emerald-300 hover:bg-emerald-900/50 transition-all"
+                    >
+                      <Truck size={14} />
+                      <span>Console do Entregador</span>
+                    </Link>
+                  )}
+                </div>
+              )}
           </div>
         </div>
 
-        <div className="pt-6 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-[11px] text-zinc-500 font-semibold">
-            © 2026 Adega Express — Projeto Acadêmico (Documento de Visão v4.3). Comercialização exclusiva de bebidas não alcoólicas.
+        {/* Bottom Legal & Academic Notice */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#9e9589]/80">
+          <p>
+            &copy; {new Date().getFullYear()} Adega Express. Todos os direitos reservados.
           </p>
-
-          {(user?.role === 'ADMINISTRADOR' || user?.role === 'ATENDENTE') && (
-            <Link
-              href="/admin"
-              title="Acessar Painel Operacional / Administrativo"
-              className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 hover:border-amber-500 hover:bg-amber-600/10 transition-all text-xs text-zinc-300 hover:text-amber-500"
-            >
-              <ShieldCheck size={16} className="text-amber-500" />
-              <span className="font-bold uppercase tracking-wider text-[10px]">
-                Painel {user.role === 'ADMINISTRADOR' ? 'Admin' : 'Atendente'}
-              </span>
-            </Link>
-          )}
+          <p className="text-center sm:text-right">
+            Ambiente acadêmico demonstrativo — nenhuma cobrança financeira real é realizada no
+            checkout.
+          </p>
         </div>
       </div>
     </footer>

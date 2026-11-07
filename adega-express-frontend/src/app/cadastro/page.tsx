@@ -1,171 +1,172 @@
-// src/app/cadastro/page.tsx
 'use client';
 
-import { useState, Suspense } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { api } from '@/lib/api';
-import { User } from '@/types';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
+import { api } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { User } from '@/types';
+import toast from 'react-hot-toast';
+import { GlassWater, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 
-function CadastroForm() {
+export default function Cadastro() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirect = searchParams?.get('redirect') || '/';
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
-      const res = await api.post<{ token: string; user: User }>('/auth/register', {
+      const response = await api.post<{ user: User; token: string }>('/auth/register', {
         name: name.trim(),
-        email: email.trim().toLowerCase(),
+        email: email.trim(),
         password,
       });
 
-      login(res.token, res.user);
-      router.push(redirect);
+      if (response.token && response.user) {
+        login(response.token, response.user);
+      }
+
+      toast.success('Conta criada com sucesso! Bem-vindo(a) à Adega Express.');
+      router.push('/');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erro ao realizar cadastro';
-      setError(msg);
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erro ao criar conta. Verifique os dados informados.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-      <Navbar />
-      <main className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full bg-zinc-900 p-8 md:p-10 rounded-xl shadow-2xl border border-zinc-800 border-t-4 border-t-amber-500">
-          <div className="text-center mb-8">
-            <Link href="/" className="inline-block mb-3">
-              <img
-                src="/logo.jpg"
-                alt="Adega Express"
-                className="w-16 h-16 rounded-full border-2 border-amber-500 shadow-lg mx-auto"
-              />
-            </Link>
-            <h1 className="text-2xl font-serif font-black text-white uppercase tracking-wider">
-              Criar Conta de Cliente
+    <div className="min-h-screen bg-[#0e0c0a] text-[#f4efe6] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 rounded-3xl border border-[#c9a256]/20 bg-[#14110e] overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.75)]">
+        {/* Left Editorial Manifesto (5 cols) */}
+        <div className="lg:col-span-5 bg-gradient-to-br from-[#1f1914] via-[#15120f] to-[#0e0c0a] p-8 sm:p-10 border-b lg:border-b-0 lg:border-r border-[#c9a256]/15 flex flex-col justify-between space-y-8">
+          <Link href="/" className="inline-flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full border border-[#c9a256]/40 bg-[#161310] flex items-center justify-center">
+              <GlassWater size={18} className="text-[#c9a256]" />
+            </div>
+            <div>
+              <span className="font-serif text-2xl font-bold tracking-[0.08em] text-[#f4efe6] block leading-none">
+                ADEGA <span className="text-[#c9a256] italic font-normal">Express</span>
+              </span>
+              <span className="text-[9px] uppercase tracking-[0.24em] text-[#9e9589]">
+                Maison Não Alcoólica
+              </span>
+            </div>
+          </Link>
+
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#c9a256]/25 bg-[#0e0c0a]/60 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-[#c9a256]">
+              <Sparkles size={12} />
+              <span>Cadastro de Cliente (UC02)</span>
+            </div>
+            <h1 className="font-serif text-3xl sm:text-4xl font-semibold text-[#f4efe6] leading-tight">
+              Faça parte da nossa curadoria sem álcool.
             </h1>
-            <p className="text-zinc-400 text-xs mt-1">
-              Cadastre-se para gerenciar seus endereços e acompanhar pedidos
+            <ul className="space-y-2.5 text-xs text-[#9e9589] pt-2">
+              <li className="flex items-center gap-2">
+                <CheckCircle2 size={14} className="text-[#c9a256] shrink-0" />
+                <span>Águas minerais, sucos integrais, refrigerantes e chás.</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 size={14} className="text-[#c9a256] shrink-0" />
+                <span>Múltiplos endereços de entrega salvos no perfil.</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 size={14} className="text-[#c9a256] shrink-0" />
+                <span>Checkout demonstrativo rápido e sem cobrança real.</span>
+              </li>
+            </ul>
+          </div>
+
+          <p className="text-[11px] text-[#9e9589]/80 border-t border-[#c9a256]/12 pt-4">
+            Cadastro simplificado conforme RF04 — sem exigência de maioridade.
+          </p>
+        </div>
+
+        {/* Right Form Console (7 cols) */}
+        <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-center">
+          <div className="mb-8">
+            <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#c9a256]">
+              Nova Conta
+            </span>
+            <h2 className="font-serif text-3xl font-semibold text-[#f4efe6] mt-1">
+              Criar conta de cliente
+            </h2>
+            <p className="text-xs text-[#9e9589] mt-1.5">
+              Já possui uma conta?{' '}
+              <Link href="/login" className="text-[#c9a256] hover:underline font-semibold ml-1">
+                Fazer login
+              </Link>
             </p>
           </div>
 
-          {error && (
-            <div
-              role="alert"
-              className="bg-red-950/60 text-red-300 border border-red-800 p-3 rounded text-xs font-bold mb-6 text-center"
-            >
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
-              <label
-                htmlFor="reg-name"
-                className="block text-[11px] font-black uppercase tracking-widest text-zinc-300 mb-1"
-              >
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9e9589] mb-2">
                 Nome Completo
               </label>
               <input
-                id="reg-name"
                 type="text"
                 required
-                maxLength={100}
+                minLength={2}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="block w-full bg-zinc-950 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
-                placeholder="Ex.: Maria Oliveira"
+                className="w-full h-12 bg-[#0e0c0a] border border-[#c9a256]/20 rounded-xl px-4 text-sm text-[#f4efe6] placeholder-[#9e9589]/50 focus:outline-none focus:border-[#c9a256]"
+                placeholder="Ex.: Maria Clara Silva"
               />
             </div>
 
             <div>
-              <label
-                htmlFor="reg-email"
-                className="block text-[11px] font-black uppercase tracking-widest text-zinc-300 mb-1"
-              >
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9e9589] mb-2">
                 E-mail
               </label>
               <input
-                id="reg-email"
                 type="email"
                 required
-                maxLength={150}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="block w-full bg-zinc-950 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
-                placeholder="seu@email.com"
+                className="w-full h-12 bg-[#0e0c0a] border border-[#c9a256]/20 rounded-xl px-4 text-sm text-[#f4efe6] placeholder-[#9e9589]/50 focus:outline-none focus:border-[#c9a256]"
+                placeholder="maria@email.com"
               />
             </div>
 
             <div>
-              <label
-                htmlFor="reg-password"
-                className="block text-[11px] font-black uppercase tracking-widest text-zinc-300 mb-1"
-              >
-                Senha (Mínimo 8 caracteres)
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9e9589] mb-2">
+                Senha (mínimo de 8 caracteres)
               </label>
               <input
-                id="reg-password"
                 type="password"
                 required
                 minLength={8}
-                maxLength={72}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="block w-full bg-zinc-950 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
-                placeholder="••••••••"
+                className="w-full h-12 bg-[#0e0c0a] border border-[#c9a256]/20 rounded-xl px-4 text-sm text-[#f4efe6] placeholder-[#9e9589]/50 focus:outline-none focus:border-[#c9a256]"
+                placeholder="Mínimo de 8 caracteres"
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-3.5 px-4 rounded shadow-md text-xs font-black tracking-widest uppercase text-black bg-amber-600 hover:bg-amber-500 focus:outline-none disabled:opacity-50 transition-colors mt-4"
-            >
-              {loading ? 'Criando conta...' : 'Cadastrar Conta'}
-            </button>
+            <div className="pt-3">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 rounded-full bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] font-semibold text-xs uppercase tracking-[0.18em] flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-[0_8px_25px_rgba(201,162,86,0.25)]"
+              >
+                <span>{loading ? 'Registrando...' : 'Concluir Cadastro'}</span>
+                <ArrowRight size={15} />
+              </button>
+            </div>
           </form>
-
-          <div className="mt-6 text-center text-xs font-medium text-zinc-400">
-            Já possui uma conta?{' '}
-            <Link
-              href={`/login?redirect=${encodeURIComponent(redirect)}`}
-              className="text-amber-500 font-bold hover:text-amber-400 underline"
-            >
-              Acessar conta
-            </Link>
-          </div>
         </div>
-      </main>
+      </div>
     </div>
-  );
-}
-
-export default function Cadastro() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-amber-500 font-bold uppercase text-xs">
-          Carregando...
-        </div>
-      }
-    >
-      <CadastroForm />
-    </Suspense>
   );
 }

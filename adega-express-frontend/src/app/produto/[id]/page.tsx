@@ -1,17 +1,28 @@
-// src/app/produto/[id]/page.tsx
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
+import ProductArtwork from '@/components/ProductArtwork';
 import { api } from '@/lib/api';
 import { Product } from '@/types';
 import { useCart } from '@/contexts/CartContext';
+import {
+  ShoppingBag,
+  ArrowLeft,
+  ShieldCheck,
+  Truck,
+  Sparkles,
+  Plus,
+  Minus,
+  PackageCheck,
+} from 'lucide-react';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Minus, Droplets, ShoppingCart, PackageCheck, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-export default function ProdutoDetalhe({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
+export default function ProductDetail() {
+  const { id } = useParams();
+  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -20,31 +31,29 @@ export default function ProdutoDetalhe({ params }: { params: Promise<{ id: strin
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await api.get<Product>(`/products/${resolvedParams.id}`);
-        setProduct(res);
+        const prod = await api.get<Product>(`/products/${id}`);
+        setProduct(prod);
       } catch {
         setProduct(null);
       } finally {
         setLoading(false);
       }
     };
-    void fetchProduct();
-  }, [resolvedParams.id]);
-
-  const handleAdd = () => {
-    if (!product) return;
-    const ok = addItem(product, quantity);
-    if (ok) {
-      toast.success(`${quantity}x ${product.name} adicionado ao carrinho!`);
-    }
-  };
+    if (id) void fetchProduct();
+  }, [id]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white">
+      <div className="min-h-screen bg-[#0e0c0a] text-[#f4efe6]">
         <Navbar />
-        <div className="max-w-5xl mx-auto px-4 py-20 text-center text-amber-500 font-black uppercase tracking-widest animate-pulse">
-          Carregando detalhes do produto...
+        <div className="max-w-6xl mx-auto px-4 py-16 grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-6 h-[480px] rounded-3xl bg-[#161310] border border-[#c9a256]/15 animate-pulse" />
+          <div className="lg:col-span-6 space-y-6 py-6">
+            <div className="h-4 w-32 bg-[#161310] rounded animate-pulse" />
+            <div className="h-12 w-3/4 bg-[#161310] rounded animate-pulse" />
+            <div className="h-24 w-full bg-[#161310] rounded animate-pulse" />
+            <div className="h-16 w-48 bg-[#161310] rounded animate-pulse" />
+          </div>
         </div>
       </div>
     );
@@ -52,21 +61,18 @@ export default function ProdutoDetalhe({ params }: { params: Promise<{ id: strin
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white">
+      <div className="min-h-screen bg-[#0e0c0a] text-[#f4efe6]">
         <Navbar />
-        <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-          <AlertCircle size={48} className="text-amber-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-black uppercase tracking-wider mb-2">
-            Produto não encontrado
-          </h1>
-          <p className="text-zinc-400 text-sm mb-6">
-            Este item não está disponível no catálogo ativo de bebidas não alcoólicas.
+        <div className="max-w-3xl mx-auto px-4 py-24 text-center space-y-6">
+          <h1 className="font-serif text-4xl font-semibold">Rótulo não encontrado</h1>
+          <p className="text-sm text-[#9e9589]">
+            O produto solicitado não está disponível no catálogo ativo.
           </p>
           <Link
             href="/#catalogo"
-            className="inline-flex items-center gap-2 bg-amber-600 text-black font-black uppercase tracking-widest text-xs px-6 py-3 rounded hover:bg-amber-500 transition-colors"
+            className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-[#c9a256] text-[#0e0c0a] font-semibold text-xs uppercase tracking-[0.16em]"
           >
-            <ArrowLeft size={16} /> Voltar ao Catálogo
+            <ArrowLeft size={15} /> Voltar à Vitrine
           </Link>
         </div>
       </div>
@@ -74,152 +80,195 @@ export default function ProdutoDetalhe({ params }: { params: Promise<{ id: strin
   }
 
   const outOfStock = !product.in_stock || product.stock_quantity <= 0;
+  const maxQty = Math.max(1, product.stock_quantity);
+
+  const handleAddToCart = () => {
+    const safeQty = Math.min(Math.max(1, quantity), product.stock_quantity);
+    const added = addItem(product, safeQty);
+    if (added) {
+      toast.success(`${safeQty}x ${product.name} adicionado à sacola!`);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="bg-[#0e0c0a] min-h-screen text-[#f4efe6] font-sans">
       <Navbar />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <Link
-          href="/#catalogo"
-          className="inline-flex items-center text-amber-500 hover:text-amber-400 mb-8 text-xs font-black uppercase tracking-widest"
+
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#9e9589] hover:text-[#c9a256] mb-8 transition-colors cursor-pointer"
         >
-          <ArrowLeft size={16} className="mr-2" />
-          Voltar ao catálogo
-        </Link>
+          <ArrowLeft size={15} /> Voltar ao Catálogo
+        </button>
 
-        <div className="bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-800 p-6 md:p-10 flex flex-col md:flex-row gap-10">
-          {/* Imagem / Representação */}
-          <div className="w-full md:w-1/2 aspect-square bg-gradient-to-b from-zinc-800/50 to-zinc-950 border border-zinc-800 rounded-xl flex items-center justify-center p-8 relative">
-            {product.image_url ? (
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="max-h-full max-w-full object-contain"
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center text-center">
-                <Droplets size={64} className="text-amber-500 mb-3" />
-                <span className="text-xs font-black uppercase tracking-widest text-amber-500">
-                  {product.brand}
-                </span>
-                <span className="text-base font-bold text-white mt-1">{product.name}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Informações */}
-          <div className="w-full md:w-1/2 flex flex-col">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-black text-amber-500 uppercase tracking-widest">
-                {product.category?.name}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+          {/* Left Studio Showcase */}
+          <div className="lg:col-span-6 rounded-3xl border border-[#c9a256]/20 bg-gradient-to-b from-[#1b1612] to-[#120f0c] p-10 flex flex-col items-center justify-center relative overflow-hidden min-h-[440px] group">
+            <div className="absolute top-5 left-5 right-5 flex items-center justify-between">
+              <span className="rounded-full border border-[#c9a256]/25 bg-[#0e0c0a]/80 px-3.5 py-1 text-xs font-mono text-[#c9a256]">
+                {product.category?.name || 'Bebida Não Alcoólica'}
               </span>
               {outOfStock ? (
-                <span className="bg-red-500/20 border border-red-500/40 text-red-400 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded">
-                  Em Falta
+                <span className="rounded-full bg-red-950/90 border border-red-500/40 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-red-200">
+                  Em Falta (RN03)
                 </span>
               ) : (
-                <span className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded flex items-center gap-1">
-                  <PackageCheck size={12} /> {product.stock_quantity} un. disponíveis
+                <span className="rounded-full bg-emerald-950/80 border border-emerald-500/30 px-3.5 py-1 text-xs font-mono text-emerald-300">
+                  {product.stock_quantity} un. disponíveis
                 </span>
               )}
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-serif font-black text-white mb-1">
-              {product.name}
-            </h1>
-            <p className="text-sm text-zinc-400 font-bold uppercase tracking-wider mb-6">
-              Marca: <span className="text-zinc-200">{product.brand}</span>
-            </p>
+            <ProductArtwork
+              name={product.name}
+              brand={product.brand}
+              categoryName={product.category?.name}
+              volumeMl={product.volume_ml}
+              imageUrl={product.image_url}
+              size="lg"
+              className="w-full h-80 my-4"
+            />
+          </div>
 
-            <div className="text-3xl font-black text-amber-500 mb-6">
-              R$ {Number(product.price).toFixed(2).replace('.', ',')}
-            </div>
+          {/* Right Specifications & Purchase Console */}
+          <div className="lg:col-span-6 rounded-3xl border border-[#c9a256]/20 bg-[#14110e] p-8 sm:p-10 flex flex-col justify-between space-y-8">
+            <div className="space-y-5">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold uppercase tracking-[0.22em] text-[#c9a256]">
+                  {product.brand}
+                </span>
+                <span className="text-[#c9a256]/30">•</span>
+                <span className="text-xs font-mono text-[#9e9589]">
+                  {product.volume_ml} mL • 0,0% Álcool
+                </span>
+              </div>
 
-            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-4 mb-6">
-              <h2 className="text-xs font-black uppercase tracking-widest text-zinc-400 mb-3">
-                Especificações do Produto
-              </h2>
-              <ul className="text-xs text-zinc-300 space-y-2">
-                <li className="flex justify-between border-b border-zinc-900 pb-1.5">
-                  <span className="text-zinc-500">Categoria:</span>
-                  <span className="font-bold text-white">{product.category?.name}</span>
-                </li>
-                <li className="flex justify-between border-b border-zinc-900 pb-1.5">
-                  <span className="text-zinc-500">Volume da Embalagem:</span>
-                  <span className="font-bold text-white">{product.volume_ml} ml</span>
-                </li>
-                <li className="flex justify-between">
-                  <span className="text-zinc-500">Classificação:</span>
-                  <span className="font-bold text-emerald-400">Bebida Não Alcoólica</span>
-                </li>
-              </ul>
-              {product.description && (
-                <p className="mt-4 pt-3 border-t border-zinc-900 text-xs text-zinc-300 leading-relaxed">
-                  {product.description}
-                </p>
-              )}
-            </div>
+              <h1 className="font-serif text-3xl sm:text-5xl font-semibold text-[#f4efe6] leading-tight">
+                {product.name}
+              </h1>
 
-            <div className="mt-auto">
-              {!outOfStock ? (
-                <div className="space-y-3">
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="flex items-center border border-zinc-700 bg-zinc-950 rounded-lg h-12">
+              <p className="text-sm sm:text-base text-[#9e9589] leading-relaxed">
+                {product.description ||
+                  'Bebida não alcoólica selecionada, conservada em temperatura ideal e pronta para consumo individual, familiar ou recepções.'}
+              </p>
+
+              {/* Price & Stock Box */}
+              <div className="rounded-2xl border border-[#c9a256]/15 bg-[#0e0c0a] p-5 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <span className="block text-[10px] uppercase tracking-[0.18em] text-[#9e9589]">
+                    Preço Unitário
+                  </span>
+                  <span className="font-mono text-3xl font-bold text-[#f4efe6]">
+                    R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="block text-[10px] uppercase tracking-[0.18em] text-[#9e9589]">
+                    Disponibilidade Imediata
+                  </span>
+                  <span
+                    className={`text-xs font-semibold ${
+                      outOfStock ? 'text-red-400' : 'text-emerald-400'
+                    }`}
+                  >
+                    {outOfStock
+                      ? 'Produto temporariamente esgotado'
+                      : `${product.stock_quantity} unidades em estoque`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Quantity Selector for Home or Events (RF17) */}
+              {!outOfStock && (
+                <div className="space-y-2 pt-2">
+                  <label className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9e9589]">
+                    Quantidade (Consumo Doméstico ou Eventos — RF17)
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <div className="inline-flex items-center rounded-full border border-[#c9a256]/25 bg-[#0e0c0a] p-1">
                       <button
                         type="button"
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        className="h-10 w-10 rounded-full flex items-center justify-center text-[#f4efe6] hover:bg-[#1c1814] cursor-pointer"
                         aria-label="Diminuir quantidade"
-                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="px-4 h-full hover:bg-zinc-800 text-zinc-300 rounded-l-lg flex items-center justify-center"
                       >
-                        <Minus size={16} />
+                        <Minus size={14} />
                       </button>
                       <input
                         type="number"
                         min={1}
-                        max={product.stock_quantity}
+                        max={maxQty}
                         value={quantity}
                         onChange={(e) => {
-                          const val = parseInt(e.target.value, 10);
-                          if (!Number.isNaN(val)) {
-                            setQuantity(Math.max(1, Math.min(product.stock_quantity, val)));
-                          }
+                          const v = parseInt(e.target.value, 10);
+                          if (Number.isNaN(v)) setQuantity(1);
+                          else setQuantity(Math.min(Math.max(1, v), maxQty));
                         }}
-                        aria-label="Quantidade"
-                        className="w-16 text-center font-bold text-white bg-transparent focus:outline-none text-sm"
+                        className="w-16 bg-transparent text-center font-mono text-sm font-semibold text-[#f4efe6] focus:outline-none"
                       />
                       <button
                         type="button"
+                        onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
+                        className="h-10 w-10 rounded-full flex items-center justify-center text-[#f4efe6] hover:bg-[#1c1814] cursor-pointer"
                         aria-label="Aumentar quantidade"
-                        onClick={() =>
-                          setQuantity(Math.min(product.stock_quantity, quantity + 1))
-                        }
-                        className="px-4 h-full hover:bg-zinc-800 text-zinc-300 rounded-r-lg flex items-center justify-center"
                       >
-                        <Plus size={16} />
+                        <Plus size={14} />
                       </button>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={handleAdd}
-                      className="flex-1 bg-amber-600 hover:bg-amber-500 text-black font-black uppercase tracking-widest text-xs py-3 px-6 rounded-lg transition-colors h-12 flex items-center justify-center gap-2"
-                    >
-                      <ShoppingCart size={16} /> Adicionar ao Carrinho
-                    </button>
+                    <div className="flex gap-1.5">
+                      {[6, 12, 24]
+                        .filter((pack) => pack <= maxQty)
+                        .map((pack) => (
+                          <button
+                            key={pack}
+                            type="button"
+                            onClick={() => setQuantity(pack)}
+                            className="h-10 px-3 rounded-full border border-[#c9a256]/20 bg-[#0e0c0a] hover:border-[#c9a256] text-xs font-mono text-[#c9a256] transition-all cursor-pointer"
+                          >
+                            +{pack} un.
+                          </button>
+                        ))}
+                    </div>
                   </div>
-                  <p className="text-[11px] text-zinc-500">
-                    Suporte a compras em maior quantidade para eventos e confraternizações (RF17), limitado ao saldo em estoque ({product.stock_quantity} un.).
-                  </p>
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="w-full bg-zinc-950 border border-red-900/40 text-red-400 font-black uppercase tracking-widest text-xs py-4 px-6 rounded-lg cursor-not-allowed"
-                >
-                  Produto Em Falta — Indisponível para Compra (RN03)
-                </button>
               )}
+            </div>
+
+            <div className="space-y-4 pt-4 border-t border-[#c9a256]/15">
+              <button
+                type="button"
+                disabled={outOfStock}
+                onClick={handleAddToCart}
+                className={`w-full h-14 rounded-full font-semibold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all ${
+                  outOfStock
+                    ? 'bg-[#1f1b18] text-[#9e9589]/50 cursor-not-allowed border border-white/5'
+                    : 'bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] cursor-pointer shadow-[0_10px_30px_rgba(201,162,86,0.28)]'
+                }`}
+              >
+                <ShoppingBag size={18} />
+                <span>
+                  {outOfStock
+                    ? 'Produto Esgotado (Indisponível)'
+                    : `Adicionar ${quantity} un. à Sacola — R$ ${(parseFloat(product.price) * quantity).toFixed(2).replace('.', ',')}`}
+                </span>
+              </button>
+
+              <div className="grid grid-cols-3 gap-3 pt-2 text-[11px] text-[#9e9589]">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={14} className="text-[#c9a256] shrink-0" />
+                  <span>100% Sem Álcool</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <PackageCheck size={14} className="text-[#c9a256] shrink-0" />
+                  <span>Reserva Imediata</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Truck size={14} className="text-[#c9a256] shrink-0" />
+                  <span>Entrega Local</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

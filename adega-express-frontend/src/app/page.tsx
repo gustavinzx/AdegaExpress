@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import ProductArtwork from '@/components/ProductArtwork';
 import { api } from '@/lib/api';
 import { Product, Category } from '@/types';
 import { useCart } from '@/contexts/CartContext';
@@ -14,12 +15,43 @@ import {
   PackageCheck,
   Filter,
   RotateCcw,
-  Droplets,
   HelpCircle,
   Sparkles,
-  ShoppingCart,
+  ShoppingBag,
+  ArrowRight,
+  GlassWater,
+  Check,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+function CatalogSkeleton() {
+  return (
+    <div className="space-y-14">
+      <div className="flex items-center justify-between border-b border-[#c9a256]/15 pb-4">
+        <div className="h-8 w-48 rounded-lg bg-[#1c1814] animate-pulse" />
+        <div className="h-5 w-24 rounded-full bg-[#1c1814] animate-pulse" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 8 }).map((_, idx) => (
+          <div
+            key={idx}
+            className="rounded-2xl border border-[#c9a256]/12 bg-[#14110e] p-5 space-y-4"
+          >
+            <div className="h-56 w-full rounded-xl bg-[#1c1814] animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-3 w-20 rounded bg-[#1c1814] animate-pulse" />
+              <div className="h-5 w-3/4 rounded bg-[#1c1814] animate-pulse" />
+            </div>
+            <div className="pt-3 flex items-center justify-between">
+              <div className="h-7 w-24 rounded bg-[#1c1814] animate-pulse" />
+              <div className="h-11 w-28 rounded-full bg-[#1c1814] animate-pulse" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -149,533 +181,585 @@ function HomeContent() {
     });
   };
 
-  // Agrupar produtos por categoria
-  const groupedProducts = products.reduce(
-    (acc, product) => {
-      const cat = product.category?.name || 'Bebidas Não Alcoólicas';
-      if (!acc[cat]) acc[cat] = [];
-      acc[cat].push(product);
-      return acc;
-    },
-    {} as Record<string, Product[]>,
+  const handleQuickAdd = (product: Product) => {
+    const added = addItem(product, 1);
+    if (added) {
+      toast.success(`${product.name} adicionado à sacola!`);
+    }
+  };
+
+  const categoriesToDisplay = categories.filter((cat) =>
+    products.some((p) => p.category_id === cat.id),
   );
 
   return (
-    <>
+    <div className="bg-[#0e0c0a] min-h-screen flex flex-col text-[#f4efe6] font-sans">
       <Navbar />
-      <main className="bg-zinc-950 min-h-screen font-sans">
-        {/* HERO SECTION */}
-        <section className="relative bg-zinc-950 border-b border-zinc-800 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(217,119,6,0.16),_transparent_65%)] pointer-events-none" />
-          <div className="max-w-7xl mx-auto px-4 py-14 md:py-20 relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-            <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-5">
-                <Sparkles size={13} /> Catálogo 100% Não Alcoólico • Pronta Entrega
-              </span>
-              <h1 className="text-4xl md:text-6xl font-serif font-black leading-tight text-white mb-5">
-                REFRESCÂNCIA &{' '}
-                <span className="text-amber-500">QUALIDADE</span> PARA O SEU DIA E EVENTOS
-              </h1>
-              <p className="text-zinc-300 text-sm md:text-base leading-relaxed mb-8 max-w-xl">
-                Distribuidora online especializada exclusivamente em bebidas não alcoólicas:{' '}
-                <strong className="text-white">Água, Sucos, Refrigerantes e Chás</strong>. Estoque
-                em tempo real, suporte a compras para eventos e acompanhamento completo do pedido.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <a
-                  href="#catalogo"
-                  className="bg-amber-600 text-black uppercase text-xs font-black tracking-widest py-3.5 px-7 rounded hover:bg-amber-500 transition-colors shadow-lg"
-                >
-                  Explorar Catálogo
-                </a>
-                <a
-                  href="#ajuda"
-                  className="bg-zinc-900 border border-zinc-700 text-zinc-200 uppercase text-xs font-bold tracking-widest py-3.5 px-6 rounded hover:border-amber-500 hover:text-amber-400 transition-colors"
-                >
-                  Como Funciona
-                </a>
-              </div>
-            </div>
 
-            {/* Category Quick Pills */}
-            <div className="grid grid-cols-2 gap-3 w-full md:w-80 shrink-0">
-              {[
-                { name: 'Água', desc: 'Mineral natural, com gás e tônica' },
-                { name: 'Sucos', desc: 'Integrais 100% fruta e néctares' },
-                { name: 'Refrigerantes', desc: 'Tradicionais, zero e familiares' },
-                { name: 'Chás', desc: 'Chás gelados e infusões prontas' },
-              ].map((cat) => {
-                const matched = categories.find((c) => c.name === cat.name);
-                const isSelected = matched && String(matched.id) === selectedCategoryId;
-                return (
+      {/* Editorial Asymmetric Hero Section */}
+      <section className="relative overflow-hidden border-b border-[#c9a256]/15 pt-10 pb-20 lg:pt-16 lg:pb-24">
+        <div className="pointer-events-none absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-[#c9a256]/8 blur-[120px]" />
+        <div className="pointer-events-none absolute bottom-0 right-10 h-80 w-80 rounded-full bg-amber-700/8 blur-[110px]" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Focal Point (7 cols) */}
+            <div className="lg:col-span-7 space-y-7">
+              <div className="inline-flex items-center gap-2.5 rounded-full border border-[#c9a256]/30 bg-[#161310] px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-[#c9a256]">
+                <Sparkles size={13} />
+                <span>Curadoria Botânica &amp; Mineral • 100% Sem Álcool</span>
+              </div>
+
+              <h1 className="font-serif text-4xl sm:text-6xl lg:text-[68px] font-semibold text-[#f4efe6] leading-[1.04] tracking-[-0.02em]">
+                A arte de servir{' '}
+                <span className="italic font-normal text-[#c9a256]">frescor puro</span> em cada
+                ocasião.
+              </h1>
+
+              <p className="text-base sm:text-lg text-[#9e9589] max-w-xl leading-relaxed">
+                De águas minerais de fontes naturais a sucos 100% prensados, refrigerantes
+                clássicos e infusões de chá gelado. Seleção pensada para a mesa da família,
+                recepções e eventos.
+              </p>
+
+              {/* Quick Category Pills */}
+              <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategoryId('');
+                    document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className={`h-11 px-5 rounded-full text-xs font-semibold uppercase tracking-[0.14em] transition-all cursor-pointer ${
+                    selectedCategoryId === ''
+                      ? 'bg-[#c9a256] text-[#0e0c0a] shadow-[0_4px_20px_rgba(201,162,86,0.3)]'
+                      : 'bg-[#161310] text-[#f4efe6] border border-[#c9a256]/20 hover:border-[#c9a256]'
+                  }`}
+                >
+                  Toda a Coleção
+                </button>
+                {categories.map((cat) => (
                   <button
-                    key={cat.name}
+                    key={cat.id}
                     type="button"
                     onClick={() => {
-                      if (matched) {
-                        setSelectedCategoryId(isSelected ? '' : String(matched.id));
-                      } else {
-                        setSearchName(cat.name);
-                      }
+                      setSelectedCategoryId(String(cat.id));
                       document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
                     }}
-                    className={`p-4 rounded-xl border text-left transition-all ${
-                      isSelected
-                        ? 'bg-amber-600/15 border-amber-500 text-white'
-                        : 'bg-zinc-900/90 border-zinc-800 hover:border-amber-500/60 text-zinc-200'
+                    className={`h-11 px-5 rounded-full text-xs font-semibold uppercase tracking-[0.14em] transition-all cursor-pointer ${
+                      selectedCategoryId === String(cat.id)
+                        ? 'bg-[#c9a256] text-[#0e0c0a] shadow-[0_4px_20px_rgba(201,162,86,0.3)]'
+                        : 'bg-[#161310] text-[#f4efe6]/85 border border-[#c9a256]/20 hover:border-[#c9a256]'
                     }`}
                   >
-                    <Droplets size={18} className="text-amber-500 mb-2" />
-                    <p className="font-black uppercase tracking-wider text-xs text-white">
-                      {cat.name}
-                    </p>
-                    <p className="text-[11px] text-zinc-400 mt-1 leading-snug">{cat.desc}</p>
+                    {cat.name}
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
 
-        {/* FEATURES BAR */}
-        <section className="bg-zinc-900/70 border-b border-zinc-800">
-          <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[
-              {
-                icon: PackageCheck,
-                title: 'Estoque em Tempo Real',
-                desc: 'Disponibilidade atualizada a cada pedido (RN01)',
-              },
-              {
-                icon: Truck,
-                title: 'Acompanhamento Online',
-                desc: 'Consulte todas as etapas até a entrega (UC05)',
-              },
-              {
-                icon: CreditCard,
-                title: 'Checkout Demonstrativo',
-                desc: 'Modalidades PIX ou Cartão sem cobrança real (RF07)',
-              },
-              {
-                icon: ShieldCheck,
-                title: 'Atendimento a Eventos',
-                desc: 'Suporte a pedidos de maior quantidade (RF17)',
-              },
-            ].map((feature, i) => (
-              <div key={i} className="flex items-center gap-3.5">
-                <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-amber-500 shrink-0">
-                  <feature.icon size={20} strokeWidth={1.8} />
-                </div>
-                <div>
-                  <h2 className="font-black uppercase tracking-wider text-white text-xs">
-                    {feature.title}
+            {/* Right Asymmetric Bento Showcase (5 cols) */}
+            <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+              <div className="col-span-2 rounded-3xl border border-[#c9a256]/25 bg-gradient-to-br from-[#1b1612] via-[#14110e] to-[#0e0c0a] p-6 flex items-center justify-between gap-4 shadow-2xl">
+                <div className="space-y-2 max-w-[58%]">
+                  <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#c9a256]">
+                    Destaque da Estação
+                  </span>
+                  <h2 className="font-serif text-2xl font-semibold text-[#f4efe6] leading-tight">
+                    Suco Integral de Uva Tinto 1L
                   </h2>
-                  <p className="text-zinc-400 text-[11px]">{feature.desc}</p>
+                  <p className="text-xs text-[#9e9589] leading-relaxed">
+                    100% uva prensada sem adição de açúcares ou conservantes.
+                  </p>
+                  <a
+                    href="#catalogo"
+                    className="inline-flex items-center gap-1.5 pt-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#c9a256] hover:text-[#e0be74]"
+                  >
+                    <span>Ver na vitrine</span>
+                    <ArrowRight size={13} />
+                  </a>
+                </div>
+                <div className="shrink-0 group">
+                  <ProductArtwork
+                    name="Suco Integral de Uva Tinto 1L"
+                    brand="Aurora"
+                    categoryName="Sucos"
+                    volumeMl={1000}
+                    size="sm"
+                    className="h-36 w-28 rounded-2xl border border-[#c9a256]/15 bg-[#120f0c]"
+                  />
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
 
-        {/* CATALOG & FILTERS SECTION (UC04 / RF01 / RF02) */}
-        <section id="catalogo" className="max-w-7xl mx-auto px-4 py-12">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 md:p-6 mb-10 shadow-xl">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-              <div>
-                <h2 className="text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
-                  <Filter size={18} className="text-amber-500" /> Filtrar Catálogo de Bebidas
-                </h2>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  Filtre por categoria, nome, marca, volume (ml) ou faixa de preço (RF01).
+              <div className="rounded-3xl border border-[#c9a256]/15 bg-[#14110e] p-5 space-y-2">
+                <div className="h-9 w-9 rounded-full bg-[#c9a256]/15 text-[#c9a256] flex items-center justify-center">
+                  <GlassWater size={17} />
+                </div>
+                <p className="font-serif text-xl font-semibold text-[#f4efe6]">4 Coleções</p>
+                <p className="text-xs text-[#9e9589] leading-relaxed">
+                  Água, Sucos, Refrigerantes e Chás selecionados.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                className="self-start md:self-auto inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-amber-500 transition-colors"
-              >
-                <RotateCcw size={14} /> Limpar Filtros
-              </button>
+
+              <div className="rounded-3xl border border-[#c9a256]/15 bg-[#14110e] p-5 space-y-2">
+                <div className="h-9 w-9 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                  <ShieldCheck size={17} />
+                </div>
+                <p className="font-serif text-xl font-semibold text-[#f4efe6]">Estoque Real</p>
+                <p className="text-xs text-[#9e9589] leading-relaxed">
+                  Reserva imediata no pedido e transparência total.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Architectural Pillars Ribbon */}
+      <section className="bg-[#120f0c] border-b border-[#c9a256]/12 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="flex items-start gap-3.5">
+              <div className="h-10 w-10 rounded-xl bg-[#1b1612] border border-[#c9a256]/20 flex items-center justify-center text-[#c9a256] shrink-0">
+                <PackageCheck size={18} />
+              </div>
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f4efe6]">
+                  Reserva Atômica (RN01)
+                </h3>
+                <p className="text-xs text-[#9e9589] mt-0.5">
+                  Baixa automática de estoque no instante do pedido.
+                </p>
+              </div>
             </div>
 
-            <form
-              onSubmit={handleApplyFilters}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3"
-            >
+            <div className="flex items-start gap-3.5">
+              <div className="h-10 w-10 rounded-xl bg-[#1b1612] border border-[#c9a256]/20 flex items-center justify-center text-[#c9a256] shrink-0">
+                <CreditCard size={18} />
+              </div>
               <div>
-                <label
-                  htmlFor="filter-name"
-                  className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1"
-                >
-                  Nome do Produto
-                </label>
-                <input
-                  id="filter-name"
-                  type="text"
-                  value={searchName}
-                  onChange={(e) => setSearchName(e.target.value)}
-                  placeholder="Ex.: Água, Suco..."
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                />
+                <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f4efe6]">
+                  Checkout Demonstrativo
+                </h3>
+                <p className="text-xs text-[#9e9589] mt-0.5">
+                  PIX ou Cartão sem cobrança bancária real (RF07).
+                </p>
               </div>
+            </div>
 
+            <div className="flex items-start gap-3.5">
+              <div className="h-10 w-10 rounded-xl bg-[#1b1612] border border-[#c9a256]/20 flex items-center justify-center text-[#c9a256] shrink-0">
+                <Truck size={18} />
+              </div>
               <div>
-                <label
-                  htmlFor="filter-category"
-                  className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1"
-                >
-                  Categoria
-                </label>
-                <select
-                  id="filter-category"
-                  value={selectedCategoryId}
-                  onChange={(e) => setSelectedCategoryId(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                >
-                  <option value="">Todas as Categorias</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f4efe6]">
+                  Logística Sincronizada
+                </h3>
+                <p className="text-xs text-[#9e9589] mt-0.5">
+                  Acompanhe cada etapa de preparo até a entrega.
+                </p>
               </div>
+            </div>
 
+            <div className="flex items-start gap-3.5">
+              <div className="h-10 w-10 rounded-xl bg-[#1b1612] border border-[#c9a256]/20 flex items-center justify-center text-[#c9a256] shrink-0">
+                <Check size={18} />
+              </div>
               <div>
-                <label
-                  htmlFor="filter-brand"
-                  className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1"
-                >
-                  Marca
-                </label>
-                <input
-                  id="filter-brand"
-                  type="text"
-                  value={brandFilter}
-                  onChange={(e) => setBrandFilter(e.target.value)}
-                  placeholder="Ex.: Minalba, Aurora..."
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                />
+                <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f4efe6]">
+                  Eventos &amp; Casa (RF17)
+                </h3>
+                <p className="text-xs text-[#9e9589] mt-0.5">
+                  Unidades avulsas ou fardos para recepções.
+                </p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-              <div>
-                <label
-                  htmlFor="filter-volume"
-                  className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1"
-                >
-                  Volume (ml)
-                </label>
-                <select
-                  id="filter-volume"
-                  value={volumeFilter}
-                  onChange={(e) => setVolumeFilter(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                >
-                  <option value="">Qualquer volume</option>
-                  <option value="290">290 ml</option>
-                  <option value="300">300 ml</option>
-                  <option value="350">350 ml</option>
-                  <option value="450">450 ml</option>
-                  <option value="500">500 ml</option>
-                  <option value="1000">1000 ml (1L)</option>
-                  <option value="1500">1500 ml (1,5L)</option>
-                  <option value="2000">2000 ml (2L)</option>
-                </select>
+      {/* Main Catalog & Filter Console */}
+      <main id="catalogo" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex-grow w-full">
+        {/* Refined Filter Console (RF01 / UC04) */}
+        <section className="rounded-3xl border border-[#c9a256]/20 bg-[#14110e] p-6 sm:p-8 mb-16 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-[#c9a256]/12">
+            <div>
+              <div className="flex items-center gap-2 text-[#c9a256] text-xs font-semibold uppercase tracking-[0.18em]">
+                <Filter size={14} />
+                <span>Sommelier de Busca &amp; Filtros</span>
               </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label
-                    htmlFor="filter-min-price"
-                    className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1"
-                  >
-                    Preço Mín (R$)
-                  </label>
-                  <input
-                    id="filter-min-price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value)}
-                    placeholder="0,00"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="filter-max-price"
-                    className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1"
-                  >
-                    Preço Máx (R$)
-                  </label>
-                  <input
-                    id="filter-max-price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                    placeholder="50,00"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-end">
-                <button
-                  type="submit"
-                  className="w-full bg-amber-600 hover:bg-amber-500 text-black font-black uppercase tracking-widest text-xs py-2.5 px-4 rounded transition-colors"
-                >
-                  Aplicar Filtros
-                </button>
-              </div>
-            </form>
-
-            {filterError && (
-              <p className="mt-3 text-xs text-red-400 font-semibold bg-red-950/40 border border-red-900/50 rounded px-3 py-2">
-                {filterError}
+              <p className="text-xs text-[#9e9589] mt-1">
+                Refine por categoria, nome, marca, volume em mililitros ou faixa de preço (RF01).
               </p>
-            )}
+            </div>
+            <button
+              type="button"
+              onClick={handleClearFilters}
+              className="inline-flex items-center gap-2 self-start sm:self-auto h-10 px-4 rounded-full border border-[#c9a256]/20 bg-[#1a1612] hover:border-[#c9a256] text-xs font-medium text-[#f4efe6] transition-all cursor-pointer"
+            >
+              <RotateCcw size={13} className="text-[#c9a256]" />
+              <span>Limpar Filtros</span>
+            </button>
           </div>
 
-          {/* PRODUCT LISTING */}
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-8">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                <div
-                  key={n}
-                  className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 h-80 animate-pulse flex flex-col justify-between"
-                >
-                  <div className="bg-zinc-800 h-40 rounded-lg" />
-                  <div className="space-y-2">
-                    <div className="bg-zinc-800 h-3 w-1/3 rounded" />
-                    <div className="bg-zinc-800 h-4 w-3/4 rounded" />
-                    <div className="bg-zinc-800 h-8 w-full rounded mt-2" />
-                  </div>
-                </div>
-              ))}
+          <form
+            onSubmit={handleApplyFilters}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4"
+          >
+            <div>
+              <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9e9589] mb-2">
+                Bebida
+              </label>
+              <input
+                type="text"
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                placeholder="Ex.: Água, Uva, Mate..."
+                className="w-full h-11 bg-[#0e0c0a] border border-[#c9a256]/20 rounded-xl px-3.5 text-xs text-[#f4efe6] placeholder-[#9e9589]/50 focus:outline-none focus:border-[#c9a256]"
+              />
             </div>
-          ) : Object.keys(groupedProducts).length === 0 ? (
-            <div className="text-center py-16 bg-zinc-900/80 border border-zinc-800 rounded-xl p-8">
-              <p className="text-zinc-300 font-bold text-base mb-2">
-                Nenhum produto encontrado para os critérios selecionados.
-              </p>
-              <p className="text-zinc-500 text-xs mb-6">
-                Tente limpar os filtros ou buscar por outra categoria (Água, Sucos, Refrigerantes ou Chás).
-              </p>
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                className="bg-amber-600 hover:bg-amber-500 text-black font-black uppercase tracking-widest text-xs px-6 py-2.5 rounded transition-colors"
+
+            <div>
+              <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9e9589] mb-2">
+                Coleção
+              </label>
+              <select
+                value={selectedCategoryId}
+                onChange={(e) => setSelectedCategoryId(e.target.value)}
+                className="w-full h-11 bg-[#0e0c0a] border border-[#c9a256]/20 rounded-xl px-3 text-xs text-[#f4efe6] focus:outline-none focus:border-[#c9a256]"
               >
-                Ver Todos os Produtos
+                <option value="">Todas as Coleções</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={String(cat.id)}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9e9589] mb-2">
+                Marca
+              </label>
+              <input
+                type="text"
+                value={brandFilter}
+                onChange={(e) => setBrandFilter(e.target.value)}
+                placeholder="Ex.: Minalba, Aurora..."
+                className="w-full h-11 bg-[#0e0c0a] border border-[#c9a256]/20 rounded-xl px-3.5 text-xs text-[#f4efe6] placeholder-[#9e9589]/50 focus:outline-none focus:border-[#c9a256]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9e9589] mb-2">
+                Volume (mL)
+              </label>
+              <select
+                value={volumeFilter}
+                onChange={(e) => setVolumeFilter(e.target.value)}
+                className="w-full h-11 bg-[#0e0c0a] border border-[#c9a256]/20 rounded-xl px-3 text-xs text-[#f4efe6] focus:outline-none focus:border-[#c9a256]"
+              >
+                <option value="">Qualquer volume</option>
+                <option value="290">290 mL</option>
+                <option value="300">300 mL</option>
+                <option value="350">350 mL</option>
+                <option value="450">450 mL</option>
+                <option value="500">500 mL</option>
+                <option value="1000">1000 mL (1L)</option>
+                <option value="1500">1500 mL (1,5L)</option>
+                <option value="2000">2000 mL (2L)</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9e9589] mb-2">
+                  Mín (R$)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.50"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  placeholder="0,00"
+                  className="w-full h-11 bg-[#0e0c0a] border border-[#c9a256]/20 rounded-xl px-2.5 text-xs text-[#f4efe6] placeholder-[#9e9589]/50 focus:outline-none focus:border-[#c9a256]"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9e9589] mb-2">
+                  Máx (R$)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.50"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  placeholder="50,00"
+                  className="w-full h-11 bg-[#0e0c0a] border border-[#c9a256]/20 rounded-xl px-2.5 text-xs text-[#f4efe6] placeholder-[#9e9589]/50 focus:outline-none focus:border-[#c9a256]"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-end">
+              <button
+                type="submit"
+                className="w-full h-11 bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] font-semibold text-xs uppercase tracking-[0.16em] rounded-xl transition-all cursor-pointer shadow-[0_4px_20px_rgba(201,162,86,0.25)]"
+              >
+                Filtrar Vitrine
               </button>
             </div>
-          ) : (
-            Object.entries(groupedProducts).map(([categoryName, categoryProducts]) => (
-              <div key={categoryName} className="mb-14">
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="h-0.5 w-8 bg-amber-500" />
-                  <h2 className="text-2xl md:text-3xl font-serif font-black text-white uppercase tracking-wider">
-                    {categoryName}
-                  </h2>
-                  <span className="text-xs text-zinc-500 font-bold uppercase tracking-widest">
-                    ({categoryProducts.length} {categoryProducts.length === 1 ? 'item' : 'itens'})
-                  </span>
-                  <div className="h-0.5 flex-1 bg-zinc-800" />
-                </div>
+          </form>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                  {categoryProducts.map((product) => {
-                    const outOfStock = !product.in_stock || product.stock_quantity <= 0;
-                    return (
-                      <div
-                        key={product.id}
-                        className={`border rounded-xl transition-all duration-200 flex flex-col bg-zinc-900 overflow-hidden shadow-lg ${
-                          outOfStock
-                            ? 'border-zinc-800/80 opacity-85'
-                            : 'border-zinc-800 hover:border-amber-500/80'
-                        }`}
-                      >
-                        {/* Image / Visual Representation */}
-                        <Link
-                          href={`/produto/${product.id}`}
-                          className="p-5 flex justify-center items-center h-48 bg-gradient-to-b from-zinc-800/60 to-zinc-950 border-b border-zinc-800 relative group"
-                        >
-                          {/* Volume Badge */}
-                          <span className="absolute top-3 left-3 bg-zinc-950/90 border border-zinc-700 text-zinc-300 text-[10px] font-bold px-2 py-0.5 rounded">
-                            {product.volume_ml >= 1000
-                              ? `${(product.volume_ml / 1000).toString().replace('.', ',')}L`
-                              : `${product.volume_ml}ml`}
-                          </span>
-
-                          {/* Stock Badge (RF02 / RN03) */}
-                          {outOfStock ? (
-                            <span className="absolute top-3 right-3 bg-red-500/20 border border-red-500/40 text-red-400 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded">
-                              Em Falta
-                            </span>
-                          ) : (
-                            <span className="absolute top-3 right-3 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded">
-                              {product.stock_quantity} em estoque
-                            </span>
-                          )}
-
-                          {product.image_url ? (
-                            <img
-                              src={product.image_url}
-                              alt={product.name}
-                              className="max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                            />
-                          ) : (
-                            <div className="flex flex-col items-center justify-center text-center px-3">
-                              <Droplets size={36} className="text-amber-500/80 mb-2" />
-                              <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">
-                                {product.brand}
-                              </span>
-                              <span className="text-xs font-bold text-zinc-300 line-clamp-2 mt-1">
-                                {product.name}
-                              </span>
-                            </div>
-                          )}
-                        </Link>
-
-                        {/* Product Info */}
-                        <div className="p-4 flex-1 flex flex-col">
-                          <div className="flex items-center justify-between gap-2 mb-1">
-                            <p className="text-[10px] text-amber-500 font-black uppercase tracking-widest">
-                              {product.brand}
-                            </p>
-                            <span className="text-[10px] text-zinc-400 font-semibold">
-                              {product.volume_ml} ml
-                            </span>
-                          </div>
-
-                          <Link
-                            href={`/produto/${product.id}`}
-                            className="font-bold text-white text-sm leading-snug mb-2 line-clamp-2 hover:text-amber-500 transition-colors"
-                          >
-                            {product.name}
-                          </Link>
-
-                          {product.description && (
-                            <p className="text-xs text-zinc-400 line-clamp-2 mb-3">
-                              {product.description}
-                            </p>
-                          )}
-
-                          <div className="mt-auto pt-3 border-t border-zinc-800/80 flex items-center justify-between">
-                            <div>
-                              <span className="text-[10px] text-zinc-500 uppercase font-bold block">
-                                Preço Unitário
-                              </span>
-                              <span className="font-black text-amber-500 text-lg">
-                                R$ {Number(product.price).toFixed(2).replace('.', ',')}
-                              </span>
-                            </div>
-                            <Link
-                              href={`/produto/${product.id}`}
-                              className="text-[11px] font-bold text-zinc-400 hover:text-white underline"
-                            >
-                              Detalhes
-                            </Link>
-                          </div>
-                        </div>
-
-                        {/* Action Button (RF02 / RN03) */}
-                        {outOfStock ? (
-                          <button
-                            type="button"
-                            disabled
-                            aria-disabled="true"
-                            className="w-full py-3.5 text-xs font-black tracking-widest uppercase bg-zinc-950 text-red-400/80 border-t border-zinc-800 cursor-not-allowed"
-                          >
-                            Em Falta — Indisponível
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const ok = addItem(product, 1);
-                              if (ok) {
-                                toast.success(`${product.name} adicionado ao carrinho!`);
-                              }
-                            }}
-                            className="w-full py-3.5 text-xs font-black tracking-widest uppercase bg-zinc-950 text-zinc-200 hover:bg-amber-600 hover:text-black transition-colors border-t border-zinc-800 flex items-center justify-center gap-2"
-                          >
-                            <ShoppingCart size={14} /> Adicionar ao Carrinho
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))
+          {filterError && (
+            <div className="mt-4 rounded-xl bg-red-950/50 border border-red-500/40 px-4 py-3 text-xs text-red-200">
+              {filterError}
+            </div>
           )}
         </section>
 
-        {/* ONLINE HELP / FAQ SECTION (Seção 8.3 do Documento de Visão) */}
-        <section id="ajuda" className="border-t border-zinc-900 bg-zinc-900/40 py-14">
-          <div className="max-w-5xl mx-auto px-4">
-            <div className="flex items-center gap-3 mb-6">
-              <HelpCircle className="text-amber-500" size={24} />
-              <h2 className="text-2xl font-serif font-black text-white uppercase tracking-wider">
-                Ajuda On-line & Perguntas Frequentes
+        {/* Catalog Grid */}
+        {loading ? (
+          <CatalogSkeleton />
+        ) : products.length === 0 ? (
+          <div className="text-center py-20 rounded-3xl border border-[#c9a256]/15 bg-[#14110e] px-6">
+            <p className="font-serif text-3xl text-[#f4efe6] mb-2">
+              Nenhuma bebida encontrada para esta seleção
+            </p>
+            <p className="text-sm text-[#9e9589] mb-8 max-w-md mx-auto">
+              Experimente limpar os filtros ou explorar todas as nossas coleções de águas, sucos
+              integrais, refrigerantes e chás.
+            </p>
+            <button
+              onClick={handleClearFilters}
+              className="h-11 px-7 rounded-full bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] font-semibold text-xs uppercase tracking-[0.16em] transition-all cursor-pointer"
+            >
+              Restaurar Vitrine Completa
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-20">
+            {categoriesToDisplay.map((category) => {
+              const catProducts = products.filter((p) => p.category_id === category.id);
+              if (catProducts.length === 0) return null;
+
+              return (
+                <section key={category.id} className="space-y-8">
+                  {/* Editorial Section Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-[#c9a256]/15 pb-5">
+                    <div>
+                      <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#c9a256]">
+                        Coleção Selecionada
+                      </span>
+                      <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-[#f4efe6] mt-1">
+                        {category.name}
+                      </h2>
+                      {category.description && (
+                        <p className="text-xs text-[#9e9589] mt-1">{category.description}</p>
+                      )}
+                    </div>
+                    <span className="text-xs font-mono text-[#9e9589]">
+                      {catProducts.length}{' '}
+                      {catProducts.length === 1 ? 'rótulo disponível' : 'rótulos disponíveis'}
+                    </span>
+                  </div>
+
+                  {/* Product Cards Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {catProducts.map((product) => {
+                      const outOfStock = !product.in_stock || product.stock_quantity <= 0;
+
+                      return (
+                        <article
+                          key={product.id}
+                          className={`group relative rounded-3xl border transition-all duration-500 flex flex-col overflow-hidden ${
+                            outOfStock
+                              ? 'border-red-900/30 bg-[#12100e]/80 opacity-85'
+                              : 'border-[#c9a256]/15 hover:border-[#c9a256]/55 bg-[#14110e] hover:shadow-[0_20px_45px_rgba(0,0,0,0.65)]'
+                          }`}
+                        >
+                          {/* Top Badges */}
+                          <div className="absolute top-3.5 left-3.5 right-3.5 z-20 flex items-center justify-between pointer-events-none">
+                            <span className="rounded-full bg-[#0e0c0a]/85 backdrop-blur-md border border-[#c9a256]/25 px-3 py-1 text-[10px] font-mono font-semibold text-[#f4efe6]">
+                              {product.volume_ml >= 1000
+                                ? `${(product.volume_ml / 1000).toString().replace('.', ',')}L`
+                                : `${product.volume_ml} mL`}
+                            </span>
+
+                            {outOfStock ? (
+                              <span className="rounded-full bg-red-950/95 border border-red-500/40 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-red-200">
+                                Em Falta
+                              </span>
+                            ) : (
+                              <span className="rounded-full bg-emerald-950/85 border border-emerald-500/30 px-2.5 py-1 text-[10px] font-mono text-emerald-300">
+                                {product.stock_quantity} un.
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Studio Bottle/Can Visual */}
+                          <Link
+                            href={`/produto/${product.id}`}
+                            className="relative h-64 w-full border-b border-[#c9a256]/10 bg-gradient-to-b from-[#1b1612] to-[#120f0c] p-6 flex items-center justify-center"
+                          >
+                            <ProductArtwork
+                              name={product.name}
+                              brand={product.brand}
+                              categoryName={category.name}
+                              volumeMl={product.volume_ml}
+                              imageUrl={product.image_url}
+                              className="w-full h-full"
+                            />
+                          </Link>
+
+                          {/* Card Info */}
+                          <div className="p-5 flex-1 flex flex-col justify-between space-y-5">
+                            <div>
+                              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#c9a256]">
+                                {product.brand}
+                              </span>
+                              <Link href={`/produto/${product.id}`}>
+                                <h3 className="font-serif text-xl font-semibold text-[#f4efe6] group-hover:text-[#c9a256] transition-colors line-clamp-2 mt-1 leading-snug">
+                                  {product.name}
+                                </h3>
+                              </Link>
+                              {product.description && (
+                                <p className="text-xs text-[#9e9589] line-clamp-2 mt-2 leading-relaxed">
+                                  {product.description}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="pt-3 border-t border-[#c9a256]/10 flex items-center justify-between gap-3">
+                              <div>
+                                <span className="block text-[10px] uppercase tracking-wider text-[#9e9589]">
+                                  Valor Unitário
+                                </span>
+                                <span className="font-mono text-lg font-semibold text-[#f4efe6]">
+                                  R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}
+                                </span>
+                              </div>
+
+                              <button
+                                type="button"
+                                disabled={outOfStock}
+                                onClick={() => handleQuickAdd(product)}
+                                className={`h-11 px-4 rounded-full text-xs font-semibold uppercase tracking-[0.12em] flex items-center gap-2 transition-all ${
+                                  outOfStock
+                                    ? 'bg-[#1f1b18] text-[#9e9589]/50 cursor-not-allowed border border-white/5'
+                                    : 'bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] cursor-pointer shadow-[0_4px_15px_rgba(201,162,86,0.2)]'
+                                }`}
+                              >
+                                <ShoppingBag size={14} />
+                                <span>{outOfStock ? 'Indisponível' : 'Adicionar'}</span>
+                              </button>
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Section 8.3: Editorial Bento Help & FAQ (#ajuda) */}
+        <section
+          id="ajuda"
+          className="mt-28 rounded-3xl border border-[#c9a256]/20 bg-gradient-to-br from-[#161310] to-[#110e0c] p-8 sm:p-12"
+        >
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-6 border-b border-[#c9a256]/15">
+            <div>
+              <div className="inline-flex items-center gap-2 text-[#c9a256] text-xs font-semibold uppercase tracking-[0.2em]">
+                <HelpCircle size={15} />
+                <span>Concierge &amp; Guia do Cliente</span>
+              </div>
+              <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-[#f4efe6] mt-2">
+                Como funciona a experiência Adega Express
               </h2>
             </div>
+            <span className="text-xs font-mono text-[#9e9589]">
+              Regras Operacionais • Documento de Visão v4.3
+            </span>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-                <h3 className="text-sm font-black uppercase tracking-wider text-amber-500 mb-2">
-                  1. Quais produtos são comercializados?
-                </h3>
-                <p className="text-xs text-zinc-300 leading-relaxed">
-                  Nesta versão acadêmica (v4.3), o Adega Express opera exclusivamente com bebidas não
-                  alcoólicas divididas em quatro categorias: <strong>Água, Sucos, Refrigerantes e Chás</strong>.
-                  Não há venda de bebidas alcoólicas ou produtos de tabacaria.
-                </p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
+            <div className="rounded-2xl border border-[#c9a256]/12 bg-[#0e0c0a]/70 p-6 space-y-2.5">
+              <span className="font-mono text-xs text-[#c9a256]">01 / ESCOPO</span>
+              <h3 className="font-serif text-xl font-semibold text-[#f4efe6]">
+                Exclusivamente Não Alcoólico
+              </h3>
+              <p className="text-xs text-[#9e9589] leading-relaxed">
+                Comercializamos exclusivamente bebidas não alcoólicas organizadas em 4 coleções:
+                <strong> Água</strong>, <strong>Sucos</strong>, <strong>Refrigerantes</strong> e{' '}
+                <strong>Chás</strong>. Não há exigência de maioridade.
+              </p>
+            </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-                <h3 className="text-sm font-black uppercase tracking-wider text-amber-500 mb-2">
-                  2. Como funciona o pagamento demonstrativo?
-                </h3>
-                <p className="text-xs text-zinc-300 leading-relaxed">
-                  O checkout registra a modalidade escolhida (<strong>PIX ou Cartão</strong>) apenas
-                  para fins demonstrativos. <strong>Nenhuma cobrança financeira real é realizada.</strong> A
-                  confirmação do pagamento é feita manualmente por um Atendente ou Administrador na Mesa
-                  de Operações.
-                </p>
-              </div>
+            <div className="rounded-2xl border border-[#c9a256]/12 bg-[#0e0c0a]/70 p-6 space-y-2.5">
+              <span className="font-mono text-xs text-[#c9a256]">02 / CHECKOUT</span>
+              <h3 className="font-serif text-xl font-semibold text-[#f4efe6]">
+                Pagamento Demonstrativo (RF07)
+              </h3>
+              <p className="text-xs text-[#9e9589] leading-relaxed">
+                Você escolhe entre <strong>PIX</strong> ou <strong>Cartão</strong> apenas como
+                registro demonstrativo no pedido. Nenhuma cobrança bancária real ou geração de QR
+                Code é realizada.
+              </p>
+            </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-                <h3 className="text-sm font-black uppercase tracking-wider text-amber-500 mb-2">
-                  3. Qual é o prazo de confirmação do pedido?
-                </h3>
-                <p className="text-xs text-zinc-300 leading-relaxed">
-                  Ao finalizar a compra, o estoque é reservado/debitado imediatamente (RN01). Caso o
-                  pagamento demonstrativo não seja confirmado pela equipe em até{' '}
-                  <strong>30 minutos</strong>, o pedido é cancelado automaticamente e o estoque é
-                  devolvido (RN07).
-                </p>
-              </div>
+            <div className="rounded-2xl border border-[#c9a256]/12 bg-[#0e0c0a]/70 p-6 space-y-2.5">
+              <span className="font-mono text-xs text-[#c9a256]">03 / RESERVA &amp; PRAZO</span>
+              <h3 className="font-serif text-xl font-semibold text-[#f4efe6]">
+                Reserva e Expiração em 30 Min (RN07)
+              </h3>
+              <p className="text-xs text-[#9e9589] leading-relaxed">
+                O estoque é reservado ao criar o pedido. Caso o pagamento demonstrativo não seja
+                confirmado pela equipe em até <strong>30 minutos</strong>, o pedido é cancelado e o
+                estoque retorna automaticamente.
+              </p>
+            </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-                <h3 className="text-sm font-black uppercase tracking-wider text-amber-500 mb-2">
-                  4. Como acompanhar meu pedido e entrega?
-                </h3>
-                <p className="text-xs text-zinc-300 leading-relaxed">
-                  Acesse <strong>Meus Pedidos</strong> no menu superior para visualizar em tempo real
-                  cada etapa: <em>Pendente, Confirmado, Separado, Em Rota, Entregue ou Cancelado</em>,
-                  sem precisar ligar para o atendimento.
-                </p>
-              </div>
+            <div className="rounded-2xl border border-[#c9a256]/12 bg-[#0e0c0a]/70 p-6 space-y-2.5">
+              <span className="font-mono text-xs text-[#c9a256]">04 / DISPONIBILIDADE</span>
+              <h3 className="font-serif text-xl font-semibold text-[#f4efe6]">
+                Rótulos Em Falta (RF02 / RN03)
+              </h3>
+              <p className="text-xs text-[#9e9589] leading-relaxed">
+                Produtos com saldo zero permanecem visíveis na vitrine com o selo{' '}
+                <strong>Em Falta</strong> para transparência do catálogo, mas ficam bloqueados para
+                adição à sacola.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-[#c9a256]/12 bg-[#0e0c0a]/70 p-6 space-y-2.5">
+              <span className="font-mono text-xs text-[#c9a256]">05 / RECEPÇÕES</span>
+              <h3 className="font-serif text-xl font-semibold text-[#f4efe6]">
+                Compras para Eventos (RF17)
+              </h3>
+              <p className="text-xs text-[#9e9589] leading-relaxed">
+                Na página de cada bebida ou direto na sacola você pode definir quantidades maiores
+                para festas e reuniões familiares, sempre respeitando o saldo em estoque.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-[#c9a256]/12 bg-[#0e0c0a]/70 p-6 space-y-2.5">
+              <span className="font-mono text-xs text-[#c9a256]">06 / LOGÍSTICA</span>
+              <h3 className="font-serif text-xl font-semibold text-[#f4efe6]">
+                5 Etapas até a Entrega (RN04)
+              </h3>
+              <p className="text-xs text-[#9e9589] leading-relaxed">
+                Acompanhe em <em>Meus Pedidos</em> a evolução completa:{' '}
+                <strong>Pendente → Confirmado → Separado → Em Rota → Entregue</strong>.
+              </p>
             </div>
           </div>
         </section>
       </main>
-    </>
+    </div>
   );
 }
 
@@ -683,8 +767,8 @@ export default function Home() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-amber-500 font-black tracking-widest uppercase">
-          Carregando catálogo...
+        <div className="min-h-screen bg-[#0e0c0a] text-[#c9a256] flex items-center justify-center font-serif text-2xl">
+          Preparando a vitrine...
         </div>
       }
     >

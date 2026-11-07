@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
+import ProductArtwork from '@/components/ProductArtwork';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
@@ -15,8 +16,9 @@ import {
   MapPin,
   CreditCard,
   Info,
-  Droplets,
   CheckCircle2,
+  ShoppingBag,
+  Tag,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -57,7 +59,7 @@ export default function Carrinho() {
       if (def) setSelectedAddressId(def.id);
       else if (res.length > 0) setSelectedAddressId(res[0].id);
     } catch {
-      // Address fetch error handled silently or on quote
+      // Address fetch error handled on quote
     }
   };
 
@@ -87,7 +89,7 @@ export default function Carrinho() {
       if (codeToUse?.trim()) {
         setAppliedCoupon(codeToUse.trim().toUpperCase());
         if (showSuccessToast) {
-          toast.success('Cupom aplicado com sucesso!');
+          toast.success('Cupom promocional aplicado!');
         }
       }
     } catch (e: unknown) {
@@ -136,27 +138,47 @@ export default function Carrinho() {
     await runQuote(couponCode, true);
   };
 
+  const removeCoupon = async () => {
+    setCouponCode('');
+    setAppliedCoupon('');
+    setDiscount(0);
+    await runQuote(undefined, false);
+  };
+
   const handleCheckout = async () => {
     if (!isAuthenticated) {
+      toast.error('Faça login como Cliente para finalizar sua compra.');
       router.push('/login?redirect=/carrinho');
       return;
     }
+
     if (user?.role !== 'CLIENTE') {
       toast.error('Apenas contas com perfil CLIENTE podem realizar pedidos.');
       return;
     }
-    if (items.length === 0) {
-      toast.error('Seu carrinho está vazio!');
-      return;
-    }
+
     if (!selectedAddressId) {
       toast.error('Selecione ou cadastre um endereço de entrega.');
       return;
     }
 
-    setLoading(true);
+    const outOfStockItem = items.find(
+      (i) => !i.product.in_stock || i.product.stock_quantity < i.quantity,
+    );
+    if (outOfStockItem) {
+      toast.error(
+        `O item "${outOfStockItem.product.name}" não possui estoque suficiente (${outOfStockItem.product.stock_quantity} un.).`,
+      );
+      return;
+    }
 
     try {
+      setLoading(true);
+      const idempotencyKey =
+        typeof crypto !== 'undefined' && 'randomUUID' in crypto
+          ? crypto.randomUUID()
+          : `order-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
       const payload: {
         address_id: number;
         payment_method: 'PIX' | 'CARTAO';
@@ -167,15 +189,9 @@ export default function Carrinho() {
         payment_method: paymentMethod,
         items: items.map((i) => ({ product_id: i.product.id, quantity: i.quantity })),
       };
-
-      if (appliedCoupon && !quoteError && discount > 0) {
+      if (appliedCoupon) {
         payload.coupon_code = appliedCoupon;
       }
-
-      const idempotencyKey =
-        typeof crypto !== 'undefined' && crypto.randomUUID
-          ? crypto.randomUUID()
-          : `order-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
       await api.post('/orders', payload, {
         headers: { 'Idempotency-Key': idempotencyKey },
@@ -183,323 +199,396 @@ export default function Carrinho() {
 
       clearCart();
       toast.success(
-        'Pedido demonstrativo registrado! Aguardando confirmação manual pela equipe.',
+        'Pedido registrado com status PENDENTE! Aguarde a confirmação manual do pagamento demonstrativo.',
       );
       router.push('/pedidos');
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Erro ao finalizar pedido.';
-      toast.error(msg);
+      const errorMessage = e instanceof Error ? e.message : 'Erro ao registrar pedido.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-zinc-950 min-h-screen font-sans text-white">
+    <div className="bg-[#0e0c0a] min-h-screen text-[#f4efe6] font-sans">
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="h-0.5 w-10 bg-amber-500" />
-          <h1 className="text-2xl md:text-3xl font-serif font-black text-white uppercase tracking-wider">
-            Carrinho & Checkout Demonstrativo
-          </h1>
-          <div className="h-0.5 flex-1 bg-zinc-800" />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-10 border-b border-[#c9a256]/15 pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#c9a256]">
+              Atelier de Compra • UC01
+            </span>
+            <h1 className="font-serif text-3xl sm:text-5xl font-semibold text-[#f4efe6] mt-1">
+              Sacola &amp; Checkout Demonstrativo
+            </h1>
+          </div>
+          <Link
+            href="/#catalogo"
+            className="text-xs font-semibold uppercase tracking-[0.16em] text-[#c9a256] hover:underline"
+          >
+            Continuar explorando rótulos →
+          </Link>
         </div>
 
-        {/* AVISO EXPLÍCITO DE PAGAMENTO DEMONSTRATIVO (RF07 / RNF05) */}
-        <div className="mb-8 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
-          <Info className="text-amber-500 shrink-0 mt-0.5" size={20} />
-          <div className="text-xs text-zinc-200 leading-relaxed">
-            <strong className="text-amber-400 uppercase tracking-wider block mb-0.5">
-              Aviso de Checkout Demonstrativo (Sem Cobrança Real)
+        {/* Academic Demonstrative Payment Notice (RF07 / RNF05) */}
+        <div className="mb-10 rounded-2xl border border-[#c9a256]/30 bg-[#161310] p-5 flex items-start gap-4">
+          <div className="h-9 w-9 rounded-full bg-[#c9a256]/15 text-[#c9a256] flex items-center justify-center shrink-0 mt-0.5">
+            <Info size={18} />
+          </div>
+          <div className="text-xs text-[#9e9589] leading-relaxed">
+            <strong className="text-[#f4efe6] uppercase tracking-wider block mb-1">
+              Aviso de Pagamento Demonstrativo (Sem Cobrança Real — RF07 / RNF05)
             </strong>
-            Nesta versão acadêmica (v4.3), a escolha entre <strong>PIX</strong> e{' '}
-            <strong>Cartão</strong> funciona apenas como registro demonstrativo no pedido. Nenhuma
-            transação bancária, geração de QR Code ou cobrança financeira real é efetuada. Após a
-            criação do pedido, um <strong>Atendente ou Administrador</strong> realizará a
-            confirmação manual na Mesa de Operações (em até 30 minutos, conforme RN07).
+            A modalidade escolhida (<strong>PIX</strong> ou <strong>Cartão</strong>) é registrada
+            exclusivamente para fins acadêmicos demonstrativos. Nenhuma transação bancária ou QR
+            Code de cobrança é gerado. O pedido inicia como <strong>PENDENTE</strong> (com reserva
+            imediata de estoque — RN01) e avança para <strong>CONFIRMADO</strong> após confirmação
+            manual por um Atendente ou Administrador (RN08). Caso não seja confirmado em até{' '}
+            <strong>30 minutos</strong>, expira automaticamente devolvendo o estoque (RN07).
           </div>
         </div>
 
         {items.length === 0 ? (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-12 text-center shadow-xl">
-            <p className="text-lg text-zinc-300 mb-2 font-bold uppercase tracking-wider">
-              Seu carrinho está vazio
-            </p>
-            <p className="text-xs text-zinc-500 mb-6">
-              Adicione águas, sucos, refrigerantes ou chás do nosso catálogo para simular uma compra.
+          <div className="text-center py-24 bg-[#14110e] rounded-3xl border border-[#c9a256]/15 px-6">
+            <div className="h-16 w-16 rounded-full bg-[#c9a256]/10 border border-[#c9a256]/25 text-[#c9a256] flex items-center justify-center mx-auto mb-5">
+              <ShoppingBag size={26} />
+            </div>
+            <h2 className="font-serif text-3xl text-[#f4efe6] mb-2">Sua sacola está vazia</h2>
+            <p className="text-sm text-[#9e9589] mb-8 max-w-md mx-auto">
+              Selecione águas minerais, sucos integrais, refrigerantes ou chás gelados em nossa
+              vitrine.
             </p>
             <Link
               href="/#catalogo"
-              className="inline-block bg-amber-600 text-black font-black uppercase tracking-widest text-xs py-3 px-8 rounded hover:bg-amber-500 transition-colors"
+              className="inline-flex items-center gap-2 h-12 px-8 rounded-full bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] font-semibold text-xs uppercase tracking-[0.18em] transition-all"
             >
-              Explorar Catálogo
+              <span>Explorar Catálogo</span>
+              <ArrowRight size={15} />
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* LISTA DE PRODUTOS NO CARRINHO (RF05 / RF17) */}
-            <div className="flex-1">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl">
-                <ul className="divide-y divide-zinc-800">
-                  {items.map((item) => (
-                    <li
-                      key={item.product.id}
-                      className="p-5 flex flex-col sm:flex-row items-center gap-5 hover:bg-zinc-800/30 transition-colors"
-                    >
-                      <div className="w-20 h-20 bg-zinc-950 rounded-lg shrink-0 flex items-center justify-center overflow-hidden border border-zinc-800">
-                        {item.product.image_url ? (
-                          <img
-                            src={item.product.image_url}
-                            alt={item.product.name}
-                            className="w-full h-full object-contain p-2"
-                          />
-                        ) : (
-                          <Droplets size={28} className="text-amber-500" />
-                        )}
-                      </div>
-
-                      <div className="flex-1 w-full text-center sm:text-left">
-                        <p className="text-[10px] text-amber-500 font-black uppercase tracking-widest mb-0.5">
-                          {item.product.brand} • {item.product.volume_ml}ml
-                        </p>
-                        <Link
-                          href={`/produto/${item.product.id}`}
-                          className="font-bold text-base text-white hover:text-amber-500 transition-colors"
-                        >
-                          {item.product.name}
-                        </Link>
-                        <p className="text-zinc-400 text-xs mt-1">
-                          R$ {Number(item.product.price).toFixed(2).replace('.', ',')} / unidade (Estoque:{' '}
-                          {item.product.stock_quantity} un.)
-                        </p>
-
-                        <div className="flex items-center justify-center sm:justify-start gap-4 mt-3">
-                          <div className="flex items-center border border-zinc-700 bg-zinc-950 rounded-md h-9">
-                            <button
-                              type="button"
-                              aria-label="Diminuir quantidade"
-                              onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                              className="px-3 hover:bg-zinc-800 text-zinc-300 transition-colors h-full rounded-l-md"
-                            >
-                              <Minus size={14} />
-                            </button>
-                            <input
-                              type="number"
-                              min={1}
-                              max={item.product.stock_quantity}
-                              value={item.quantity}
-                              onChange={(e) => {
-                                const val = parseInt(e.target.value, 10);
-                                if (!Number.isNaN(val)) {
-                                  updateQuantity(item.product.id, val);
-                                }
-                              }}
-                              aria-label={`Quantidade de ${item.product.name}`}
-                              className="w-14 text-center font-bold text-white text-xs bg-transparent focus:outline-none"
-                            />
-                            <button
-                              type="button"
-                              aria-label="Aumentar quantidade"
-                              onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                              className="px-3 hover:bg-zinc-800 text-zinc-300 transition-colors h-full rounded-r-md"
-                            >
-                              <Plus size={14} />
-                            </button>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeItem(item.product.id)}
-                            className="text-zinc-500 hover:text-red-400 transition-colors p-1"
-                            title="Remover item"
-                            aria-label={`Remover ${item.product.name}`}
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="text-right sm:w-32 bg-zinc-950 p-3.5 rounded-lg border border-zinc-800">
-                        <span className="text-[10px] text-zinc-500 block mb-0.5 uppercase font-black tracking-widest">
-                          Subtotal
-                        </span>
-                        <span className="font-black text-base text-amber-500">
-                          R$ {(Number(item.product.price) * item.quantity).toFixed(2).replace('.', ',')}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* PAINEL DE FINALIZAÇÃO (UC01 / UC06) */}
-            <div className="w-full lg:w-96">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 sticky top-24 shadow-xl">
-                <h2 className="text-lg font-black text-white uppercase tracking-wider mb-5 flex items-center gap-2">
-                  <ArrowRight size={18} className="text-amber-500" /> Resumo & Finalização
-                </h2>
-
-                {/* ENDEREÇO DE ENTREGA (UC14 / RN10) */}
-                <div className="mb-5">
-                  <label
-                    htmlFor="checkout-address"
-                    className="block text-[11px] font-black text-zinc-300 uppercase tracking-widest mb-2 flex items-center gap-1.5"
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            {/* Left Column: Items, Address & Demonstrative Payment (8 cols) */}
+            <div className="lg:col-span-8 space-y-8">
+              {/* 1. Cart Items */}
+              <section className="bg-[#14110e] p-6 sm:p-8 rounded-3xl border border-[#c9a256]/15 space-y-6">
+                <div className="flex items-center justify-between border-b border-[#c9a256]/12 pb-4">
+                  <h2 className="font-serif text-2xl font-semibold text-[#f4efe6]">
+                    1. Rótulos Selecionados ({items.length})
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={clearCart}
+                    className="text-xs text-[#9e9589] hover:text-red-400 transition-colors cursor-pointer"
                   >
-                    <MapPin size={13} className="text-amber-500" /> Endereço de Entrega
-                  </label>
-                  {isAuthenticated ? (
-                    addresses.length > 0 ? (
-                      <div className="space-y-2">
-                        <select
-                          id="checkout-address"
-                          value={selectedAddressId || ''}
-                          onChange={(e) => setSelectedAddressId(Number(e.target.value))}
-                          className="w-full border border-zinc-700 rounded-md px-3 py-2.5 bg-zinc-950 text-xs text-white focus:outline-none focus:border-amber-500"
-                        >
-                          {addresses.map((a) => (
-                            <option key={a.id} value={a.id}>
-                              {a.is_default ? '[Padrão] ' : ''}
-                              {a.street}, {a.number} — {a.neighborhood} ({a.city}/{a.state})
-                            </option>
-                          ))}
-                        </select>
-                        <Link
-                          href="/perfil?tab=ENDERECOS"
-                          className="inline-block text-[11px] text-amber-500 hover:underline font-semibold"
-                        >
-                          + Gerenciar ou cadastrar novo endereço
-                        </Link>
-                      </div>
-                    ) : (
-                      <div className="text-xs text-amber-400 bg-amber-500/10 p-3 rounded-md border border-amber-500/30">
-                        Você ainda não possui endereço ativo cadastrado.{' '}
-                        <Link href="/perfil?tab=ENDERECOS" className="underline font-bold">
-                          Clique aqui para cadastrar em Meu Perfil
-                        </Link>
-                        .
-                      </div>
-                    )
-                  ) : (
-                    <div className="text-xs text-zinc-400 bg-zinc-950 p-3 rounded-md border border-zinc-800">
-                      <Link href="/login?redirect=/carrinho" className="text-amber-500 font-bold underline">
-                        Entre na sua conta
-                      </Link>{' '}
-                      para selecionar o endereço e calcular o frete.
-                    </div>
-                  )}
+                    Esvaziar sacola
+                  </button>
                 </div>
 
-                {/* MODALIDADE DE PAGAMENTO DEMONSTRATIVO (RF07) */}
-                <div className="mb-5">
-                  <span className="block text-[11px] font-black text-zinc-300 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                    <CreditCard size={13} className="text-amber-500" /> Modalidade Demonstrativa
-                  </span>
-                  <div className="grid grid-cols-2 gap-2">
+                <div className="divide-y divide-[#c9a256]/10">
+                  {items.map((item) => (
+                    <div
+                      key={item.product.id}
+                      className="py-5 first:pt-0 last:pb-0 flex flex-col sm:flex-row items-start sm:items-center gap-5"
+                    >
+                      <div className="h-24 w-20 rounded-2xl border border-[#c9a256]/15 bg-[#0e0c0a] shrink-0 flex items-center justify-center overflow-hidden">
+                        <ProductArtwork
+                          name={item.product.name}
+                          brand={item.product.brand}
+                          categoryName={item.product.category?.name}
+                          volumeMl={item.product.volume_ml}
+                          imageUrl={item.product.image_url}
+                          size="sm"
+                        />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#c9a256]">
+                          {item.product.brand} • {item.product.volume_ml}mL
+                        </span>
+                        <Link href={`/produto/${item.product.id}`}>
+                          <h3 className="font-serif text-xl font-semibold text-[#f4efe6] hover:text-[#c9a256] transition-colors truncate">
+                            {item.product.name}
+                          </h3>
+                        </Link>
+                        <p className="text-xs text-[#9e9589] mt-0.5 font-mono">
+                          Unitário: R$ {parseFloat(item.product.price).toFixed(2).replace('.', ',')}{' '}
+                          • Estoque: {item.product.stock_quantity} un.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-4 self-end sm:self-center">
+                        <div className="inline-flex items-center rounded-full border border-[#c9a256]/25 bg-[#0e0c0a] p-1">
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                            className="h-8 w-8 rounded-full flex items-center justify-center text-[#f4efe6] hover:bg-[#1c1814] cursor-pointer"
+                            aria-label="Diminuir quantidade"
+                          >
+                            <Minus size={13} />
+                          </button>
+                          <span className="w-9 text-center font-mono text-xs font-semibold">
+                            {item.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                            className="h-8 w-8 rounded-full flex items-center justify-center text-[#f4efe6] hover:bg-[#1c1814] cursor-pointer"
+                            aria-label="Aumentar quantidade"
+                          >
+                            <Plus size={13} />
+                          </button>
+                        </div>
+
+                        <div className="text-right min-w-[90px]">
+                          <span className="font-mono text-sm font-bold text-[#f4efe6]">
+                            R${' '}
+                            {(parseFloat(item.product.price) * item.quantity)
+                              .toFixed(2)
+                              .replace('.', ',')}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => removeItem(item.product.id)}
+                          className="h-9 w-9 rounded-full flex items-center justify-center text-[#9e9589] hover:text-red-400 hover:bg-red-950/30 transition-colors cursor-pointer"
+                          title="Remover item"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* 2. Delivery Address */}
+              {isAuthenticated && user?.role === 'CLIENTE' && (
+                <section className="bg-[#14110e] p-6 sm:p-8 rounded-3xl border border-[#c9a256]/15 space-y-5">
+                  <div className="flex items-center justify-between border-b border-[#c9a256]/12 pb-4">
+                    <h2 className="font-serif text-2xl font-semibold text-[#f4efe6] flex items-center gap-2.5">
+                      <MapPin size={20} className="text-[#c9a256]" />
+                      <span>2. Endereço de Entrega</span>
+                    </h2>
+                    <Link
+                      href="/perfil?tab=ENDERECOS"
+                      className="text-xs font-semibold uppercase tracking-[0.14em] text-[#c9a256] hover:underline"
+                    >
+                      Gerenciar Endereços →
+                    </Link>
+                  </div>
+
+                  {addresses.length === 0 ? (
+                    <div className="rounded-2xl border border-[#c9a256]/20 bg-[#0e0c0a] p-6 text-center space-y-3">
+                      <p className="text-sm text-[#9e9589]">
+                        Você ainda não possui um endereço de entrega cadastrado.
+                      </p>
+                      <Link
+                        href="/perfil?tab=ENDERECOS"
+                        className="inline-flex items-center gap-2 h-10 px-5 rounded-full bg-[#c9a256] text-[#0e0c0a] font-semibold text-xs uppercase tracking-[0.14em]"
+                      >
+                        Cadastrar Endereço Agora
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {addresses.map((addr) => {
+                        const selected = selectedAddressId === addr.id;
+                        return (
+                          <div
+                            key={addr.id}
+                            onClick={() => setSelectedAddressId(addr.id)}
+                            className={`p-5 rounded-2xl border cursor-pointer transition-all ${
+                              selected
+                                ? 'border-[#c9a256] bg-[#1c1712] shadow-[0_8px_25px_rgba(201,162,86,0.12)]'
+                                : 'border-[#c9a256]/15 bg-[#0e0c0a] hover:border-[#c9a256]/40'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#c9a256]">
+                                {addr.is_default ? 'Endereço Padrão' : 'Endereço Cadastrado'}
+                              </span>
+                              {selected && <CheckCircle2 size={16} className="text-[#c9a256]" />}
+                            </div>
+                            <p className="font-semibold text-sm text-[#f4efe6]">
+                              {addr.street}, {addr.number}
+                            </p>
+                            {addr.complement && (
+                              <p className="text-xs text-[#9e9589]">{addr.complement}</p>
+                            )}
+                            <p className="text-xs text-[#9e9589] mt-1">
+                              {addr.neighborhood} — {addr.city}/{addr.state}
+                            </p>
+                            <p className="text-[11px] font-mono text-[#9e9589]/70 mt-1">
+                              CEP {addr.zip}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {/* 3. Demonstrative Payment Modality (RF07) */}
+              {isAuthenticated && user?.role === 'CLIENTE' && (
+                <section className="bg-[#14110e] p-6 sm:p-8 rounded-3xl border border-[#c9a256]/15 space-y-5">
+                  <div className="border-b border-[#c9a256]/12 pb-4">
+                    <h2 className="font-serif text-2xl font-semibold text-[#f4efe6] flex items-center gap-2.5">
+                      <CreditCard size={20} className="text-[#c9a256]" />
+                      <span>3. Modalidade de Pagamento Demonstrativa (RF07)</span>
+                    </h2>
+                    <p className="text-xs text-[#9e9589] mt-1">
+                      Escolha a modalidade que ficará registrada no pedido para conferência manual
+                      pela equipe.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('PIX')}
-                      className={`flex flex-col items-center justify-center py-3 px-2 rounded-md border text-xs transition-all ${
+                      className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
                         paymentMethod === 'PIX'
-                          ? 'bg-amber-600/15 border-amber-500 text-amber-400 font-bold'
-                          : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                          ? 'border-[#c9a256] bg-[#1c1712] shadow-[0_8px_25px_rgba(201,162,86,0.12)]'
+                          : 'border-[#c9a256]/15 bg-[#0e0c0a] hover:border-[#c9a256]/40'
                       }`}
                     >
-                      <span className="font-black uppercase">PIX</span>
-                      <span className="text-[10px] text-zinc-400 mt-0.5">Simulado</span>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-serif text-xl font-semibold text-[#f4efe6]">
+                          PIX (Demonstrativo)
+                        </span>
+                        {paymentMethod === 'PIX' && (
+                          <CheckCircle2 size={17} className="text-[#c9a256]" />
+                        )}
+                      </div>
+                      <p className="text-xs text-[#9e9589] leading-relaxed">
+                        Registra PIX como forma de pagamento. Sem QR Code ou cobrança bancária real.
+                      </p>
                     </button>
+
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('CARTAO')}
-                      className={`flex flex-col items-center justify-center py-3 px-2 rounded-md border text-xs transition-all ${
+                      className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
                         paymentMethod === 'CARTAO'
-                          ? 'bg-amber-600/15 border-amber-500 text-amber-400 font-bold'
-                          : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                          ? 'border-[#c9a256] bg-[#1c1712] shadow-[0_8px_25px_rgba(201,162,86,0.12)]'
+                          : 'border-[#c9a256]/15 bg-[#0e0c0a] hover:border-[#c9a256]/40'
                       }`}
                     >
-                      <span className="font-black uppercase">Cartão</span>
-                      <span className="text-[10px] text-zinc-400 mt-0.5">Simulado</span>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-serif text-xl font-semibold text-[#f4efe6]">
+                          Cartão (Demonstrativo)
+                        </span>
+                        {paymentMethod === 'CARTAO' && (
+                          <CheckCircle2 size={17} className="text-[#c9a256]" />
+                        )}
+                      </div>
+                      <p className="text-xs text-[#9e9589] leading-relaxed">
+                        Registra Cartão no pedido. Nenhum número de cartão é solicitado ou cobrado.
+                      </p>
                     </button>
                   </div>
-                  <p className="text-[11px] text-zinc-400 mt-2 leading-snug">
-                    Nenhum dado bancário ou de cartão é solicitado. O pagamento permanece{' '}
-                    <strong>PENDENTE</strong> até conferência manual por Atendente ou Administrador.
-                  </p>
+                </section>
+              )}
+            </div>
+
+            {/* Right Column: Server Quotation & Order Summary (4 cols) */}
+            <div className="lg:col-span-4">
+              <div className="bg-[#14110e] p-6 sm:p-8 rounded-3xl border border-[#c9a256]/25 sticky top-28 space-y-6 shadow-[0_25px_60px_rgba(0,0,0,0.65)]">
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#c9a256]">
+                    Cotação Oficial no Servidor (RF06)
+                  </span>
+                  <h2 className="font-serif text-2xl font-semibold text-[#f4efe6] mt-1">
+                    Resumo do Pedido
+                  </h2>
                 </div>
 
-                {/* CUPOM DE DESCONTO (UC06 / RF08) */}
-                <div className="mb-5">
-                  <label
-                    htmlFor="checkout-coupon"
-                    className="block text-[11px] font-black text-zinc-300 uppercase tracking-widest mb-2"
-                  >
-                    Cupom de Desconto (Opcional)
+                {/* Coupon Box (UC06) */}
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9e9589] mb-2">
+                    Cupom Promocional (UC06)
                   </label>
                   <div className="flex gap-2">
-                    <input
-                      id="checkout-coupon"
-                      type="text"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      className="flex-1 border border-zinc-700 rounded-md px-3 py-2 text-xs bg-zinc-950 text-white focus:outline-none focus:border-amber-500 uppercase"
-                      placeholder="EX: BEMVINDO10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => void applyCoupon()}
-                      disabled={!couponCode.trim() || loading}
-                      className="bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold px-4 rounded-md transition-colors disabled:opacity-50 border border-zinc-700"
-                    >
-                      Aplicar
-                    </button>
-                  </div>
-                  {appliedCoupon && discount > 0 && (
-                    <div className="flex items-center justify-between text-emerald-400 text-xs mt-1.5 font-semibold">
-                      <span className="flex items-center gap-1">
-                        <CheckCircle2 size={13} /> Cupom {appliedCoupon} ativo
-                      </span>
+                    <div className="relative flex-1">
+                      <Tag
+                        size={14}
+                        className="absolute left-3.5 top-3.5 text-[#c9a256]/70 pointer-events-none"
+                      />
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        placeholder="CÓDIGO"
+                        className="w-full h-11 bg-[#0e0c0a] border border-[#c9a256]/20 rounded-xl pl-9 pr-3 text-xs font-mono uppercase text-[#f4efe6] focus:outline-none focus:border-[#c9a256]"
+                      />
+                    </div>
+                    {appliedCoupon ? (
                       <button
                         type="button"
-                        onClick={() => {
-                          setCouponCode('');
-                          setAppliedCoupon('');
-                          void runQuote('');
-                        }}
-                        className="text-zinc-400 hover:text-red-400 underline text-[11px]"
+                        onClick={() => void removeCoupon()}
+                        className="h-11 px-4 rounded-xl bg-red-950/50 border border-red-500/40 text-red-200 text-xs font-semibold uppercase tracking-wider cursor-pointer"
                       >
                         Remover
                       </button>
-                    </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => void applyCoupon()}
+                        className="h-11 px-4 rounded-xl bg-[#1f1a15] hover:bg-[#c9a256] text-[#c9a256] hover:text-[#0e0c0a] border border-[#c9a256]/30 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer"
+                      >
+                        Aplicar
+                      </button>
+                    )}
+                  </div>
+                  {appliedCoupon && (
+                    <p className="text-[11px] text-emerald-400 font-mono mt-2">
+                      ✓ Cupom {appliedCoupon} validado pelo servidor
+                    </p>
                   )}
                 </div>
 
                 {quoteError && (
-                  <div className="mb-4 p-3 rounded bg-red-950/50 border border-red-800 text-red-300 text-xs font-semibold">
+                  <div className="rounded-xl bg-red-950/50 border border-red-500/40 p-3.5 text-xs text-red-200">
                     {quoteError}
                   </div>
                 )}
 
-                {/* VALORES CALCULADOS NO SERVIDOR (RF06) */}
-                <div className="space-y-2.5 mb-6 bg-zinc-950 p-4 rounded-lg border border-zinc-800 text-xs">
-                  <div className="flex justify-between text-zinc-400">
+                <div className="space-y-3 pt-4 border-t border-[#c9a256]/12 text-sm">
+                  <div className="flex justify-between text-[#9e9589]">
                     <span>Subtotal dos Itens</span>
-                    <span>R$ {quoteSubtotal.toFixed(2).replace('.', ',')}</span>
+                    <span className="font-mono text-[#f4efe6]">
+                      R$ {quoteSubtotal.toFixed(2).replace('.', ',')}
+                    </span>
                   </div>
-                  <div className="flex justify-between text-zinc-400">
-                    <span>Frete Fixo Local</span>
-                    <span>R$ {shippingFee.toFixed(2).replace('.', ',')}</span>
-                  </div>
+
                   {discount > 0 && (
-                    <div className="flex justify-between text-emerald-400 font-bold">
-                      <span>Desconto ({appliedCoupon})</span>
-                      <span>- R$ {discount.toFixed(2).replace('.', ',')}</span>
+                    <div className="flex justify-between text-emerald-400">
+                      <span>Desconto Promocional</span>
+                      <span className="font-mono">
+                        - R$ {discount.toFixed(2).replace('.', ',')}
+                      </span>
                     </div>
                   )}
-                  <div className="pt-3 border-t border-zinc-800 flex justify-between items-center">
-                    <span className="font-black text-white uppercase tracking-wider text-sm">
-                      Total do Pedido
+
+                  <div className="flex justify-between text-[#9e9589]">
+                    <span>Taxa de Entrega Fixa</span>
+                    <span className="font-mono text-[#f4efe6]">
+                      {selectedAddressId
+                        ? `R$ ${shippingFee.toFixed(2).replace('.', ',')}`
+                        : 'Selecione o endereço'}
                     </span>
-                    <span className="text-xl font-black text-amber-500">
+                  </div>
+
+                  <div className="pt-4 border-t border-[#c9a256]/15 flex justify-between items-baseline">
+                    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[#c9a256]">
+                      Total Demonstrativo
+                    </span>
+                    <span className="font-mono text-2xl font-bold text-[#f4efe6]">
                       R$ {quoteTotal.toFixed(2).replace('.', ',')}
                     </span>
                   </div>
@@ -507,15 +596,18 @@ export default function Carrinho() {
 
                 <button
                   type="button"
+                  disabled={loading || !!quoteError}
                   onClick={() => void handleCheckout()}
-                  disabled={loading || (isAuthenticated && (!selectedAddressId || !!quoteError))}
-                  className="w-full bg-amber-600 hover:bg-amber-500 text-black font-black uppercase tracking-widest text-xs py-4 rounded flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                  className="w-full h-14 rounded-full bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] font-semibold text-xs uppercase tracking-[0.18em] flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-[0_10px_30px_rgba(201,162,86,0.28)]"
                 >
-                  {loading
-                    ? 'Registrando Pedido...'
-                    : isAuthenticated
-                      ? 'Confirmar Pedido Demonstrativo'
-                      : 'Entrar para Finalizar Compra'}
+                  <span>
+                    {loading
+                      ? 'Processando...'
+                      : isAuthenticated
+                        ? 'Registrar Pedido Demonstrativo'
+                        : 'Entrar para Finalizar'}
+                  </span>
+                  <ArrowRight size={16} />
                 </button>
               </div>
             </div>

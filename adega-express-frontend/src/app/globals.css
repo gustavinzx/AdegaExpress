@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0e0c0a;
+  --surface: #151210;
+  --surface-elevated: #1d1916;
+  --border-subtle: rgba(214, 184, 130, 0.14);
+  --border-strong: rgba(214, 184, 130, 0.32);
+  --foreground: #f4EFE6;
+  --muted: #9e9589;
+  --accent-gold: #c9a256;
+  --accent-copper: #b07d3c;
 }
 
 @theme inline {
@@ -13,15 +20,45 @@
   --font-serif: var(--font-playfair);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  background-color: #0e0c0a;
+  color: #f4efe6;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #0e0c0a;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(201, 162, 86, 0.07) 0%, transparent 45%),
+    radial-gradient(circle at 85% 20%, rgba(138, 98, 48, 0.05) 0%, transparent 50%);
+  color: #f4efe6;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.01em;
+  selection-background-color: #c9a256;
+  selection-color: #0e0c0a;
+}
+
+::selection {
+  background: rgba(201, 162, 86, 0.28);
+  color: #f4efe6;
+}
+
+/* Editorial scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0e0c0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a241e;
+  border-radius: 9999px;
+  border: 2px solid #0e0c0a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c9a256;
 }

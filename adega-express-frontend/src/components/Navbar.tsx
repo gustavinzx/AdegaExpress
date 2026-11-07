@@ -1,193 +1,230 @@
 'use client';
 
 import Link from 'next/link';
-import { Search, ShoppingCart, User, LogOut, Sparkles, ShieldCheck, Truck, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import {
+  ShoppingBag,
+  User as UserIcon,
+  LogOut,
+  Search,
+  Package,
+  Truck,
+  Shield,
+  HelpCircle,
+  Sparkles,
+  GlassWater,
+} from 'lucide-react';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function Navbar() {
-  const [searchQuery, setSearchQuery] = useState('');
+function SearchInput() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState(searchParams?.get('q') || '');
 
-  const { user, logout } = useAuth();
-  const { itemCount } = useCart();
-
-  const handleSearch = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/?q=${encodeURIComponent(searchQuery.trim())}#catalogo`);
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      router.push(`/?q=${encodeURIComponent(query.trim())}#catalogo`);
     } else {
       router.push('/#catalogo');
     }
   };
 
   return (
-    <header className="w-full bg-zinc-950 border-b border-zinc-800 sticky top-0 z-50 shadow-2xl">
-      {/* Top Academic Demonstration Bar */}
-      <div className="bg-amber-600 text-black text-[10px] font-black uppercase tracking-widest text-center py-1.5 px-4 flex justify-center items-center gap-2">
-        <Sparkles size={12} strokeWidth={2.5} />
-        Loja Virtual Demonstrativa Exclusivamente de Bebidas Não Alcoólicas • Sem Cobrança Financeira Real
-        <Sparkles size={12} strokeWidth={2.5} />
+    <form onSubmit={handleSearch} className="relative w-full">
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Buscar águas, sucos integrais, chás ou refrigerantes..."
+        className="w-full h-11 bg-[#161310]/90 text-[#f4efe6] pl-4 pr-12 rounded-full border border-[#c9a256]/20 focus:outline-none focus:border-[#c9a256]/60 focus:ring-2 focus:ring-[#c9a256]/15 transition-all text-xs placeholder-[#9e9589]"
+      />
+      <button
+        type="submit"
+        aria-label="Pesquisar no catálogo"
+        className="absolute right-1.5 top-1.5 h-8 w-8 rounded-full bg-[#c9a256]/15 hover:bg-[#c9a256] text-[#c9a256] hover:text-[#0e0c0a] flex items-center justify-center transition-all cursor-pointer"
+      >
+        <Search size={14} />
+      </button>
+    </form>
+  );
+}
+
+export default function Navbar() {
+  const { user, logout, isAuthenticated } = useAuth();
+  const { itemCount } = useCart();
+
+  return (
+    <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#0e0c0a]/90 border-b border-[#c9a256]/15">
+      {/* Top Editorial Ribbon */}
+      <div className="bg-[#151210] border-b border-[#c9a256]/10 py-2 px-4">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-[11px] tracking-[0.14em] uppercase text-[#9e9589]">
+          <div className="flex items-center gap-2 text-[#c9a256]">
+            <Sparkles size={12} />
+            <span className="font-semibold">Maison Não Alcoólica • Curadoria Refrescante</span>
+          </div>
+          <div className="hidden md:flex items-center gap-6">
+            <span>Águas Minerais</span>
+            <span className="text-[#c9a256]/40">•</span>
+            <span>Sucos Prensados</span>
+            <span className="text-[#c9a256]/40">•</span>
+            <span>Refrigerantes Clássicos</span>
+            <span className="text-[#c9a256]/40">•</span>
+            <span>Infusões &amp; Chás</span>
+          </div>
+          <span className="text-[10px] text-[#9e9589]/80 font-mono">
+            Checkout Demonstrativo • Doc. Visão v4.3
+          </span>
+        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4 md:gap-8">
-        {/* LOGO */}
-        <Link href="/" className="flex items-center gap-3 group shrink-0">
-          <div className="bg-zinc-900 p-1 rounded-full border border-zinc-800 group-hover:border-amber-500 transition-colors">
-            <img src="/logo.jpg" alt="Adega Express" className="w-11 h-11 rounded-full object-cover" />
-          </div>
-          <div>
-            <span className="text-lg md:text-xl font-black text-white tracking-tighter uppercase group-hover:text-amber-500 transition-colors block leading-none">
-              Adega<span className="text-amber-500 group-hover:text-white transition-colors">Express</span>
-            </span>
-            <span className="text-[9px] text-zinc-400 uppercase tracking-widest font-bold block mt-0.5">
-              Água • Sucos • Refrigerantes • Chás
-            </span>
-          </div>
-        </Link>
-
-        {/* SEARCH BAR */}
-        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl relative" role="search">
-          <label htmlFor="navbar-search" className="sr-only">
-            Buscar águas, sucos, refrigerantes ou chás
-          </label>
-          <input
-            id="navbar-search"
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar águas, sucos, refrigerantes ou chás..."
-            className="w-full bg-zinc-900 border border-zinc-800 text-white text-sm rounded-full py-2.5 px-5 pr-12 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-zinc-500 font-medium"
-          />
-          <button
-            type="submit"
-            aria-label="Buscar produtos"
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 bg-amber-600 rounded-full text-black hover:bg-amber-500 transition-colors"
-          >
-            <Search size={16} strokeWidth={2.5} />
-          </button>
-        </form>
-
-        {/* NAVIGATION & ACTIONS */}
-        <nav className="flex items-center gap-3 md:gap-5" aria-label="Menu principal">
-          <Link
-            href="/#catalogo"
-            className="hidden lg:inline-block text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-amber-500 transition-colors"
-          >
-            Catálogo
-          </Link>
-          <Link
-            href="/#ajuda"
-            className="hidden lg:inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-amber-500 transition-colors"
-          >
-            <HelpCircle size={14} /> Ajuda
+      {/* Main Navigation Bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20 gap-6">
+          {/* Brand Crest */}
+          <Link href="/" className="flex items-center gap-3.5 group shrink-0">
+            <div className="h-11 w-11 rounded-full border border-[#c9a256]/40 bg-gradient-to-br from-[#231d17] to-[#120f0c] flex items-center justify-center shadow-[0_0_25px_rgba(201,162,86,0.12)] group-hover:border-[#c9a256] transition-all">
+              <GlassWater size={20} className="text-[#c9a256]" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-serif text-2xl sm:text-[26px] font-bold tracking-[0.08em] text-[#f4efe6] leading-none">
+                ADEGA <span className="text-[#c9a256] italic font-normal">Express</span>
+              </span>
+              <span className="text-[9px] uppercase tracking-[0.28em] text-[#9e9589] mt-1">
+                Boutique de Bebidas Sem Álcool
+              </span>
+            </div>
           </Link>
 
-          {user ? (
-            <div className="flex items-center gap-3">
-              {user.role === 'CLIENTE' && (
-                <Link
-                  href="/pedidos"
-                  className="hidden sm:inline-block text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-amber-500 transition-colors"
-                >
-                  Meus Pedidos
-                </Link>
-              )}
-              <Link
-                href="/perfil"
-                className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-full"
-              >
-                <User size={16} className="text-amber-500" />
-                <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">
-                  {user.name.split(' ')[0]}
-                </span>
-              </Link>
-              {(user.role === 'ADMINISTRADOR' || user.role === 'ATENDENTE') && (
-                <Link
-                  href="/admin"
-                  className="text-[10px] font-black uppercase tracking-widest text-amber-500 border border-amber-500/60 bg-amber-500/10 px-2.5 py-1.5 rounded hover:bg-amber-500 hover:text-black transition-colors flex items-center gap-1"
-                >
-                  <ShieldCheck size={13} />
-                  {user.role === 'ADMINISTRADOR' ? 'Painel Admin' : 'Operação'}
-                </Link>
-              )}
-              {user.role === 'ENTREGADOR' && (
-                <Link
-                  href="/entregador"
-                  className="text-[10px] font-black uppercase tracking-widest text-emerald-400 border border-emerald-500/60 bg-emerald-500/10 px-2.5 py-1.5 rounded hover:bg-emerald-500 hover:text-black transition-colors flex items-center gap-1"
-                >
-                  <Truck size={13} /> Entregas
-                </Link>
-              )}
-              <button
-                onClick={() => void logout()}
-                className="text-zinc-400 hover:text-red-400 transition-colors p-1.5"
-                title="Encerrar sessão"
-                aria-label="Sair da conta"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/login"
-                className="flex items-center gap-1.5 text-zinc-300 hover:text-amber-500 transition-colors text-xs font-bold uppercase tracking-wider px-3 py-2"
-              >
-                <User size={16} />
-                <span>Entrar</span>
-              </Link>
-              <Link
-                href="/cadastro"
-                className="hidden sm:inline-block bg-amber-600 hover:bg-amber-500 text-black text-[11px] font-black uppercase tracking-widest px-3.5 py-2 rounded transition-colors"
-              >
-                Cadastrar
-              </Link>
-            </div>
-          )}
+          {/* Search Console (Desktop) */}
+          <div className="hidden md:flex flex-1 max-w-md mx-4">
+            <Suspense
+              fallback={
+                <div className="w-full h-11 bg-[#161310] rounded-full border border-[#c9a256]/15 animate-pulse" />
+              }
+            >
+              <SearchInput />
+            </Suspense>
+          </div>
 
-          {/* CART */}
-          <Link
-            href="/carrinho"
-            aria-label={`Carrinho de compras com ${itemCount} itens`}
-            className="flex items-center gap-2 text-white hover:text-amber-500 transition-colors relative group"
-          >
-            <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-full group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-500 transition-colors">
-              <ShoppingCart size={18} />
-            </div>
-            {itemCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-amber-500 text-black text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-zinc-950">
+          {/* Right Action Cluster */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/#catalogo"
+              className="hidden lg:inline-flex items-center h-11 px-3.5 text-xs font-medium uppercase tracking-[0.14em] text-[#f4efe6]/80 hover:text-[#c9a256] transition-colors"
+            >
+              Catálogo
+            </Link>
+
+            <Link
+              href="/#ajuda"
+              className="hidden sm:inline-flex items-center gap-1.5 h-11 px-3 text-xs font-medium uppercase tracking-[0.14em] text-[#9e9589] hover:text-[#c9a256] transition-colors"
+              title="Central de Ajuda"
+            >
+              <HelpCircle size={15} />
+              <span className="hidden lg:inline">Ajuda</span>
+            </Link>
+
+            {/* Cart Trigger */}
+            <Link
+              href="/carrinho"
+              className="relative inline-flex items-center gap-2.5 h-11 px-4 rounded-full bg-[#181411] hover:bg-[#221c17] border border-[#c9a256]/25 text-[#f4efe6] transition-all"
+              title="Sacola de Compras"
+            >
+              <ShoppingBag size={17} className="text-[#c9a256]" />
+              <span className="hidden sm:inline text-xs font-medium tracking-wider uppercase">
+                Sacola
+              </span>
+              <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#c9a256] text-[#0e0c0a] text-[11px] font-bold font-mono">
                 {itemCount}
               </span>
-            )}
-          </Link>
-        </nav>
-      </div>
+            </Link>
 
-      {/* MOBILE SEARCH BAR */}
-      <div className="md:hidden px-4 pb-3">
-        <form onSubmit={handleSearch} className="relative w-full" role="search">
-          <label htmlFor="navbar-mobile-search" className="sr-only">
-            Buscar bebidas não alcoólicas
-          </label>
-          <input
-            id="navbar-mobile-search"
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar águas, sucos, refrigerantes ou chás..."
-            className="w-full bg-zinc-900 border border-zinc-800 text-white text-sm rounded-full py-2 px-4 pr-10 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-zinc-500"
-          />
-          <button
-            type="submit"
-            aria-label="Buscar"
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 bg-amber-600 rounded-full text-black"
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2 pl-2 border-l border-[#c9a256]/15">
+                {user?.role === 'CLIENTE' && (
+                  <Link
+                    href="/pedidos"
+                    className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full bg-[#161310] hover:bg-[#211c17] border border-[#c9a256]/15 text-xs font-medium tracking-wider uppercase text-[#f4efe6] hover:text-[#c9a256] transition-all"
+                    title="Meus Pedidos"
+                  >
+                    <Package size={15} className="text-[#c9a256]" />
+                    <span className="hidden xl:inline">Pedidos</span>
+                  </Link>
+                )}
+
+                {(user?.role === 'ADMINISTRADOR' || user?.role === 'ATENDENTE') && (
+                  <Link
+                    href="/admin"
+                    className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full bg-[#c9a256]/15 hover:bg-[#c9a256]/25 border border-[#c9a256]/40 text-xs font-semibold tracking-wider uppercase text-[#c9a256] transition-all"
+                  >
+                    <Shield size={15} />
+                    <span className="hidden sm:inline">
+                      {user.role === 'ADMINISTRADOR' ? 'Painel Admin' : 'Operação'}
+                    </span>
+                  </Link>
+                )}
+
+                {user?.role === 'ENTREGADOR' && (
+                  <Link
+                    href="/entregador"
+                    className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-500/30 text-xs font-semibold tracking-wider uppercase text-emerald-300 transition-all"
+                  >
+                    <Truck size={15} />
+                    <span className="hidden sm:inline">Entregas</span>
+                  </Link>
+                )}
+
+                <Link
+                  href="/perfil"
+                  className="inline-flex items-center gap-2 h-11 px-3.5 rounded-full bg-[#161310] hover:bg-[#211c17] border border-[#c9a256]/15 text-xs font-medium text-[#f4efe6] hover:text-[#c9a256] transition-all"
+                  title="Meu Perfil"
+                >
+                  <UserIcon size={15} className="text-[#c9a256]" />
+                  <span className="hidden lg:inline max-w-[110px] truncate">
+                    {user?.name?.split(' ')[0]}
+                  </span>
+                </Link>
+
+                <button
+                  onClick={() => void logout()}
+                  className="inline-flex items-center justify-center h-11 w-11 rounded-full bg-[#161310] hover:bg-red-950/40 border border-[#c9a256]/15 hover:border-red-500/30 text-[#9e9589] hover:text-red-400 transition-all cursor-pointer"
+                  title="Encerrar Sessão"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 pl-2 border-l border-[#c9a256]/15">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center justify-center h-11 px-4 rounded-full text-xs font-medium uppercase tracking-[0.14em] text-[#f4efe6] hover:text-[#c9a256] transition-colors"
+                >
+                  Entrar
+                </Link>
+                <Link
+                  href="/cadastro"
+                  className="inline-flex items-center justify-center h-11 px-5 rounded-full bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] font-semibold text-xs uppercase tracking-[0.14em] transition-all shadow-[0_4px_20px_rgba(201,162,86,0.25)]"
+                >
+                  Criar Conta
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Search Bar */}
+        <div className="md:hidden pb-3.5">
+          <Suspense
+            fallback={
+              <div className="w-full h-11 bg-[#161310] rounded-full border border-[#c9a256]/15 animate-pulse" />
+            }
           >
-            <Search size={14} strokeWidth={2.5} />
-          </button>
-        </form>
+            <SearchInput />
+          </Suspense>
+        </div>
       </div>
     </header>
   );
