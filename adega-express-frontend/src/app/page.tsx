@@ -186,21 +186,28 @@ function HomeContent() {
     <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
       <Navbar />
 
-      {/* Hero Banner Clean */}
-      <section className="bg-gradient-to-b from-teal-900 via-teal-950 to-slate-900 text-white py-14 sm:py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Hero Banner with Commercial Photography & Spotlight Card */}
+      <section className="relative text-white py-14 sm:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-slate-950">
+        {/* Real Commercial Photography Background */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity scale-105 transition-transform duration-1000"
+          style={{ backgroundImage: "url('/hero-commercial.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-teal-950/70" />
+
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
-          <div className="lg:col-span-7 space-y-5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-800/80 border border-teal-600/40 text-teal-200 text-xs font-semibold uppercase tracking-wider">
+          <div className="lg:col-span-7 space-y-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-900/80 border border-teal-500/30 text-teal-200 text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
               <GlassWater size={14} className="text-amber-400" />
-              <span>Bebidas Não Alcoólicas</span>
+              <span>Bebidas 100% Não Alcoólicas • Pronta Entrega</span>
             </div>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
-              Adega Express - Bebidas sem álcool, entregues rápido.
+              Adega Express — Bebidas refrescantes entregues rápido.
             </h1>
 
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl">
-              Águas minerais de fonte, sucos 100% integrais, refrigerantes e infusões de chá prontas para sua casa, reuniões ou eventos.
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl font-normal">
+              Águas minerais de fontes puras, sucos integrais prensados a frio, refrigerantes clássicos e chás botânicos selecionados para o seu dia a dia e momentos especiais.
             </p>
 
             {/* Quick Category Buttons */}
@@ -213,8 +220,8 @@ function HomeContent() {
                 }}
                 className={`h-9 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   selectedCategoryId === ''
-                    ? 'bg-amber-500 text-slate-950 shadow-sm'
-                    : 'bg-teal-900/80 text-teal-100 hover:bg-teal-800 border border-teal-700/50'
+                    ? 'bg-amber-400 text-slate-950 shadow-md font-extrabold'
+                    : 'bg-slate-900/80 text-slate-200 hover:bg-slate-800 border border-slate-700/60'
                 }`}
               >
                 Todas as Coleções
@@ -229,8 +236,8 @@ function HomeContent() {
                   }}
                   className={`h-9 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                     selectedCategoryId === String(cat.id)
-                      ? 'bg-amber-500 text-slate-950 shadow-sm'
-                      : 'bg-teal-900/80 text-teal-100 hover:bg-teal-800 border border-teal-700/50'
+                      ? 'bg-amber-400 text-slate-950 shadow-md font-extrabold'
+                      : 'bg-slate-900/80 text-slate-200 hover:bg-slate-800 border border-slate-700/60'
                   }`}
                 >
                   {cat.name}
@@ -239,40 +246,92 @@ function HomeContent() {
             </div>
           </div>
 
-          {/* Right Highlight Card */}
-          <div className="lg:col-span-5 bg-white/10 backdrop-blur-md border border-white/15 rounded-3xl p-6 text-white space-y-4 shadow-xl">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-300">
-                Destaque do Catálogo
-              </span>
-              <span className="text-[11px] font-semibold text-teal-200">Em Estoque</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <ProductArtwork
-                name="Suco Integral de Uva Tinto 1L"
-                brand="Aurora"
-                categoryName="Sucos"
-                volumeMl={1000}
-                size="sm"
-                className="h-28 w-24 rounded-xl bg-white/5 border border-white/10 shrink-0"
-              />
-              <div className="space-y-1">
-                <h3 className="font-bold text-lg text-white leading-snug">
-                  Suco Integral de Uva Tinto 1L
-                </h3>
-                <p className="text-xs text-slate-300">
-                  100% uva selecionada prensada, sem adição de açúcar e sem conservantes.
-                </p>
-                <div className="pt-1 text-base font-extrabold text-amber-300">R$ 16,90</div>
+          {/* Right Spotlight Product Card (Retail Spotlight) */}
+          <div className="lg:col-span-5">
+            <div className="bg-white rounded-3xl p-6 text-slate-900 shadow-2xl border border-slate-100 flex flex-col justify-between relative overflow-hidden">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-extrabold uppercase tracking-wider">
+                  <span>★</span>
+                  <span>Destaque da Semana</span>
+                </span>
+                <span className="text-[11px] font-bold text-emerald-700 flex items-center gap-1.5 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Pronta Entrega
+                </span>
+              </div>
+
+              {/* Product Visual & Details */}
+              <div className="my-4 flex flex-col sm:flex-row items-center gap-5">
+                <div className="h-44 w-36 sm:w-40 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2.5 shrink-0 relative group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/products/suco-aurora-uva-1000ml.jpg"
+                    alt="Suco Integral de Uva Tinto 1L Aurora"
+                    className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute bottom-2 right-2 bg-slate-900/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-xs">
+                    1 Litro
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-1.5 text-center sm:text-left">
+                  <span className="text-[11px] uppercase tracking-wider font-bold text-teal-800">
+                    Aurora • Sucos Naturais
+                  </span>
+                  <h3 className="font-extrabold text-xl text-slate-900 leading-tight">
+                    Suco Integral de Uva Tinto 1L
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    100% uva selecionada prensada, sem adição de açúcar e sem conservantes.
+                  </p>
+                  <div className="pt-2">
+                    <span className="text-[10px] uppercase font-semibold text-slate-400 block leading-none">
+                      Preço Especial
+                    </span>
+                    <span className="text-2xl font-black text-slate-900">
+                      R$ 16,90
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    const uva = products.find((p) => p.name.includes('Suco Integral de Uva')) || {
+                      id: 164,
+                      name: 'Suco Integral de Uva Tinto 1L',
+                      brand: 'Aurora',
+                      price: '16.90',
+                      stock_quantity: 35,
+                      in_stock: true,
+                      category_id: 2,
+                      volume_ml: 1000,
+                      abv_percent: '0.00',
+                    } as Product;
+                    handleAddToCart(uva, e);
+                  }}
+                  className="h-11 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                >
+                  <ShoppingBag size={15} />
+                  <span>Adicionar</span>
+                </button>
+
+                <Link
+                  href={
+                    products.find((p) => p.name.includes('Suco Integral de Uva'))
+                      ? `/produto/${products.find((p) => p.name.includes('Suco Integral de Uva'))?.id}`
+                      : '/#catalogo'
+                  }
+                  className="h-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200"
+                >
+                  <span>Ver Detalhes</span>
+                  <ArrowRight size={14} />
+                </Link>
               </div>
             </div>
-            <a
-              href="#catalogo"
-              className="w-full flex items-center justify-center gap-2 h-10 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs tracking-wide transition-all"
-            >
-              <span>Ver no Catálogo</span>
-              <ArrowRight size={14} />
-            </a>
           </div>
         </div>
       </section>
