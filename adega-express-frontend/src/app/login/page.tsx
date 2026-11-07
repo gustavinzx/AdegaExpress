@@ -80,15 +80,27 @@ function LoginForm() {
             </p>
           </div>
 
-          <div className="rounded-2xl bg-teal-900/60 border border-teal-700/60 p-4 space-y-2 text-xs text-teal-200">
+          {process.env.NEXT_PUBLIC_DEMO_HINTS === 'true' && process.env.NODE_ENV !== 'production' && (
+            <div className="rounded-2xl bg-teal-900/60 border border-teal-700/60 p-4 space-y-2 text-xs text-teal-200">
+              <div className="flex items-center gap-1.5 font-bold text-amber-300">
+                <ShieldCheck size={14} />
+                <span>Contas de Demonstração</span>
+              </div>
+              <p className="text-[11px] leading-relaxed text-teal-100">
+                Admin: <code className="text-white font-mono">admin@adegaexpress.com</code><br />
+                Cliente: <code className="text-white font-mono">cliente@adegaexpress.com</code><br />
+                Senha: <code className="text-amber-300 font-mono font-bold">Admin@123</code>
+              </p>
+            </div>
+          )}
+
+          <div className="rounded-2xl bg-teal-900/40 border border-teal-700/40 p-4 space-y-1.5 text-xs text-teal-100">
             <div className="flex items-center gap-1.5 font-bold text-amber-300">
               <ShieldCheck size={14} />
-              <span>Contas de Demonstração</span>
+              <span>Ambiente Seguro Demonstrativo</span>
             </div>
-            <p className="text-[11px] leading-relaxed text-teal-100">
-              Admin: <code className="text-white font-mono">admin@adegaexpress.com</code><br />
-              Cliente: <code className="text-white font-mono">cliente@adegaexpress.com</code><br />
-              Senha: <code className="text-amber-300 font-mono font-bold">Admin@123</code>
+            <p className="text-[11px] leading-relaxed text-teal-200">
+              Plataforma acadêmica com autenticação por sessão segura via cookie HttpOnly e controle de acesso baseado em perfis (RBAC).
             </p>
           </div>
         </div>

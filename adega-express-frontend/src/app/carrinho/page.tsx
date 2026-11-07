@@ -130,9 +130,13 @@ export default function Carrinho() {
   const applyCoupon = async () => {
     if (!couponCode.trim()) return;
     if (items.length === 0) return;
-    if (!selectedAddressId) {
+    const targetAddressId = selectedAddressId || (addresses.length > 0 ? addresses[0].id : null);
+    if (!targetAddressId) {
       toast.error('Selecione um endereço de entrega antes de aplicar o cupom.');
       return;
+    }
+    if (!selectedAddressId && targetAddressId) {
+      setSelectedAddressId(targetAddressId);
     }
     await runQuote(couponCode, true);
   };
@@ -580,7 +584,7 @@ export default function Carrinho() {
 
                   <div className="pt-3 border-t border-slate-200 flex justify-between items-baseline">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-900">
-                      Total a Pagar
+                      Total Demonstrativo
                     </span>
                     <span className="text-2xl font-extrabold text-teal-800">
                       R$ {quoteTotal.toFixed(2).replace('.', ',')}
