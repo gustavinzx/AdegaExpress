@@ -4,16 +4,13 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import {
-  ShoppingBag,
+  ShoppingCart,
   User as UserIcon,
   LogOut,
   Search,
   Package,
   Truck,
   Shield,
-  HelpCircle,
-  Sparkles,
-  GlassWater,
 } from 'lucide-react';
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -38,15 +35,15 @@ function SearchInput() {
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Buscar águas, sucos integrais, chás ou refrigerantes..."
-        className="w-full h-11 bg-[#161310]/90 text-[#f4efe6] pl-4 pr-12 rounded-full border border-[#c9a256]/20 focus:outline-none focus:border-[#c9a256]/60 focus:ring-2 focus:ring-[#c9a256]/15 transition-all text-xs placeholder-[#9e9589]"
+        placeholder="Buscar águas, sucos, refrigerantes, chás..."
+        className="w-full h-11 bg-zinc-900 border border-zinc-800 text-white text-sm rounded-full pl-5 pr-12 focus:outline-none focus:border-amber-500 transition-colors placeholder-zinc-500"
       />
       <button
         type="submit"
-        aria-label="Pesquisar no catálogo"
-        className="absolute right-1.5 top-1.5 h-8 w-8 rounded-full bg-[#c9a256]/15 hover:bg-[#c9a256] text-[#c9a256] hover:text-[#0e0c0a] flex items-center justify-center transition-all cursor-pointer"
+        aria-label="Pesquisar"
+        className="absolute right-1.5 top-1.5 h-8 w-8 rounded-full bg-amber-600 hover:bg-amber-500 text-black flex items-center justify-center transition-colors cursor-pointer"
       >
-        <Search size={14} />
+        <Search size={15} strokeWidth={2.5} />
       </button>
     </form>
   );
@@ -57,169 +54,124 @@ export default function Navbar() {
   const { itemCount } = useCart();
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#0e0c0a]/90 border-b border-[#c9a256]/15">
-      {/* Top Editorial Ribbon */}
-      <div className="bg-[#151210] border-b border-[#c9a256]/10 py-2 px-4">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-[11px] tracking-[0.14em] uppercase text-[#9e9589]">
-          <div className="flex items-center gap-2 text-[#c9a256]">
-            <Sparkles size={12} />
-            <span className="font-semibold">Maison Não Alcoólica • Curadoria Refrescante</span>
-          </div>
-          <div className="hidden md:flex items-center gap-6">
-            <span>Águas Minerais</span>
-            <span className="text-[#c9a256]/40">•</span>
-            <span>Sucos Prensados</span>
-            <span className="text-[#c9a256]/40">•</span>
-            <span>Refrigerantes Clássicos</span>
-            <span className="text-[#c9a256]/40">•</span>
-            <span>Infusões &amp; Chás</span>
-          </div>
-          <span className="text-[10px] text-[#9e9589]/80 font-mono">
-            Checkout Demonstrativo • Doc. Visão v4.3
-          </span>
-        </div>
-      </div>
-
-      {/* Main Navigation Bar */}
+    <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 gap-6">
-          {/* Brand Crest */}
-          <Link href="/" className="flex items-center gap-3.5 group shrink-0">
-            <div className="h-11 w-11 rounded-full border border-[#c9a256]/40 bg-gradient-to-br from-[#231d17] to-[#120f0c] flex items-center justify-center shadow-[0_0_25px_rgba(201,162,86,0.12)] group-hover:border-[#c9a256] transition-all">
-              <GlassWater size={20} className="text-[#c9a256]" />
+          {/* LOGO */}
+          <Link href="/" className="flex items-center gap-3 group shrink-0">
+            <div className="bg-black p-1 rounded-full border border-zinc-800 group-hover:border-amber-500 transition-colors">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo.jpg"
+                alt="Adega Express"
+                className="w-11 h-11 rounded-full object-cover"
+              />
             </div>
-            <div className="flex flex-col">
-              <span className="font-serif text-2xl sm:text-[26px] font-bold tracking-[0.08em] text-[#f4efe6] leading-none">
-                ADEGA <span className="text-[#c9a256] italic font-normal">Express</span>
-              </span>
-              <span className="text-[9px] uppercase tracking-[0.28em] text-[#9e9589] mt-1">
-                Boutique de Bebidas Sem Álcool
-              </span>
-            </div>
+            <span className="text-xl font-serif font-black text-white tracking-wider uppercase">
+              Adega<span className="text-amber-500">Express</span>
+            </span>
           </Link>
 
-          {/* Search Console (Desktop) */}
-          <div className="hidden md:flex flex-1 max-w-md mx-4">
+          {/* SEARCH BAR (Desktop) */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-4">
             <Suspense
               fallback={
-                <div className="w-full h-11 bg-[#161310] rounded-full border border-[#c9a256]/15 animate-pulse" />
+                <div className="w-full h-11 bg-zinc-900 rounded-full border border-zinc-800 animate-pulse" />
               }
             >
               <SearchInput />
             </Suspense>
           </div>
 
-          {/* Right Action Cluster */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/#catalogo"
-              className="hidden lg:inline-flex items-center h-11 px-3.5 text-xs font-medium uppercase tracking-[0.14em] text-[#f4efe6]/80 hover:text-[#c9a256] transition-colors"
-            >
-              Catálogo
-            </Link>
-
-            <Link
-              href="/#ajuda"
-              className="hidden sm:inline-flex items-center gap-1.5 h-11 px-3 text-xs font-medium uppercase tracking-[0.14em] text-[#9e9589] hover:text-[#c9a256] transition-colors"
-              title="Central de Ajuda"
-            >
-              <HelpCircle size={15} />
-              <span className="hidden lg:inline">Ajuda</span>
-            </Link>
-
-            {/* Cart Trigger */}
-            <Link
-              href="/carrinho"
-              className="relative inline-flex items-center gap-2.5 h-11 px-4 rounded-full bg-[#181411] hover:bg-[#221c17] border border-[#c9a256]/25 text-[#f4efe6] transition-all"
-              title="Sacola de Compras"
-            >
-              <ShoppingBag size={17} className="text-[#c9a256]" />
-              <span className="hidden sm:inline text-xs font-medium tracking-wider uppercase">
-                Sacola
-              </span>
-              <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#c9a256] text-[#0e0c0a] text-[11px] font-bold font-mono">
-                {itemCount}
-              </span>
-            </Link>
-
+          {/* ACTIONS */}
+          <div className="flex items-center gap-4">
             {isAuthenticated ? (
-              <div className="flex items-center gap-2 pl-2 border-l border-[#c9a256]/15">
+              <div className="flex items-center gap-3">
                 {user?.role === 'CLIENTE' && (
                   <Link
                     href="/pedidos"
-                    className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full bg-[#161310] hover:bg-[#211c17] border border-[#c9a256]/15 text-xs font-medium tracking-wider uppercase text-[#f4efe6] hover:text-[#c9a256] transition-all"
-                    title="Meus Pedidos"
+                    className="flex items-center gap-1.5 text-zinc-300 hover:text-amber-500 text-xs font-bold uppercase tracking-wider px-2.5 py-2 transition-colors"
                   >
-                    <Package size={15} className="text-[#c9a256]" />
-                    <span className="hidden xl:inline">Pedidos</span>
+                    <Package size={17} />
+                    <span className="hidden lg:inline">Pedidos</span>
                   </Link>
                 )}
 
                 {(user?.role === 'ADMINISTRADOR' || user?.role === 'ATENDENTE') && (
                   <Link
                     href="/admin"
-                    className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full bg-[#c9a256]/15 hover:bg-[#c9a256]/25 border border-[#c9a256]/40 text-xs font-semibold tracking-wider uppercase text-[#c9a256] transition-all"
+                    className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-500 border border-amber-500/50 px-3 py-2 rounded-lg hover:bg-amber-500 hover:text-black transition-colors"
                   >
                     <Shield size={15} />
-                    <span className="hidden sm:inline">
-                      {user.role === 'ADMINISTRADOR' ? 'Painel Admin' : 'Operação'}
-                    </span>
+                    <span>{user.role === 'ADMINISTRADOR' ? 'Admin' : 'Pedidos'}</span>
                   </Link>
                 )}
 
                 {user?.role === 'ENTREGADOR' && (
                   <Link
                     href="/entregador"
-                    className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-500/30 text-xs font-semibold tracking-wider uppercase text-emerald-300 transition-all"
+                    className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-400 border border-emerald-500/50 px-3 py-2 rounded-lg hover:bg-emerald-500 hover:text-black transition-colors"
                   >
                     <Truck size={15} />
-                    <span className="hidden sm:inline">Entregas</span>
+                    <span>Entregas</span>
                   </Link>
                 )}
 
                 <Link
                   href="/perfil"
-                  className="inline-flex items-center gap-2 h-11 px-3.5 rounded-full bg-[#161310] hover:bg-[#211c17] border border-[#c9a256]/15 text-xs font-medium text-[#f4efe6] hover:text-[#c9a256] transition-all"
-                  title="Meu Perfil"
+                  className="flex items-center gap-2 text-zinc-300 hover:text-white text-xs font-bold uppercase tracking-wider px-2 py-2 transition-colors"
                 >
-                  <UserIcon size={15} className="text-[#c9a256]" />
-                  <span className="hidden lg:inline max-w-[110px] truncate">
-                    {user?.name?.split(' ')[0]}
-                  </span>
+                  <UserIcon size={18} />
+                  <span className="hidden sm:inline">{user?.name?.split(' ')[0]}</span>
                 </Link>
 
                 <button
                   onClick={() => void logout()}
-                  className="inline-flex items-center justify-center h-11 w-11 rounded-full bg-[#161310] hover:bg-red-950/40 border border-[#c9a256]/15 hover:border-red-500/30 text-[#9e9589] hover:text-red-400 transition-all cursor-pointer"
-                  title="Encerrar Sessão"
+                  className="p-2 text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
+                  title="Sair"
                 >
-                  <LogOut size={16} />
+                  <LogOut size={18} />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2 pl-2 border-l border-[#c9a256]/15">
+              <div className="flex items-center gap-3">
                 <Link
                   href="/login"
-                  className="inline-flex items-center justify-center h-11 px-4 rounded-full text-xs font-medium uppercase tracking-[0.14em] text-[#f4efe6] hover:text-[#c9a256] transition-colors"
+                  className="flex items-center gap-2 text-zinc-300 hover:text-amber-500 text-xs font-bold uppercase tracking-wider px-3 py-2 transition-colors"
                 >
-                  Entrar
+                  <UserIcon size={18} />
+                  <span>Entrar</span>
                 </Link>
                 <Link
                   href="/cadastro"
-                  className="inline-flex items-center justify-center h-11 px-5 rounded-full bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] font-semibold text-xs uppercase tracking-[0.14em] transition-all shadow-[0_4px_20px_rgba(201,162,86,0.25)]"
+                  className="hidden sm:inline-flex items-center justify-center h-10 px-4 rounded-lg bg-amber-600 hover:bg-amber-500 text-black font-bold text-xs uppercase tracking-wider transition-colors"
                 >
-                  Criar Conta
+                  Cadastrar
                 </Link>
               </div>
             )}
+
+            {/* CART */}
+            <Link
+              href="/carrinho"
+              className="relative flex items-center justify-center w-11 h-11 rounded-full bg-zinc-900 border border-zinc-800 hover:border-amber-500 text-white hover:text-amber-500 transition-colors"
+              title="Carrinho"
+            >
+              <ShoppingCart size={19} />
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-amber-500 text-black text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
           </div>
         </div>
 
-        {/* Mobile Search Bar */}
-        <div className="md:hidden pb-3.5">
+        {/* MOBILE SEARCH */}
+        <div className="md:hidden pb-3">
           <Suspense
             fallback={
-              <div className="w-full h-11 bg-[#161310] rounded-full border border-[#c9a256]/15 animate-pulse" />
+              <div className="w-full h-11 bg-zinc-900 rounded-full border border-zinc-800 animate-pulse" />
             }
           >
             <SearchInput />

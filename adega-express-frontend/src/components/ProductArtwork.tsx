@@ -15,27 +15,24 @@ interface ProductArtworkProps {
 interface Palette {
   liquidTop: string;
   liquidBottom: string;
-  glow: string;
   labelBg: string;
   labelAccent: string;
   cap: string;
-  badge: string;
   vessel: 'can' | 'glass-bottle' | 'carafe' | 'tea-bottle';
 }
 
 function resolvePalette(name: string, categoryName = '', volumeMl = 500): Palette {
   const lower = `${name} ${categoryName}`.toLowerCase();
-  const isCan = lower.includes('lata') || (volumeMl >= 250 && volumeMl <= 360 && !lower.includes('garrafa'));
+  const isCan =
+    lower.includes('lata') || (volumeMl >= 250 && volumeMl <= 360 && !lower.includes('garrafa'));
 
   if (lower.includes('coca-cola')) {
     return {
       liquidTop: '#3a0b0b',
       liquidBottom: '#160404',
-      glow: 'rgba(220, 38, 38, 0.26)',
       labelBg: '#b91c1c',
       labelAccent: '#fef2f2',
       cap: '#dc2626',
-      badge: 'Cola Clássica',
       vessel: isCan ? 'can' : 'carafe',
     };
   }
@@ -43,23 +40,19 @@ function resolvePalette(name: string, categoryName = '', volumeMl = 500): Palett
     return {
       liquidTop: '#b4690e',
       liquidBottom: '#5c3104',
-      glow: 'rgba(217, 119, 6, 0.25)',
       labelBg: '#14532d',
       labelAccent: '#fde68a',
       cap: '#15803d',
-      badge: 'Guaraná Original',
       vessel: isCan ? 'can' : 'carafe',
     };
   }
-  if (lower.includes('sprite') || lower.includes('limão') && lower.includes('refrigerante')) {
+  if (lower.includes('sprite') || (lower.includes('limão') && lower.includes('refrigerante'))) {
     return {
       liquidTop: '#0f766e',
       liquidBottom: '#064e3b',
-      glow: 'rgba(16, 185, 129, 0.24)',
       labelBg: '#047857',
       labelAccent: '#ecfdf5',
       cap: '#10b981',
-      badge: 'Zero Açúcar • Limão',
       vessel: isCan ? 'can' : 'glass-bottle',
     };
   }
@@ -67,11 +60,9 @@ function resolvePalette(name: string, categoryName = '', volumeMl = 500): Palett
     return {
       liquidTop: '#1e3a5f',
       liquidBottom: '#0f172a',
-      glow: 'rgba(234, 179, 8, 0.22)',
       labelBg: '#ca8a04',
       labelAccent: '#fefce8',
       cap: '#eab308',
-      badge: 'Quinino Botânico',
       vessel: isCan ? 'can' : 'glass-bottle',
     };
   }
@@ -79,11 +70,9 @@ function resolvePalette(name: string, categoryName = '', volumeMl = 500): Palett
     return {
       liquidTop: '#4c0519',
       liquidBottom: '#1f030d',
-      glow: 'rgba(159, 18, 57, 0.30)',
       labelBg: '#27171c',
       labelAccent: '#f4c095',
       cap: '#881337',
-      badge: 'Colheita 100% Integral',
       vessel: 'carafe',
     };
   }
@@ -91,11 +80,9 @@ function resolvePalette(name: string, categoryName = '', volumeMl = 500): Palett
     return {
       liquidTop: '#ea580c',
       liquidBottom: '#9a3412',
-      glow: 'rgba(249, 115, 22, 0.26)',
       labelBg: '#1c1917',
       labelAccent: '#fdba74',
       cap: '#ea580c',
-      badge: 'Prensado a Frio',
       vessel: 'carafe',
     };
   }
@@ -103,23 +90,19 @@ function resolvePalette(name: string, categoryName = '', volumeMl = 500): Palett
     return {
       liquidTop: '#d97706',
       liquidBottom: '#78350f',
-      glow: 'rgba(245, 158, 11, 0.25)',
       labelBg: '#261c14',
       labelAccent: '#fcd34d',
       cap: '#b45309',
       vessel: lower.includes('chá') || lower.includes('cha') ? 'tea-bottle' : 'carafe',
-      badge: lower.includes('chá') || lower.includes('cha') ? 'Infusão Gelada' : 'Polpa Selecionada',
     };
   }
   if (lower.includes('maçã') || lower.includes('maca')) {
     return {
       liquidTop: '#a16207',
       liquidBottom: '#422006',
-      glow: 'rgba(202, 138, 4, 0.24)',
       labelBg: '#1f1a14',
       labelAccent: '#fef08a',
       cap: '#b91c1c',
-      badge: '100% Fruta Prensada',
       vessel: 'glass-bottle',
     };
   }
@@ -127,24 +110,20 @@ function resolvePalette(name: string, categoryName = '', volumeMl = 500): Palett
     return {
       liquidTop: '#78350f',
       liquidBottom: '#291305',
-      glow: 'rgba(180, 83, 9, 0.26)',
       labelBg: '#1f2419',
       labelAccent: '#d9f99d',
       cap: '#65a30d',
-      badge: 'Infusão Botânica',
       vessel: isCan ? 'can' : 'tea-bottle',
     };
   }
-  // Default: Água Mineral (Com Gás / Sem Gás)
-  const sparkling = lower.includes('com gás') || lower.includes('com gas') || lower.includes('gaseificada');
+  const sparkling =
+    lower.includes('com gás') || lower.includes('com gas') || lower.includes('gaseificada');
   return {
     liquidTop: sparkling ? '#0e4f6e' : '#164e63',
     liquidBottom: '#082635',
-    glow: sparkling ? 'rgba(56, 189, 248, 0.26)' : 'rgba(34, 211, 238, 0.22)',
     labelBg: '#11222b',
     labelAccent: '#bae6fd',
     cap: sparkling ? '#0284c7' : '#38bdf8',
-    badge: sparkling ? 'Fonte Natural • Com Gás' : 'Fonte Mineral Cristalina',
     vessel: volumeMl >= 1000 ? 'carafe' : 'glass-bottle',
   };
 }
@@ -160,7 +139,8 @@ export default function ProductArtwork({
 }: ProductArtworkProps) {
   const [imgFailed, setImgFailed] = useState(false);
   const palette = resolvePalette(name, categoryName, volumeMl);
-  const volumeLabel = volumeMl >= 1000 ? `${(volumeMl / 1000).toString().replace('.', ',')}L` : `${volumeMl}ml`;
+  const volumeLabel =
+    volumeMl >= 1000 ? `${(volumeMl / 1000).toString().replace('.', ',')}L` : `${volumeMl}ml`;
   const uid = `${name}-${brand}-${volumeMl}`.replace(/[^a-zA-Z0-9]/g, '');
 
   if (imageUrl && !imgFailed) {
@@ -171,7 +151,7 @@ export default function ProductArtwork({
           src={imageUrl}
           alt={name}
           onError={() => setImgFailed(true)}
-          className="h-full w-full object-contain transition-transform duration-700 group-hover:scale-105"
+          className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
         />
       </div>
     );
@@ -180,21 +160,10 @@ export default function ProductArtwork({
   const svgScale = size === 'sm' ? 'h-20 w-20' : size === 'lg' ? 'h-72 w-56' : 'h-48 w-40';
 
   return (
-    <div
-      className={`relative flex flex-col items-center justify-center select-none overflow-hidden ${className}`}
-      style={{
-        background: `radial-gradient(circle at 50% 42%, ${palette.glow} 0%, rgba(20, 17, 14, 0.2) 68%, transparent 100%)`,
-      }}
-    >
-      {/* Subtle studio pedestal reflection */}
-      <div
-        className="pointer-events-none absolute bottom-3 h-3 w-28 rounded-full blur-md transition-all duration-500 group-hover:w-32"
-        style={{ background: palette.glow }}
-      />
-
+    <div className={`relative flex items-center justify-center select-none overflow-hidden ${className}`}>
       <svg
-        viewBox="0 0 180 260"
-        className={`${svgScale} drop-shadow-[0_18px_28px_rgba(0,0,0,0.65)] transition-transform duration-500 group-hover:-translate-y-1.5 group-hover:scale-[1.03]`}
+        viewBox="0 0 180 250"
+        className={`${svgScale} drop-shadow-[0_14px_20px_rgba(0,0,0,0.45)] transition-transform duration-500 group-hover:scale-105`}
         role="img"
         aria-label={`${name} - ${brand}`}
       >
@@ -212,7 +181,6 @@ export default function ProductArtwork({
 
         {palette.vessel === 'can' ? (
           <g>
-            {/* Sleek 350ml Aluminum Can */}
             <ellipse cx="90" cy="48" rx="41" ry="7" fill="#d4d4d8" />
             <ellipse cx="90" cy="48" rx="35" ry="4.5" fill="#71717a" />
             <path
@@ -221,7 +189,6 @@ export default function ProductArtwork({
               stroke="rgba(255,255,255,0.18)"
               strokeWidth="1.2"
             />
-            {/* Label Band */}
             <rect
               x="46"
               y="88"
@@ -233,13 +200,11 @@ export default function ProductArtwork({
               strokeOpacity="0.45"
               strokeWidth="1"
             />
-            {/* Specular highlight */}
             <rect x="52" y="54" width="16" height="168" rx="8" fill={`url(#shine-${uid})`} />
             <ellipse cx="90" cy="228" rx="34" ry="5" fill="#a1a1aa" />
           </g>
         ) : palette.vessel === 'carafe' ? (
           <g>
-            {/* Artisan Carafe / 1L-2L Bottle */}
             <rect x="76" y="16" width="28" height="16" rx="4" fill={palette.cap} />
             <rect x="74" y="30" width="32" height="5" rx="2" fill="#d6b882" />
             <path
@@ -248,7 +213,6 @@ export default function ProductArtwork({
               stroke="rgba(255,255,255,0.22)"
               strokeWidth="1.4"
             />
-            {/* Front Atelier Label */}
             <rect
               x="50"
               y="112"
@@ -260,7 +224,6 @@ export default function ProductArtwork({
               strokeOpacity="0.55"
               strokeWidth="1.1"
             />
-            {/* Glass Highlight */}
             <path
               d="M54 102 Q51 116 51 135 L51 215 L63 215 L63 130 Q63 112 69 98 Z"
               fill={`url(#shine-${uid})`}
@@ -268,7 +231,6 @@ export default function ProductArtwork({
           </g>
         ) : (
           <g>
-            {/* Classic Glass / Tea / Mineral Bottle */}
             <rect x="78" y="18" width="24" height="15" rx="3.5" fill={palette.cap} />
             <rect x="76" y="31" width="28" height="4" rx="1.5" fill="#c9a256" />
             <path
@@ -277,7 +239,6 @@ export default function ProductArtwork({
               stroke="rgba(255,255,255,0.22)"
               strokeWidth="1.3"
             />
-            {/* Label */}
             <rect
               x="56"
               y="114"
@@ -289,12 +250,10 @@ export default function ProductArtwork({
               strokeOpacity="0.5"
               strokeWidth="1"
             />
-            {/* Highlight */}
             <rect x="59" y="102" width="12" height="118" rx="6" fill={`url(#shine-${uid})`} />
           </g>
         )}
 
-        {/* Typography inside the bottle/can label */}
         <text
           x="90"
           y={palette.vessel === 'can' ? '118' : '140'}
@@ -338,12 +297,6 @@ export default function ProductArtwork({
           {volumeLabel}
         </text>
       </svg>
-
-      {size !== 'sm' && (
-        <span className="mt-1 inline-flex items-center rounded-full border border-[#c9a256]/20 bg-[#151210]/85 px-2.5 py-0.5 text-[10px] font-medium tracking-[0.14em] uppercase text-[#c9a256]">
-          {palette.badge}
-        </span>
-      )}
     </div>
   );
 }
