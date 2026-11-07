@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ALLOWED_CATEGORIES, isNonAlcoholicProductName } from './lib/business';
 
 const text = (max: number) => z.string().trim().min(1).max(max);
 export const id = z.number().int().positive().max(2147483647);
@@ -29,7 +30,7 @@ export const register = z
     email: z.string().trim().toLowerCase().email().max(200),
     password,
     cpf: z.string().max(14).optional(),
-    birth_date: date,
+    birth_date: date.optional(),
   })
   .strict();
 export const login = z
@@ -87,16 +88,36 @@ export const address = z
   })
   .strict();
 export const category = z
-  .object({ name: text(100), description: text(5000).nullable().optional() })
+  .object({
+    name: z.enum(ALLOWED_CATEGORIES, {
+      message:
+        'Categoria não permitida no escopo acadêmico. Use Água, Sucos, Refrigerantes ou Chás.',
+    }),
+    description: text(5000).nullable().optional(),
+    active: z.boolean().optional(),
+  })
   .strict();
 export const product = z
   .object({
-    name: text(200),
-    description: text(5000).nullable().optional(),
+    name: text(200).refine(
+      (v) => isNonAlcoholicProductName(v),
+      'Produto fora do escopo acadêmico (apenas bebidas não alcoólicas são permitidas).',
+    ),
+    description: text(5000)
+      .refine(
+        (v) => isNonAlcoholicProductName('', v),
+        'Descrição menciona produto alcoólico ou tabacaria, fora do escopo.',
+      )
+      .nullable()
+      .optional(),
     category_id: id,
     price: money.refine((v) => v > 0, 'Preço deve ser positivo.'),
     volume_ml: id,
-    abv_percent: z.number().min(0).max(100).multipleOf(0.01),
+    abv_percent: z
+      .number()
+      .min(0)
+      .max(0, 'Apenas bebidas não alcoólicas (0% de teor alcoólico) são permitidas.')
+      .default(0),
     brand: text(150),
     stock_quantity: z.number().int().min(0).max(1000000).default(0),
     image_url: z
@@ -176,6 +197,11 @@ export const pagination = z.object({
   page: positiveQuery.default(1),
   limit: positiveQuery.pipe(z.number().max(100)).default(20),
 });
+export const categoryQuery = pagination
+  .extend({
+    include_inactive: z.enum(['true', 'false']).optional(),
+  })
+  .strict();
 const amountQuery = z
   .string()
   .regex(/^\d+(\.\d{1,2})?$/)
@@ -186,29 +212,36 @@ export const productQuery = pagination
     category_id: positiveQuery.optional(),
     name: text(200).optional(),
     brand: text(150).optional(),
+    volume_ml: positiveQuery.optional(),
     min_price: amountQuery.optional(),
     max_price: amountQuery.optional(),
-    min_abv: amountQuery.pipe(z.number().max(100)).optional(),
-    max_abv: amountQuery.pipe(z.number().max(100)).optional(),
     active: z.enum(['true', 'false']).optional(),
   })
   .strict()
   .refine(
     (v) => v.min_price === undefined || v.max_price === undefined || v.min_price <= v.max_price,
     'Faixa de preço inválida.',
-  )
-  .refine(
-    (v) => v.min_abv === undefined || v.max_abv === undefined || v.min_abv <= v.max_abv,
-    'Faixa de teor alcoólico inválida.',
   );
 export const orderQuery = pagination
-  .extend({ status: orderStatus.shape.status.optional() })
-  .strict();
+  .extend({
+    status: orderStatus.shape.status.optional(),
+    from: date.optional(),
+    to: date.optional(),
+  })
+  .strict()
+  .refine(
+    (v) => v.from === undefined || v.to === undefined || v.to >= v.from,
+    'Período de filtro inválido.',
+  );
 export const deliveryQuery = pagination
   .extend({ status: deliveryStatus.shape.status.optional() })
   .strict();
 export const reportQuery = z
-  .object({ from: date, to: date })
+  .object({
+    from: date,
+    to: date,
+    group_by: z.enum(['PRODUTO', 'CATEGORIA', 'PAGAMENTO']).optional(),
+  })
   .strict()
   .refine(
     (v) =>

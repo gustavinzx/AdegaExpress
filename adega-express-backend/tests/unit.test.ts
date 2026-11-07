@@ -4,6 +4,9 @@ import { Prisma } from '@prisma/client';
 import {
   businessDate,
   isAdult,
+  isAllowedCategoryName,
+  isNonAlcoholicProductName,
+  isOrderPaymentExpired,
   startBusinessDay,
   discountedTotal,
   assertOrderTransition,
@@ -93,4 +96,45 @@ test('cupom percentual tem limite e vigência coerente', () => {
   assert.equal(s.coupon.parse(data).code, 'TESTE');
   assert.equal(s.coupon.safeParse({ ...data, discount_value: 101 }).success, false);
   assert.equal(s.coupon.safeParse({ ...data, valid_until: '2025-01-01' }).success, false);
+});
+test('escopo não alcoólico permite apenas Água, Sucos, Refrigerantes e Chás e rejeita bebidas alcoólicas/tabaco', () => {
+  for (const allowed of ['Água', 'Sucos', 'Refrigerantes', 'Chás']) {
+    assert.equal(isAllowedCategoryName(allowed), true);
+    assert.equal(s.category.safeParse({ name: allowed }).success, true);
+  }
+  for (const forbidden of ['Cervejas', 'Vinhos', 'Destilados', 'Tabacaria']) {
+    assert.equal(isAllowedCategoryName(forbidden), false);
+    assert.equal(s.category.safeParse({ name: forbidden }).success, false);
+  }
+  assert.equal(isNonAlcoholicProductName('Água Mineral Sem Gás 500ml'), true);
+  assert.equal(isNonAlcoholicProductName('Cerveja Pilsen 350ml'), false);
+  assert.equal(isNonAlcoholicProductName('Seda Smoking'), false);
+  assert.equal(
+    s.product.safeParse({
+      name: 'Suco Integral de Uva 1L',
+      category_id: 1,
+      price: 12.9,
+      volume_ml: 1000,
+      brand: 'Aurora',
+      stock_quantity: 10,
+    }).success,
+    true,
+  );
+  assert.equal(
+    s.product.safeParse({
+      name: 'Suco Integral de Uva 1L',
+      category_id: 1,
+      price: 12.9,
+      volume_ml: 1000,
+      abv_percent: 4.5,
+      brand: 'Aurora',
+      stock_quantity: 10,
+    }).success,
+    false,
+  );
+});
+test('prazo de 30 minutos para confirmação de pagamento é verificado com relógio controlável (RN07)', () => {
+  const createdAt = new Date('2026-11-07T12:00:00.000Z');
+  assert.equal(isOrderPaymentExpired(createdAt, new Date('2026-11-07T12:29:59.000Z')), false);
+  assert.equal(isOrderPaymentExpired(createdAt, new Date('2026-11-07T12:30:00.000Z')), true);
 });

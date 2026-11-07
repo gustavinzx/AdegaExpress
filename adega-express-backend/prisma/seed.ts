@@ -9,7 +9,6 @@ async function seed(): Promise<void> {
     name: process.env.ADMIN_NAME || 'Administrador Adega Express',
     email: process.env.ADMIN_EMAIL,
     password: process.env.ADMIN_PASSWORD,
-    birth_date: '1990-01-01',
   });
   const existing = await db.user.findUnique({ where: { email: input.email } });
   if (existing) {

@@ -8,6 +8,7 @@ import app from '../src/app';
 import prisma from '../src/services/prisma.service';
 import { businessDate } from '../src/lib/business';
 import { setUserActive } from '../src/services/admin.service';
+import { expirePendingOrders } from '../src/services/order.service';
 
 const api = request(app);
 const tokens: Record<string, string> = {};
@@ -24,16 +25,16 @@ const address = {
   zip: '01001000',
 };
 const auth = (token: string) => ({ Authorization: `Bearer ${tokens[token]}` });
-async function product(stock = 10, price = 10) {
+async function product(stock = 10, price = 10, volume_ml = 350) {
   const response = await api
     .post('/products')
     .set(auth('admin'))
     .send({
-      name: `Produto ${++sequence}`,
+      name: `Bebida Refrescante ${++sequence}`,
       category_id: categoryId,
       price,
-      volume_ml: 350,
-      abv_percent: 4.5,
+      volume_ml,
+      abv_percent: 0,
       brand: 'Teste',
       stock_quantity: stock,
     })
@@ -51,10 +52,17 @@ async function order(productId: number, quantity = 1, extra = {}) {
       ...extra,
     });
 }
-async function separated(productId: number) {
+async function separated(productId: number, markPaid = true) {
   const created = await order(productId);
   assert.equal(created.status, 201, JSON.stringify(created.body));
   const id = created.body.data.id as number;
+  if (markPaid) {
+    await api
+      .patch(`/orders/${id}/payment`)
+      .set(auth('attendant'))
+      .send({ status: 'PAGO', reference: 'Confirmação manual demonstrativa' })
+      .expect(200);
+  }
   await api
     .patch(`/orders/${id}/status`)
     .set(auth('attendant'))
@@ -80,7 +88,7 @@ before(async () => {
   for (const [name, role] of Object.entries(roles)) {
     const email = name.toLowerCase() + '@example.com';
     const user = await prisma.user.create({
-      data: { name, email, role, password_hash, birth_date: new Date('1990-01-01') },
+      data: { name, email, role, password_hash },
     });
     ids[name] = user.id;
     const logged = await api
@@ -89,9 +97,14 @@ before(async () => {
       .expect(200);
     tokens[name] = logged.body.data.token;
   }
-  categoryId = (
-    await api.post('/categories').set(auth('admin')).send({ name: 'Bebidas' }).expect(201)
-  ).body.data.id;
+  const existingCat = await prisma.category.findUnique({ where: { name: 'Refrigerantes' } });
+  if (existingCat) {
+    categoryId = existingCat.id;
+  } else {
+    categoryId = (
+      await api.post('/categories').set(auth('admin')).send({ name: 'Refrigerantes' }).expect(201)
+    ).body.data.id;
+  }
   addressId = (await api.post('/addresses').set(auth('client')).send(address).expect(201)).body.data
     .id;
 });
@@ -123,12 +136,12 @@ test('seeds podem ser repetidos sem duplicar contas ou repor estoque', async () 
   assert.equal(await prisma.user.count({ where: { email: 'bootstrap@example.com' } }), 1);
   assert.equal(
     await prisma.product.count({
-      where: { description: 'Produto fictício para demonstração acadêmica.' },
+      where: { description: 'Produto fictício não alcoólico para demonstração acadêmica.' },
     }),
     4,
   );
   const sample = await prisma.product.findFirstOrThrow({
-    where: { name: 'Cerveja Pilsen Demonstração' },
+    where: { name: 'Água Mineral Sem Gás Demonstração' },
   });
   assert.equal(sample.stock_quantity, 48);
   assert.equal(await prisma.stockMovement.count({ where: { product_id: sample.id } }), 1);
@@ -145,17 +158,12 @@ test('JSON inválido, rota inexistente e CORS retornam erros controlados', async
   assert.equal(response.headers['access-control-allow-origin'], 'http://localhost:3000');
   assert.ok(response.headers['x-content-type-options']);
 });
-test('cadastro valida idade e não permite escalar perfil', async () => {
+test('cadastro cria conta de cliente com cookie HttpOnly e não permite escalar perfil', async () => {
   const data = {
     name: 'Novo Cliente',
     email: 'NEW@example.com',
     password: 'Segredo-Teste-123',
-    birth_date: '2000-01-01',
   };
-  await api
-    .post('/auth/register')
-    .send({ ...data, birth_date: businessDate() })
-    .expect(400);
   await api
     .post('/auth/register')
     .send({ ...data, role: 'ADMINISTRADOR' })
@@ -164,6 +172,9 @@ test('cadastro valida idade e não permite escalar perfil', async () => {
   assert.equal(created.body.data.user.email, 'new@example.com');
   assert.equal(created.body.data.user.role, 'CLIENTE');
   assert.equal(created.body.data.user.password_hash, undefined);
+  const rawCookies = created.headers['set-cookie'];
+  const cookieList = Array.isArray(rawCookies) ? rawCookies : rawCookies ? [rawCookies] : [];
+  assert.ok(cookieList.some((c: string) => c.includes('adega_token=') && c.includes('HttpOnly')));
   await api.post('/auth/register').send(data).expect(409);
   await api.post('/auth/login').send({ email: data.email, password: 'errada' }).expect(401);
 });
@@ -188,13 +199,33 @@ test('endereços pertencem ao cliente e mantêm exatamente um padrão', async ()
   assert.equal(restored.body.data[0].id, addressId);
   assert.equal(restored.body.data[0].is_default, true);
 });
-test('catálogo pagina, filtra e mantém produto sem estoque visível', async () => {
-  const id = await product(0, 19.99);
+test('catálogo pagina, filtra por volume e mantém apenas escopo não alcoólico público', async () => {
+  const id = await product(0, 19.99, 510);
   const item = await api.get(`/products/${id}`).expect(200);
   assert.equal(item.body.data.in_stock, false);
-  const list = await api.get('/products?limit=1&brand=Teste&min_price=19&max_price=20').expect(200);
+  const list = await api
+    .get('/products?limit=1&brand=Teste&min_price=19&max_price=20&volume_ml=510')
+    .expect(200);
   assert.equal(list.body.data.length, 1);
   assert.equal(list.body.meta.limit, 1);
+  const categories = await api.get('/categories').expect(200);
+  for (const cat of categories.body.data as { name: string }[]) {
+    assert.ok(['Água', 'Sucos', 'Refrigerantes', 'Chás'].includes(cat.name));
+  }
+  await api.post('/categories').set(auth('admin')).send({ name: 'Cervejas' }).expect(400);
+  await api
+    .post('/products')
+    .set(auth('admin'))
+    .send({
+      name: 'Cerveja Proibida',
+      category_id: categoryId,
+      price: 10,
+      volume_ml: 350,
+      abv_percent: 0,
+      brand: 'Teste',
+      stock_quantity: 5,
+    })
+    .expect(400);
   await api.get('/products?limit=1000').expect(400);
   await api.get('/products/not-an-id').expect(400);
   await api.put(`/products/${id}`).set(auth('admin')).send({ stock_quantity: 100 }).expect(400);
@@ -261,17 +292,44 @@ test('checkout rejeita endereço de outro cliente e região não atendida', asyn
     .expect(201);
   assert.equal((await order(id, 1, { address_id: far.body.data.id })).status, 400);
 });
-test('maioridade é verificada novamente no checkout de contas legadas', async () => {
-  const id = await product();
-  await prisma.user.update({ where: { id: ids.client }, data: { birth_date: null } });
-  try {
-    assert.equal((await order(id)).status, 403);
-  } finally {
-    await prisma.user.update({
-      where: { id: ids.client },
-      data: { birth_date: new Date('1990-01-01') },
-    });
-  }
+test('RN07 e RN08: pedido pendente sem pagamento não avança para CONFIRMADO e expira em 30 minutos com devolução idempotente', async () => {
+  const id = await product(5);
+  const created = await order(id, 2);
+  assert.equal(created.status, 201);
+  const orderId = created.body.data.id as number;
+  assert.equal((await prisma.product.findUniqueOrThrow({ where: { id } })).stock_quantity, 3);
+
+  // RN08: Não pode avançar para CONFIRMADO antes do pagamento PAGO
+  await api
+    .patch(`/orders/${orderId}/status`)
+    .set(auth('attendant'))
+    .send({ status: 'CONFIRMADO' })
+    .expect(409);
+
+  // RN07: Simula pedido pendente com mais de 30 minutos
+  const thirtyOneMinAgo = new Date(Date.now() - 31 * 60 * 1000);
+  await prisma.order.update({
+    where: { id: orderId },
+    data: { created_at: thirtyOneMinAgo },
+  });
+
+  const firstRun = await expirePendingOrders();
+  const secondRun = await expirePendingOrders();
+  assert.ok(firstRun >= 1);
+  assert.equal(secondRun, 0);
+
+  const expiredOrder = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+  assert.equal(expiredOrder.status, 'CANCELADO');
+  assert.equal((await prisma.product.findUniqueOrThrow({ where: { id } })).stock_quantity, 5);
+  assert.equal(
+    await prisma.stockMovement.count({
+      where: {
+        product_id: id,
+        reason: `Cancelamento automático (RN07) - Pedido #${orderId}`,
+      },
+    }),
+    1,
+  );
 });
 test('snapshot preserva endereço e nome do produto após edições', async () => {
   const id = await product();
@@ -461,6 +519,8 @@ test('fluxo operacional sincroniza pedido e entrega e exige pagamento para concl
     .set(auth('admin'))
     .send({ deliverer_id: ids.otherDriver })
     .expect(409);
+  // RN09: Se o pagamento não estiver PAGO (ex.: estado legado/inconsistente), bloqueia conclusão da entrega
+  await prisma.order.update({ where: { id }, data: { payment_status: 'PENDENTE' } });
   await api
     .patch(`/deliveries/${deliveryId}/status`)
     .set(auth('driver'))

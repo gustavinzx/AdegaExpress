@@ -45,6 +45,7 @@ app.use(
         callback(new AppError(403, 'Origem não permitida.'));
       }
     },
+    credentials: true,
     exposedHeaders: ['X-Request-Id', 'Idempotency-Replayed'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

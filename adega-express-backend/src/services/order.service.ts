@@ -4,7 +4,14 @@ import { z } from 'zod';
 import prisma from './prisma.service';
 import { transaction } from '../lib/transaction';
 import { AppError } from '../lib/errors';
-import { businessDate, isAdult, discountedTotal, assertOrderTransition } from '../lib/business';
+import {
+  ALLOWED_CATEGORIES,
+  ORDER_EXPIRATION_MS,
+  businessDate,
+  startBusinessDay,
+  discountedTotal,
+  assertOrderTransition,
+} from '../lib/business';
 import { config } from '../config';
 import * as schemas from '../schemas';
 import { pageArgs, paged } from './catalog.service';
@@ -15,9 +22,80 @@ const detail = {
   items: {
     include: { product: { select: { id: true, name: true, brand: true, volume_ml: true } } },
   },
-  delivery: true,
+  delivery: {
+    include: { deliverer: { select: { id: true, name: true } } },
+  },
   history: { orderBy: { id: 'asc' as const } },
+  payments: { orderBy: { id: 'asc' as const } },
 } satisfies Prisma.OrderInclude;
+
+export async function expirePendingOrders(now = new Date()): Promise<number> {
+  const cutoff = new Date(now.getTime() - ORDER_EXPIRATION_MS);
+  const expiredCandidates = await prisma.order.findMany({
+    where: {
+      status: 'PENDENTE',
+      payment_status: 'PENDENTE',
+      created_at: { lte: cutoff },
+    },
+    select: { id: true },
+  });
+  let cancelledCount = 0;
+  for (const candidate of expiredCandidates) {
+    const cancelled = await transaction(async (tx) => {
+      const order = await tx.order.findUnique({
+        where: { id: candidate.id },
+        include: { items: true },
+      });
+      if (
+        !order ||
+        order.status !== 'PENDENTE' ||
+        order.payment_status !== 'PENDENTE' ||
+        order.created_at.getTime() > cutoff.getTime()
+      ) {
+        return false;
+      }
+      const reason = 'Pagamento demonstrativo não confirmado no prazo de 30 minutos (RN07).';
+      const changed = await tx.order.updateMany({
+        where: { id: order.id, status: 'PENDENTE', payment_status: 'PENDENTE' },
+        data: { status: 'CANCELADO', cancellation_reason: reason },
+      });
+      if (!changed.count) {
+        return false;
+      }
+      for (const item of [...order.items].sort((a, b) => a.product_id - b.product_id)) {
+        const updated = await tx.product.updateMany({
+          where: { id: item.product_id, stock_quantity: { lte: 2147483647 - item.quantity } },
+          data: { stock_quantity: { increment: item.quantity } },
+        });
+        if (!updated.count) {
+          throw new AppError(409, 'Limite do estoque excedido.');
+        }
+        await tx.stockMovement.create({
+          data: {
+            product_id: item.product_id,
+            type: 'ENTRADA',
+            quantity: item.quantity,
+            reason: `Cancelamento automático (RN07) - Pedido #${order.id}`,
+            actor_id: order.user_id,
+          },
+        });
+      }
+      await tx.orderHistory.create({
+        data: {
+          order_id: order.id,
+          status: 'CANCELADO',
+          actor_id: order.user_id,
+          reason,
+        },
+      });
+      return true;
+    });
+    if (cancelled) {
+      cancelledCount++;
+    }
+  }
+  return cancelledCount;
+}
 
 async function priceOrder(
   tx: Prisma.TransactionClient,
@@ -27,9 +105,6 @@ async function priceOrder(
   const user = await tx.user.findUnique({ where: { id: user_id } });
   if (!user?.active || user.role !== 'CLIENTE') {
     throw new AppError(403, 'Compra disponível apenas para clientes ativos.');
-  }
-  if (!user.birth_date || !isAdult(user.birth_date)) {
-    throw new AppError(403, 'Maioridade não confirmada.');
   }
   const address = await tx.address.findFirst({
     where: { id: input.address_id, user_id, archived: false },
@@ -47,7 +122,12 @@ async function priceOrder(
     throw new AppError(400, 'Endereço fora da área de entrega.');
   }
   const products = await tx.product.findMany({
-    where: { id: { in: input.items.map((i) => i.product_id) }, active: true },
+    where: {
+      id: { in: input.items.map((i) => i.product_id) },
+      active: true,
+      abv_percent: 0,
+      category: { active: true, name: { in: [...ALLOWED_CATEGORIES] } },
+    },
   });
   const items = input.items
     .map((item) => {
@@ -184,7 +264,22 @@ export async function createOrder(user_id: number, input: schemas.CheckoutInput,
   }
 }
 export async function listOrders(query: z.infer<typeof schemas.orderQuery>, user_id?: number) {
-  const where = { user_id, status: query.status };
+  await expirePendingOrders();
+  const created_at: Prisma.DateTimeFilter = {};
+  if (query.from) {
+    created_at.gte = startBusinessDay(query.from);
+  }
+  if (query.to) {
+    const nextDay = new Date(new Date(query.to + 'T00:00:00Z').getTime() + 86400000)
+      .toISOString()
+      .slice(0, 10);
+    created_at.lt = startBusinessDay(nextDay);
+  }
+  const where: Prisma.OrderWhereInput = {
+    user_id,
+    status: query.status,
+    ...(query.from || query.to ? { created_at } : {}),
+  };
   const [items, count] = await prisma.$transaction([
     prisma.order.findMany({
       where,
@@ -199,12 +294,18 @@ export async function listOrders(query: z.infer<typeof schemas.orderQuery>, user
         shipping_fee: true,
         payment_method: true,
         payment_status: true,
+        paid_at: true,
+        cancellation_reason: true,
+        address_snapshot: true,
         created_at: true,
         updated_at: true,
-        user: { select: { id: true, name: true } },
+        user: { select: { id: true, name: true, email: true } },
         _count: { select: { items: true } },
         items: { select: { id: true, quantity: true, product_name: true, unit_price: true } },
-        delivery: true,
+        delivery: {
+          include: { deliverer: { select: { id: true, name: true } } },
+        },
+        payments: { orderBy: { id: 'asc' } },
       },
     }),
     prisma.order.count({ where }),
@@ -212,6 +313,7 @@ export async function listOrders(query: z.infer<typeof schemas.orderQuery>, user
   return paged(items, count, query);
 }
 export async function getOrderById(id: number, actor: AuthPayload) {
+  await expirePendingOrders();
   const where: Prisma.OrderWhereInput = { id };
   if (actor.role === 'CLIENTE') {
     where.user_id = actor.sub;
@@ -231,6 +333,7 @@ export async function updateOrderStatus(
   actor: AuthPayload,
   reason?: string,
 ) {
+  await expirePendingOrders();
   return transaction(async (tx) => {
     const order = await tx.order.findUnique({ where: { id }, include: { items: true } });
     if (!order || (actor.role === 'CLIENTE' && order.user_id !== actor.sub)) {
@@ -248,6 +351,12 @@ export async function updateOrderStatus(
     assertOrderTransition(order.status, status);
     if (status === 'EM_ROTA' || status === 'ENTREGUE') {
       throw new AppError(409, 'Atualize estas etapas pela entrega atribuída ao entregador.');
+    }
+    if ((status === 'CONFIRMADO' || status === 'SEPARADO') && order.payment_status !== 'PAGO') {
+      throw new AppError(
+        409,
+        'O pagamento demonstrativo deve ser confirmado como PAGO antes de confirmar ou separar o pedido (RN08).',
+      );
     }
     if (status === 'CANCELADO' && !reason) {
       throw new AppError(400, 'Informe o motivo do cancelamento.');
@@ -300,6 +409,7 @@ export async function recordPayment(
   input: z.infer<typeof schemas.payment>,
   actor_id: number,
 ) {
+  await expirePendingOrders();
   return transaction(async (tx) => {
     const order = await tx.order.findUnique({ where: { id } });
     if (!order) {
@@ -324,6 +434,7 @@ export async function recordPayment(
         payment_status: input.status,
         ...(input.status === 'PAGO' ? { paid_at: new Date() } : {}),
       },
+      include: detail,
     });
   });
 }
@@ -332,5 +443,19 @@ export async function paymentHistory(order_id: number) {
   if (!exists) {
     throw new AppError(404, 'Pedido não encontrado.');
   }
-  return prisma.paymentRecord.findMany({ where: { order_id }, orderBy: { id: 'asc' } });
+  const records = await prisma.paymentRecord.findMany({
+    where: { order_id },
+    orderBy: { id: 'asc' },
+  });
+  const actorIds = [...new Set(records.map((r) => r.actor_id))];
+  const actors = actorIds.length
+    ? await prisma.user.findMany({
+        where: { id: { in: actorIds } },
+        select: { id: true, name: true, role: true },
+      })
+    : [];
+  return records.map((r) => ({
+    ...r,
+    actor: actors.find((a) => a.id === r.actor_id) ?? null,
+  }));
 }

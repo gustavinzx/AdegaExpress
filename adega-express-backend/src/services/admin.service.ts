@@ -6,6 +6,7 @@ import { Page } from '../schemas';
 import { pageArgs, paged } from './catalog.service';
 import { userSelect } from './auth.service';
 import { startBusinessDay } from '../lib/business';
+import { expirePendingOrders } from './order.service';
 
 export async function listStaff(page: Page) {
   const where = { role: { not: 'CLIENTE' as const } };
@@ -62,7 +63,12 @@ export async function listDeliverers() {
     take: 100,
   });
 }
-export async function salesReport(from: string, to: string) {
+export async function salesReport(
+  from: string,
+  to: string,
+  group_by?: 'PRODUTO' | 'CATEGORIA' | 'PAGAMENTO',
+) {
+  await expirePendingOrders();
   const start = startBusinessDay(from);
   const nextDay = new Date(new Date(to + 'T00:00:00Z').getTime() + 86400000)
     .toISOString()
@@ -74,11 +80,18 @@ export async function salesReport(from: string, to: string) {
     payment_status: 'PAGO' as const,
     status: { not: 'CANCELADO' as const },
   };
-  const [byStatus, paid, refunds, top, lowStock] = await prisma.$transaction([
+  const [byStatus, byPayment, paid, refunds, top, paidItems, lowStock] = await prisma.$transaction([
     prisma.order.groupBy({
       by: ['status'],
       orderBy: { status: 'asc' },
       where: { created_at },
+      _count: { _all: true },
+      _sum: { total: true },
+    }),
+    prisma.order.groupBy({
+      by: ['payment_method'],
+      orderBy: { payment_method: 'asc' },
+      where: paidWhere,
       _count: { _all: true },
       _sum: { total: true },
     }),
@@ -99,6 +112,16 @@ export async function salesReport(from: string, to: string) {
       orderBy: { _sum: { quantity: 'desc' } },
       take: 10,
     }),
+    prisma.orderItem.findMany({
+      where: { order: paidWhere },
+      select: {
+        product_id: true,
+        product_name: true,
+        quantity: true,
+        unit_price: true,
+        product: { select: { category: { select: { id: true, name: true } } } },
+      },
+    }),
     prisma.product.findMany({
       where: { active: true, stock_quantity: { lte: 5 } },
       select: { id: true, name: true, stock_quantity: true },
@@ -110,6 +133,21 @@ export async function salesReport(from: string, to: string) {
     where: { id: { in: top.map((p) => p.product_id) } },
     select: { id: true, name: true },
   });
+  const byCategoryMap = new Map<
+    string,
+    { category: string; quantity: number; revenue: Prisma.Decimal }
+  >();
+  for (const item of paidItems) {
+    const categoryName = item.product.category.name;
+    const current = byCategoryMap.get(categoryName) ?? {
+      category: categoryName,
+      quantity: 0,
+      revenue: new Prisma.Decimal(0),
+    };
+    current.quantity += item.quantity;
+    current.revenue = current.revenue.add(item.unit_price.mul(item.quantity));
+    byCategoryMap.set(categoryName, current);
+  }
   const revenue = paid._sum.total ?? new Prisma.Decimal(0);
   return {
     period: {
@@ -117,8 +155,15 @@ export async function salesReport(from: string, to: string) {
       to,
       timezone: 'America/Sao_Paulo',
       basis: 'Data de criação do pedido; pagamento na situação atual',
+      group_by: group_by ?? null,
     },
     orders_by_status: byStatus,
+    orders_by_payment_method: byPayment.map((p) => ({
+      payment_method: p.payment_method,
+      count: typeof p._count === 'object' && p._count ? (p._count._all ?? 0) : 0,
+      total: p._sum?.total ?? new Prisma.Decimal(0),
+    })),
+    sales_by_category: Array.from(byCategoryMap.values()),
     paid_orders: paid._count._all,
     paid_revenue: revenue,
     discounts: paid._sum.discount ?? new Prisma.Decimal(0),

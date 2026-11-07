@@ -1,8 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { Role } from '@prisma/client';
 import { z } from 'zod';
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { authMiddleware, SESSION_COOKIE_NAME } from '../middlewares/auth.middleware';
 import { requireRole } from '../middlewares/requireRole.middleware';
+import { config } from '../config';
 import { AppError } from '../lib/errors';
 import * as s from '../schemas';
 import * as auth from '../services/auth.service';
@@ -12,6 +13,36 @@ import * as orders from '../services/order.service';
 import * as delivery from '../services/delivery.service';
 import * as admin from '../services/admin.service';
 import prisma from '../services/prisma.service';
+
+const cookieDurationMs: Record<string, number> = {
+  '15m': 15 * 60 * 1000,
+  '1h': 60 * 60 * 1000,
+  '8h': 8 * 60 * 60 * 1000,
+  '1d': 24 * 60 * 60 * 1000,
+  '7d': 7 * 24 * 60 * 60 * 1000,
+};
+
+function setSessionCookie(res: Response, token?: string): void {
+  if (!token) {
+    return;
+  }
+  res.cookie(SESSION_COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: config.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: cookieDurationMs[config.JWT_EXPIRES_IN] ?? 8 * 60 * 60 * 1000,
+  });
+}
+
+function clearSessionCookie(res: Response): void {
+  res.clearCookie(SESSION_COOKIE_NAME, {
+    httpOnly: true,
+    secure: config.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+  });
+}
 
 export const apiRouter = Router();
 const ADMIN: Role[] = ['ADMINISTRADOR'];
@@ -116,14 +147,23 @@ route(
   {
     method: 'post',
     path: '/auth/register',
-    summary: 'Cadastrar cliente maior de idade',
+    summary: 'Cadastrar cliente',
     body: s.register,
     status: 201,
   },
-  (req) => auth.register(s.register.parse(req.body)),
+  async (req, res) => {
+    const result = await auth.register(s.register.parse(req.body));
+    setSessionCookie(res, result.token);
+    return result;
+  },
 );
-route({ method: 'post', path: '/auth/login', summary: 'Autenticar', body: s.login }, (req) =>
-  auth.login(s.login.parse(req.body)),
+route(
+  { method: 'post', path: '/auth/login', summary: 'Autenticar', body: s.login },
+  async (req, res) => {
+    const result = await auth.login(s.login.parse(req.body));
+    setSessionCookie(res, result.token);
+    return result;
+  },
 );
 route(
   { method: 'get', path: '/auth/me', summary: 'Consultar perfil autenticado', roles: ALL },
@@ -137,7 +177,10 @@ route(
     roles: ALL,
     status: 204,
   },
-  (req) => auth.logout(req.user!.sub),
+  async (req, res) => {
+    await auth.logout(req.user!.sub);
+    clearSessionCookie(res);
+  },
 );
 route(
   {
@@ -148,7 +191,10 @@ route(
     body: s.passwordChange,
     status: 204,
   },
-  (req) => auth.changePassword(req.user!.sub, s.passwordChange.parse(req.body)),
+  async (req, res) => {
+    await auth.changePassword(req.user!.sub, s.passwordChange.parse(req.body));
+    clearSessionCookie(res);
+  },
 );
 
 route(
@@ -260,8 +306,18 @@ route(
 );
 
 route(
-  { method: 'get', path: '/categories', summary: 'Listar categorias', query: s.pagination },
-  (req) => catalog.listCategories(s.pagination.strict().parse(req.query)),
+  { method: 'get', path: '/categories', summary: 'Listar categorias ativas', query: s.pagination },
+  (req) => catalog.listCategories(s.categoryQuery.parse(req.query), false),
+);
+route(
+  {
+    method: 'get',
+    path: '/admin/categories',
+    summary: 'Listar categorias ativas e inativas',
+    roles: ADMIN,
+    query: s.categoryQuery,
+  },
+  (req) => catalog.listCategories(s.categoryQuery.parse(req.query), true),
 );
 route(
   {
@@ -519,8 +575,8 @@ route(
     query: s.reportQuery,
   },
   (req) => {
-    const { from, to } = s.reportQuery.parse(req.query);
-    return admin.salesReport(from, to);
+    const { from, to, group_by } = s.reportQuery.parse(req.query);
+    return admin.salesReport(from, to, group_by);
   },
 );
 route({ method: 'get', path: '/health', summary: 'Verificar processo da API' }, () => ({
@@ -539,9 +595,9 @@ export const openapi = {
   openapi: '3.0.3',
   info: {
     title: 'Adega Express API',
-    version: '2.0.0',
+    version: '2.1.0',
     description:
-      'E-commerce B2C. Pagamentos são conferidos manualmente; esta API não efetua cobranças externas. Datas civis em AAAA-MM-DD, dinheiro em BRL. Listas usam page/limit (máximo 100).',
+      'E-commerce B2C demonstrativo exclusivamente de bebidas não alcoólicas (Água, Sucos, Refrigerantes e Chás). Pagamentos são conferidos manualmente; esta API não efetua cobranças externas. Datas civis em AAAA-MM-DD, dinheiro em BRL. Listas usam page/limit (máximo 100).',
   },
   servers: [{ url: '/' }],
   components: {

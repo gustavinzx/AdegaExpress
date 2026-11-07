@@ -1,6 +1,28 @@
 import { Prisma, OrderStatus, DeliveryStatus } from '@prisma/client';
 import { AppError } from './errors';
 
+export const ALLOWED_CATEGORIES = ['Água', 'Sucos', 'Refrigerantes', 'Chás'] as const;
+export const FORBIDDEN_PRODUCT_TERMS =
+  /\b(cerveja|cervejas|vinho|vinhos|vodka|whisky|whiskey|gin|rum|tequila|cacha[cç]a|catuaba|destilado|destilados|alco[oó]lic[oa]|tabaco|tabacaria|cigarro|cigarros|seda|sedas|fumo|isqueiro|charuto|narguil[eé]|ess[eê]ncia)\b/i;
+
+export function isAllowedCategoryName(name: string): boolean {
+  const normalized = name.trim();
+  return ALLOWED_CATEGORIES.includes(normalized as (typeof ALLOWED_CATEGORIES)[number]);
+}
+
+export function isNonAlcoholicProductName(name: string, description?: string | null): boolean {
+  return (
+    !FORBIDDEN_PRODUCT_TERMS.test(name) &&
+    (!description || !FORBIDDEN_PRODUCT_TERMS.test(description))
+  );
+}
+
+export const ORDER_EXPIRATION_MS = 30 * 60 * 1000;
+
+export function isOrderPaymentExpired(createdAt: Date, now = new Date()): boolean {
+  return now.getTime() - createdAt.getTime() >= ORDER_EXPIRATION_MS;
+}
+
 export function businessDate(now = new Date()): string {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Sao_Paulo',

@@ -1,62 +1,29 @@
-# Decisões do backend Adega Express
+# Decisões de Arquitetura — Backend Adega Express (v4.3)
 
-## Escopo desta etapa
+## 1. Alinhamento ao Documento de Visão v4.3 (Escopo Não Alcoólico)
 
-Foi mantida a base Node.js, Express, TypeScript, Prisma e MySQL. O trabalho concentra as regras no backend e conserva o envelope `status/data` usado pelo frontend existente. As rotas estão agrupadas em um registro que também gera o OpenAPI, reduzindo diferenças entre documentação e implementação. Serviços implementam regras; schemas validam entradas; o middleware traduz erros de forma uniforme.
+- **Escopo de Catálogo:** O sistema opera exclusivamente como loja demonstrativa de bebidas não alcoólicas nas categorias **Água**, **Sucos**, **Refrigerantes** e **Chás**. Validações em `src/lib/business.ts` e `src/schemas.ts` impedem a criação ou reativação de categorias fora dessa lista, exigem `abv_percent = 0` e rejeitam nomes com termos de bebidas alcoólicas ou tabacaria.
+- **Migração Segura de Legado (`20261107120000_non_alcoholic_scope`):** Categorias e produtos antigos fora do escopo não alcoólico são desativados logicamente (`active = false`) sem apagar pedidos ou itens históricos (RN11).
+- **Cadastro sem Restrição Etária (UC02 / RF04):** Como o escopo é estritamente não alcoólico, o cadastro de cliente exige apenas `name`, `email` e `password` (mínimo 8 caracteres), sem bloqueio de maioridade (18+).
 
-## Compra e estoque
+## 2. Compra, Estoque e Expiração em 30 Minutos
 
-A cotação não reserva mercadoria. A criação do pedido calcula tudo novamente, valida o proprietário do endereço e a maioridade e executa a baixa em transação. A condição `stock_quantity >= quantidade` na atualização impede saldo negativo. Transações serializáveis são repetidas no máximo três vezes após a tentativa inicial em conflitos reconhecidos pelo Prisma. Os itens são processados em ordem de ID para reduzir deadlocks.
+- **Cotação e Checkout Atômico (RN01 / RN02 / RF06):** `POST /orders/quote` calcula subtotal, desconto de cupom e taxa de entrega no servidor sem reservar estoque. `POST /orders` recalcula todos os valores no servidor e debita o estoque em transação `Serializable` com verificação condicional `stock_quantity >= quantity`.
+- **Expiração Automática de 30 Minutos (RN07 / RF18):** Pedidos `PENDENTE` com `payment_status = PENDENTE` cujo `created_at` ultrapasse 30 minutos são cancelados automaticamente por `expirePendingOrders()` (executado em background e antes das consultas/operações de pedidos e relatórios), devolvendo o estoque na mesma transação com registro em `stock_movements` (`Cancelamento automático (RN07) - Pedido #ID`).
+- **Devolução Idempotente de Estoque (RN07 / RF15):** O cancelamento verifica o status atual dentro da transação antes de devolver os itens ao saldo do produto, garantindo que nenhuma devolução ocorra em duplicidade.
 
-Pedidos `PENDENTE` já consomem estoque. Não existe expiração automática; a equipe precisa cancelar pedidos abandonados. Essa decisão mantém a regra descrita no UC01 atual. Antes de disponibilizar a loja publicamente, deve-se definir uma política de expiração e eventual tarefa agendada.
+## 3. Pagamento Demonstrativo e Confirmação Manual
 
-O cabeçalho `Idempotency-Key` é opcional para compatibilidade, mas deve ser enviado pelo próximo frontend. A chave é única por cliente, com hash dos dados normalizados. O banco garante que uma repetição concorrente não gere outra compra. Não há serviço externo dentro da transação.
+- **Sem Cobrança Real (RF07 / RNF05):** `payment_method` (`PIX` ou `CARTAO`) registra apenas a modalidade demonstrativa escolhida pelo cliente. Não há integração bancária ou geração de QR Code.
+- **Confirmação Manual Auditável (UC11 / RN08 / RN12):** A confirmação é registrada por `ATENDENTE` ou `ADMINISTRADOR` em `PATCH /orders/:id/payment`, gravando `actor_id`, `paid_at`, `status` e `reference` em `payment_records`.
+- **Bloqueio de Avanço Operacional (RN08):** `PATCH /orders/:id/status` impede que um pedido avance para `CONFIRMADO` ou `SEPARADO` enquanto `payment_status !== 'PAGO'`.
 
-Alterações manuais de estoque têm quantidade, tipo, motivo e responsável. A API de edição do produto rejeita `stock_quantity`: correções de saldo devem ser expressas como movimentações. A auditoria começa na nova versão; não foram inventadas movimentações anteriores à migração.
+## 4. Entregas e Sincronização de Status
 
-## Histórico e migração
+- **Fluxo Sequencial (RN04 / RN05 / RN06 / RN09):** As etapas seguem `PENDENTE` → `CONFIRMADO` → `SEPARADO` → `EM_ROTA` → `ENTREGUE`. Ao avançar para `SEPARADO`, é criado o registro em `deliveries` com status `AGUARDANDO`.
+- O entregador atribuído (`deliverer_id`) atualiza sua entrega para `SAIU_PARA_ENTREGA` (sincronizando o pedido para `EM_ROTA`) e `ENTREGUE` (sincronizando o pedido para `ENTREGUE`, exigindo `payment_status = PAGO`).
 
-O pedido guarda subtotal, desconto, frete, endereço e nome/preço de cada item. Mudanças posteriores no catálogo ou no endereço não alteram esses campos. A tabela de endereços usa arquivamento para não quebrar relacionamentos. A tabela de produtos mantém desativação lógica.
+## 5. Segurança de Sessão e Autorização
 
-A migration nova adiciona campos e tabelas; não apaga dados. Nos pedidos legados, utiliza o endereço e o nome do produto disponíveis na data da migração. Não é possível reconstruir alterações históricas feitas antes dela. O subtotal é reconstruído a partir dos itens e o desconto é a diferença não negativa para o total registrado. Não é inferido pagamento confirmado nem criada uma autoria fictícia para mudanças antigas de status.
-
-## Estados e entregas
-
-O pedido avança de `PENDENTE` para `CONFIRMADO`, depois `SEPARADO`. Ao separar, nasce uma entrega `AGUARDANDO`, inicialmente sem entregador. O atendente ou administrador atribui um entregador ativo.
-
-Somente esse entregador pode passar a `SAIU_PARA_ENTREGA`, que sincroniza o pedido para `EM_ROTA`, e depois a `ENTREGUE`, que sincroniza a conclusão. Etapas não podem ser puladas ou desfeitas. Repetir a mesma etapa é inofensivo. O registro de histórico indica o usuário que fez cada alteração.
-
-Cancelamento é permitido antes de sair para entrega. O cliente pode cancelar apenas o próprio pedido pendente; a equipe também pode cancelar confirmado ou separado. O estoque é devolvido uma única vez na mesma transação. Entregas de pedidos cancelados permanecem como histórico, não aparecem na fila e não podem ser movimentadas.
-
-## Pagamentos
-
-`payment_method` representa a opção do cliente; `payment_status` representa a conferência do recebimento. São conceitos distintos. A confirmação não depende simplesmente de criar o pedido ou mudar o status operacional.
-
-Nesta versão, PIX e cartão são recebidos fora da API e conferidos por administrador/atendente. Uma referência e o ID do responsável ficam em `payment_records`. A equipe pode consultar o histórico de conferências na rota de pagamentos do pedido. Entrega concluída exige pagamento marcado como `PAGO`. Essa é uma regra operacional assumida para esta implementação e pode ser ajustada se a distribuidora trabalhar com crédito ou outro fluxo.
-
-Cancelar pedido já pago gera `ESTORNO_PENDENTE`. Depois de devolver o dinheiro fora do sistema, a equipe registra `ESTORNADO`. A operação não comunica com bancos ou adquirentes. Para um gateway futuro, essa conferência precisará ser conectada a eventos autenticados e idempotentes do provedor.
-
-## Autenticação e proteção
-
-Senha é armazenada com bcrypt; o JWT tem algoritmo fixo e expiração configurável. Cada usuário possui versão de sessão. Logout, troca de senha e desativação revogam tokens anteriores. O perfil e o estado ativo são consultados no banco em cada requisição protegida.
-
-O cadastro público não aceita perfil arbitrário. As validações são estritas, inclusive para campos extras, datas inválidas, valores negativos, quantidade fracionária e IDs. Erros internos não devolvem SQL, senha ou detalhes do Prisma. Logs registram método, caminho, status, duração e ID da requisição, sem corpo, token, email ou endereço.
-
-CORS restringe origens do navegador. Autorização continua sendo exigida independentemente do CORS. Helmet adiciona cabeçalhos e há limites de tamanho de JSON e frequência de requisições. O limitador usa memória local, adequado para uma instância; múltiplas instâncias exigem armazenamento compartilhado. A aplicação não armazena números de cartão.
-
-## Relatórios e frete
-
-Frete usa uma taxa fixa configurada e, opcionalmente, uma lista de cidades e UF atendidas. Não se apresenta como cálculo por CEP, distância, mapa ou otimização de rota.
-
-O relatório agrupa pedidos criados no período escolhido e considera o pagamento atual. Receita é o total de pedidos pagos não cancelados, incluindo frete. Não é fluxo de caixa por data de recebimento, nem substitui contabilidade. Datas são interpretadas no fuso de São Paulo. Períodos de consulta são limitados a 366 dias.
-
-## Alinhamento com o Documento de Visão
-
-- UC01: verificação de idade agora também ocorre na compra; estoque é debitado ao criar o pedido pendente.
-- Cupom inválido: a implementação bloqueia a compra e solicita correção/remoção, em vez de continuar silenciosamente sem desconto. O texto do fluxo de exceção deve refletir essa decisão.
-- UC03: saída para entrega agora sincroniza `EM_ROTA`. A conclusão exige pagamento conferido e o pedido precisa ter seguido as etapas.
-- No UC03, `SEPARADO` é condição para iniciar a entrega; na conclusão, o pedido já está `EM_ROTA`. A pré-condição do documento precisa distinguir essas etapas.
-- Os três valores de `DeliveryStatus` foram preservados: `AGUARDANDO`, `SAIU_PARA_ENTREGA`, `ENTREGUE`.
-- Cobrança via gateway, ajuda on-line e manuais para cada perfil ainda são promessas do produto, não funcionalidades concluídas nesta entrega de backend.
-
-O Word original não foi alterado. Essas decisões estão registradas para orientar uma revisão posterior da documentação acadêmica.
+- **Cookies `HttpOnly` + Bearer Token (RNF07 / UC13):** O login e o cadastro definem o cookie `adega_token` (`HttpOnly`, `SameSite=Lax`, `Secure` em produção) além de retornar o JWT no corpo para clientes de API.
+- **Revogação Imediata (RF20):** `POST /auth/logout`, `PATCH /auth/password` e a desativação de usuário incrementam `token_version` e limpam o cookie, invalidando imediatamente sessões anteriores.

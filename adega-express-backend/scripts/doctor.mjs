@@ -23,13 +23,20 @@ try {
   result(true, 'Conexão com MySQL');
   const migrations =
     await db.$queryRaw`SELECT migration_name, finished_at, rolled_back_at FROM _prisma_migrations`;
-  const ready = migrations.some(
-    (m) =>
-      m.migration_name === '20260921120000_backend_business_rules' &&
-      m.finished_at &&
-      !m.rolled_back_at,
-  );
-  result(ready, 'Migration de regras de negócio aplicada');
+  const ready =
+    migrations.some(
+      (m) =>
+        m.migration_name === '20260921120000_backend_business_rules' &&
+        m.finished_at &&
+        !m.rolled_back_at,
+    ) &&
+    migrations.some(
+      (m) =>
+        m.migration_name === '20261107120000_non_alcoholic_scope' &&
+        m.finished_at &&
+        !m.rolled_back_at,
+    );
+  result(ready, 'Migrations de regras de negócio e escopo não alcoólico aplicadas');
   if (ready) {
     result(
       (await db.user.count({ where: { role: 'ADMINISTRADOR', active: true } })) > 0,

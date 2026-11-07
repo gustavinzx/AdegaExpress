@@ -1,128 +1,164 @@
-# 🍷 Adega Express
+# 🥤 Adega Express — E-commerce & Operação de Bebidas Não Alcoólicas (v4.3)
 
-Um sistema completo, moderno e de alto padrão (E-commerce & Sistema de Gestão) para adegas, cervejarias e lojas de conveniência. 
+Sistema completo de comércio eletrônico B2C e gestão operacional desenvolvido em monorepo (**Next.js 16 + Node.js/Express + Prisma ORM + MySQL**), adequado integralmente ao **Documento de Visão do Adega Express — Versão 4.3 (Escopo Acadêmico Não Alcoólico)**.
 
 ![Status](https://img.shields.io/badge/Status-Conclu%C3%ADdo-success)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+![Version](https://img.shields.io/badge/Documento_de_Vis%C3%A3o-v4.3-amber)
+![Escopo](https://img.shields.io/badge/Escopo-Bebidas_N%C3%A3o_Alco%C3%B3licas-emerald)
 
 ---
 
-## 🎯 Sobre o Projeto
+## 🎯 Escopo do Projeto (Documento de Visão v4.3)
 
-O **Adega Express** é uma plataforma ponta-a-ponta que unifica a experiência de compra premium do cliente final com um sistema robusto de gestão de operações para os donos e entregadores. O projeto possui um design *dark premium*, remetendo à identidade clássica de tabacarias e adegas de luxo.
+O **Adega Express** é uma loja virtual demonstrativa voltada **exclusivamente à comercialização de bebidas não alcoólicas** para consumo doméstico, reuniões familiares e pequenos eventos, atendendo às 4 categorias oficiais:
+- **Água** (com e sem gás)
+- **Sucos** (integrais e néctares)
+- **Refrigerantes**
+- **Chás** (prontos para consumo)
 
-O sistema é dividido em duas partes operando em um monorepo:
-- **Frontend:** Interface Web ultrarrápida construída com **Next.js 15** e Tailwind CSS v4.
-- **Backend:** API RESTful robusta desenvolvida em **Node.js** com TypeScript, Express e **Prisma ORM** (MySQL).
+> **Restrições e Delimitações de Escopo:**
+> - **Sem bebidas alcoólicas ou tabacaria:** O sistema bloqueia, tanto na interface quanto na API/banco de dados, o cadastro e a exibição de produtos alcoólicos (`abv_percent > 0`) ou itens de tabacaria. Não há exigência de verificação de maioridade (18+).
+> - **Pagamento Demonstrativo (Sem Cobrança Real):** No checkout, o cliente escolhe entre **PIX** ou **Cartão** apenas como modalidade demonstrativa registrada no pedido. **Não há geração de QR Code bancário, código copia-e-cola, gateway financeiro ou cobrança real.** A confirmação do pagamento (`PAGO`) é registrada manualmente por um **Atendente** ou **Administrador** com auditoria de responsável, data/hora e referência demonstrativa.
+> - **Sem Rastreamento GPS em Tempo Real (RF19 — Won't):** O acompanhamento da entrega é realizado por mudança de status (`PENDENTE` → `CONFIRMADO` → `SEPARADO` → `EM_ROTA` → `ENTREGUE`).
 
-## ✨ Principais Funcionalidades
+---
 
-### 🛒 Para o Cliente (E-commerce)
-- **Trava de Idade Rigorosa:** Verificação de maioridade baseada na Data de Nascimento no momento do cadastro (compliance legal).
-- **Catálogo Premium:** Divisão inteligente por categorias (Cervejas, Destilados, Vinhos, Tabacaria e Sem Álcool).
-- **Checkout Completo:** Sistema de carrinho de compras fluido, com aplicação dinâmica de cupons de desconto.
-- **Simulação de Pagamento:** Fluxo de finalização integrado suportando Cartão de Crédito e simulação realista de **PIX (QR Code & Copia-e-Cola)**.
-- **Painel de Perfil:** Gerenciamento de múltiplos endereços de entrega e visualização do histórico e status de pedidos.
+## 👥 Perfis de Usuário e Permissões
 
-### 👔 Para o Dono (Painel Administrador)
-- **Mesa de Operações:** Dashboard centralizado acessível por usuários com permissão `ADMINISTRADOR`.
-- **Gestão de Pedidos:** Acompanhamento do ciclo de vida completo do pedido (Aguardando Pagamento -> Em Separação -> Saiu para Entrega -> Entregue).
-- **Despacho Logístico:** Atribuição manual de pedidos aos entregadores disponíveis.
-- **Gestão de Catálogo e Estoque:** Visualização de todos os produtos, preços e disponibilidade.
+Toda autorização é validada no backend via JWT (`HttpOnly` cookie + header `Authorization: Bearer`) e conferida no banco a cada requisição:
 
-### 🛵 Para o Motoboy (Painel do Entregador)
-- **Interface Mobile-First:** Tela simplificada com botões gigantes e design focado para uso na rua (celular).
-- **Aceite de Corridas:** Entregador visualiza os pedidos despachados para ele.
-- **Mudança de Status Rápida:** Botões de ação para registrar "Saiu para Entrega" e, posteriormente, "Pedido Entregue", atualizando em tempo real para o administrador e para o cliente.
+| Perfil | Responsabilidades e Funcionalidades |
+| :--- | :--- |
+| **Visitante** | Consultar o catálogo público de bebidas não alcoólicas, buscar/filtrar produtos (nome, categoria, marca, volume e faixa de preço), visualizar produtos "Em Falta" e realizar cadastro como Cliente. |
+| **Cliente** | Gerenciar carrinho, aplicar cupons válidos, gerenciar múltiplos endereços (criar, editar, definir padrão e arquivar), realizar pedidos com checkout demonstrativo, acompanhar etapas do pedido e cancelar pedidos `PENDENTE`. |
+| **Atendente** | Consultar pedidos, registrar confirmação manual do pagamento demonstrativo (`PAGO` / `ESTORNADO`), avançar status para `CONFIRMADO` e `SEPARADO` e atribuir entregadores. |
+| **Entregador** | Consultar exclusivamente as entregas atribuídas ao seu perfil e atualizar o status para `SAIU_PARA_ENTREGA` (sincronizando pedido para `EM_ROTA`) e `ENTREGUE` (permitido somente quando o pagamento está `PAGO`). |
+| **Administrador** | Possui todas as permissões operacionais + gestão completa de produtos, categorias, cupons de desconto, movimentações manuais de estoque (entrada/saída com histórico auditável), gestão de equipe (`ATENDENTE`, `ENTREGADOR`, `ADMINISTRADOR`) e relatórios de vendas por período. |
+
+---
+
+## ⚙️ Regras de Negócio Implementadas (RN01 a RN13)
+
+1. **Baixa Atômica de Estoque (RN01 / RN02):** Ao criar um pedido (`PENDENTE`), o estoque é debitado atomicamente em transação serializável no MySQL.
+2. **Produtos Sem Estoque (RF02 / RN03):** Produtos com `stock_quantity = 0` permanecem visíveis no catálogo com selo **"Em Falta"** e têm a adição ao carrinho e compra bloqueadas no frontend e no backend.
+3. **Confirmação Manual de Pagamento antes da Confirmação do Pedido (RN08 / RN12):** Um pedido só pode avançar para `CONFIRMADO` ou `SEPARADO` após o pagamento demonstrativo ser confirmado como `PAGO` por Atendente ou Administrador, gerando registro em `payment_records` (responsável, data/hora e referência).
+4. **Expiração Automática em 30 Minutos (RN07 / RF18):** Pedidos `PENDENTE` cujo pagamento não seja confirmado em até **30 minutos** são cancelados automaticamente, devolvendo os itens ao estoque na mesma transação com registro em `stock_movements`.
+5. **Devolução Idempotente de Estoque (RN07 / RF15):** O cancelamento (manual ou automático por expiração) devolve o estoque uma única vez de forma idempotente.
+6. **Geração Automática de Entrega (RN05):** Quando o pedido avança para `SEPARADO`, o sistema cria automaticamente o registro de entrega com status `AGUARDANDO`.
+7. **Sincronização Entrega ↔ Pedido (RN06 / RN09):** Quando o entregador registra `SAIU_PARA_ENTREGA`, o pedido passa para `EM_ROTA`. Quando registra `ENTREGUE`, o pedido passa para `ENTREGUE` (bloqueado caso `payment_status !== 'PAGO'`).
+8. **Proteção de Histórico (RN10 / RN11):** Pedidos preservam snapshots imutáveis de endereço, preços e nomes dos itens. Endereços em uso são arquivados logicamente e produtos com histórico são inativados sem exclusão física.
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-### Frontend
-- [Next.js 15](https://nextjs.org/) (App Router & React 19)
-- [Tailwind CSS v4](https://tailwindcss.com/) (Estilização Utilitária)
-- [Framer Motion](https://www.framer.com/motion/) (Animações Fluídas)
-- [Lucide React](https://lucide.dev/) (Ícones)
-- [Zod](https://zod.dev/) & [React Hook Form](https://react-hook-form.com/) (Validação Client-side)
+### Frontend (`adega-express-frontend`)
+- **Next.js 16** (App Router) & **React 19**
+- **TypeScript** (Modo Estrito)
+- **Tailwind CSS v4**
+- **Lucide React** & **React Hot Toast**
 
-### Backend
-- [Node.js](https://nodejs.org/) & [Express](https://expressjs.com/) (API)
-- [TypeScript](https://www.typescriptlang.org/) (Tipagem Segura)
-- [Prisma ORM](https://www.prisma.io/) (Banco de Dados)
-- [MySQL](https://www.mysql.com/) (Armazenamento Relacional)
-- [JSON Web Tokens (JWT)](https://jwt.io/) (Autenticação Stateless via Cookies HTTP-Only)
-- [Bcryptjs](https://www.npmjs.com/package/bcryptjs) (Criptografia de Senhas)
+### Backend (`adega-express-backend`)
+- **Node.js** & **Express 4**
+- **TypeScript** (Modo Estrito)
+- **Prisma ORM 5** & **MySQL 8**
+- **Zod** (Validação de schemas e geração de contrato OpenAPI 3.0 / Swagger em `/docs`)
+- **JWT (`jsonwebtoken`)** (Sessão via cookie `HttpOnly` `adega_token` + `Bearer`, controle de `token_version` e proteção CSRF por `Origin`/`Referer`)
+- **Bcrypt** (Hash seguro de senhas com limite de 72 bytes UTF-8)
 
 ---
 
-## 🚀 Como Rodar o Projeto Localmente
-
-Siga os passos abaixo para testar o projeto na sua máquina:
+## 🚀 Como Executar o Projeto Localmente
 
 ### 1. Pré-requisitos
-- Node.js (v18+)
-- MySQL rodando localmente (ou via Docker)
-- Git
+- **Node.js** v20.19+ (ou v22/v24)
+- **MySQL 8.0** ativo localmente
 
-### 2. Clonando o Repositório
-```bash
-git clone https://github.com/gustavinzx/AdegaExpress.git
-cd AdegaExpress
-```
+### 2. Configurando e Iniciando o Backend (`http://localhost:3001`)
 
-### 3. Configurando o Backend
-```bash
+```powershell
 cd adega-express-backend
 
-# Instale as dependências
+# Instalar dependências
 npm install
 
-# Crie e preencha suas variáveis de ambiente baseado no exemplo
-cp .env.example .env
+# Gerar arquivo .env inicial (se não existir)
+npm run setup
+```
 
-# Configure a URL do seu MySQL no arquivo .env gerado, exemplo:
-# DATABASE_URL="mysql://root:suasenha@localhost:3306/adega_express"
+Edite o arquivo `adega-express-backend/.env` com as credenciais do seu MySQL local:
+```dotenv
+PORT=3001
+NODE_ENV=development
+DATABASE_URL="mysql://root:SUA_SENHA@127.0.0.1:3306/adega_express"
+JWT_SECRET="SEU_SEGREDO_ALEATORIO_COM_PELO_MENOS_32_CARACTERES"
+JWT_EXPIRES_IN="8h"
+CORS_ORIGINS="http://localhost:3000"
+SHIPPING_FEE=5.00
+DELIVERY_CITIES="São Paulo"
+DELIVERY_STATE=SP
+ADMIN_NAME="Administrador Adega Express"
+ADMIN_EMAIL="admin@adegaexpress.com.br"
+ADMIN_PASSWORD="AdminPassword123!"
+```
 
-# Rode as migrações para criar as tabelas no banco de dados
-npx prisma migrate dev
+Execute as migrações e popule o banco de demonstração (bebidas não alcoólicas):
+```powershell
+npm run prisma:generate
+npm run prisma:deploy
+npm run seed
+npm run seed:demo
 
-# Popule o banco com dados de exemplo (Cervejas, Destilados, etc.)
-npx ts-node seed_full_catalog.ts
-
-# Inicie o servidor
+# Iniciar servidor de desenvolvimento na porta 3001
 npm run dev
 ```
-O servidor da API estará rodando em `http://localhost:3001`.
+- **API Base:** `http://localhost:3001`
+- **Swagger UI (Documentação Interativa):** `http://localhost:3001/docs`
 
-### 4. Configurando o Frontend
-Abra um novo terminal e navegue até a pasta do frontend:
-```bash
+### 3. Configurando e Iniciando o Frontend (`http://localhost:3000`)
+
+Em outro terminal:
+```powershell
 cd adega-express-frontend
 
-# Instale as dependências
+# Instalar dependências
 npm install
 
-# Crie o arquivo de ambiente apontando para a API local
+# Criar .env.local (opcional, padrão já aponta para http://localhost:3001)
 cp .env.example .env.local
 
-# Inicie a aplicação
+# Iniciar servidor Next.js na porta 3000
 npm run dev
 ```
-O site estará acessível em `http://localhost:3000`.
+Acesse **`http://localhost:3000`** no navegador.
 
 ---
 
-## 🛡️ Segurança e Decisões de Arquitetura
+## 🧪 Como Executar os Testes Automatizados
 
-- **Autenticação Segura:** Tokens JWT não ficam expostos em `localStorage`. A aplicação utiliza o padrão `httpOnly` para gravar os cookies no navegador, neutralizando ataques de XSS (Cross-Site Scripting).
-- **Idempotência no Carrinho:** Validações rigorosas no backend previnem cobranças duplicadas e manipulações de preço no client-side durante o checkout.
-- **Layout Furtivo:** O botão de acesso ao Painel de Administração fica escondido no rodapé e é reativo à credencial do banco de dados (só é montado no HTML se o usuário for `ADMINISTRADOR`).
+### Backend (Testes Unitários, Typecheck, Lint, Build e Integração com MySQL)
+```powershell
+cd adega-express-backend
+
+# Verificação completa (Prisma generate + TypeScript + ESLint + 12 Testes Unitários + Build)
+npm run check
+
+# Testes de Integração HTTP + Migrações + Seeds em instância MySQL isolada (24 cenários)
+npm run test:integration
+```
+
+### Frontend (TypeScript, ESLint e Build de Produção)
+```powershell
+cd adega-express-frontend
+
+npx tsc --noEmit
+npm run lint
+npm run build
+```
 
 ---
 
-## 👨‍💻 Desenvolvido por
-**Gustavo** (gustavinzx)
+## 📂 Estrutura do Repositório
 
-Um projeto criado com amor à boa interface, engenharia de software sólida e respeito à sede da sexta-feira! 🥃
+- [`adega-express-backend/`](./adega-express-backend): API RESTful Express + Prisma + MySQL, migrações não destrutivas, seeds não alcoólicos, documentação OpenAPI e suíte de testes automatizados.
+- [`adega-express-frontend/`](./adega-express-frontend): Aplicação web Next.js com catálogo público, filtros, carrinho com cotação no servidor, checkout demonstrativo, área do cliente, mesa de operações (Atendente/Admin) e painel do entregador.

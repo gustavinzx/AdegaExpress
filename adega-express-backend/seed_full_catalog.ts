@@ -3,126 +3,228 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Iniciando inclusão do catálogo completo enviado...');
+  console.log('Iniciando atualização do catálogo demonstrativo de bebidas não alcoólicas...');
 
-  // 1. Garantir que as categorias existem
-  const catTabacaria = await prisma.category.upsert({
-    where: { name: 'Tabacaria' },
-    update: {},
-    create: { name: 'Tabacaria', description: 'Fumos, sedas, isqueiros e materiais' }
+  // Desativar categorias e produtos antigos fora do escopo, preservando histórico
+  await prisma.category.updateMany({
+    where: { name: { notIn: ['Água', 'Sucos', 'Refrigerantes', 'Chás'] } },
+    data: { active: false },
   });
 
-  const catCervejas = await prisma.category.upsert({
-    where: { name: 'Cervejas' },
-    update: {},
-    create: { name: 'Cervejas', description: 'Cervejas em lata, long neck e litrão' }
+  await prisma.product.updateMany({
+    where: { abv_percent: { gt: 0 } },
+    data: { active: false },
   });
 
-  const itemsTabacaria = [
-    { name: 'Fumo Trevo', price: 7.00 },
-    { name: 'Fumo Maratá', price: 5.00 }, // ? no original
-    { name: 'Papel do Trevo', price: 3.00 },
-    { name: 'Fumo Super Bom', price: 5.00 }, // ?? no original
-    { name: 'Seda La Revolucion', price: 16.00 },
-    { name: 'Seda Papelito', price: 4.00 },
-    { name: 'Isqueiro Pequeno', price: 4.00 },
-    { name: 'Isqueiro Grande', price: 6.00 },
-    { name: 'Caixinha de Seda Zomo Verde/Marrom', price: 5.00 },
-    { name: 'Seda Smoking', price: 5.50 },
-    { name: 'Tabaco Nature Picado', price: 2.00 },
-    { name: 'Caixa do Tabaco Nature', price: 13.00 },
-    { name: 'Tabaco Selva Picado', price: 1.50 },
-    { name: 'Caixa do Tabaco Selva', price: 12.00 },
-    { name: 'Caixa Tabaco Selva Ice', price: 16.00 },
-    { name: 'Tabaco Grande', price: 1.00 },
-    { name: 'Tabaco Ice Grande', price: 1.50 },
+  const categoriesData = [
+    { name: 'Água', description: 'Águas minerais naturais, com gás e saborizadas' },
+    { name: 'Sucos', description: 'Sucos integrais, néctares e bebidas de frutas naturais' },
+    { name: 'Refrigerantes', description: 'Refrigerantes tradicionais, zero açúcar e tônicas' },
+    { name: 'Chás', description: 'Chás gelados prontos para beber e infusões naturais' },
   ];
 
-  const itemsCervejas = [
-    // Unidades / Latas 350ml
-    { name: 'Amstel Lata 350ml', price: 3.50 },
-    { name: 'Antarctica Lata 350ml', price: 3.50 },
-    { name: 'Antarctica Original Lata 350ml', price: 5.00 },
-    { name: 'Brahma Lata 350ml', price: 4.00 },
-    { name: 'Itaipava Lata 350ml', price: 3.00 },
-    { name: 'Spaten Lata 350ml', price: 4.00 },
-    { name: 'Heineken Lata 350ml', price: 5.00 },
-    { name: 'Kaiser Lata 350ml', price: 3.50 },
-    
-    // 330ml Garrafa de Vidro (Long Neck)
-    { name: 'Heineken Garrafa 330ml', price: 8.00 },
-    { name: 'Spaten Garrafa 330ml', price: 8.00 },
-    { name: 'Eisenbahn Garrafa 330ml', price: 7.00 },
-    { name: 'Corona Garrafa 330ml', price: 9.00 },
-    { name: 'Stella Artois Garrafa 330ml', price: 8.00 },
-    { name: 'Budweiser Garrafa 330ml', price: 8.00 },
+  const categoryMap = new Map<string, number>();
+  for (const cat of categoriesData) {
+    const saved = await prisma.category.upsert({
+      where: { name: cat.name },
+      update: { description: cat.description, active: true },
+      create: { name: cat.name, description: cat.description, active: true },
+    });
+    categoryMap.set(cat.name, saved.id);
+  }
 
-    // Sem Glúten
-    { name: 'Stella Gold (Sem Glúten)', price: 9.00 },
-    { name: 'Michelob Ultra (Sem Glúten)', price: 9.00 }, // Presumo que Michelloti era Michelob
+  const catalogItems = [
+    // Água
+    {
+      cat: 'Água',
+      name: 'Água Mineral Sem Gás 500ml',
+      brand: 'Minalba',
+      price: '2.50',
+      volume_ml: 500,
+      stock: 150,
+      description: 'Água mineral natural sem gás em garrafa individual de 500ml.',
+    },
+    {
+      cat: 'Água',
+      name: 'Água Mineral Com Gás 500ml',
+      brand: 'Minalba',
+      price: '3.00',
+      volume_ml: 500,
+      stock: 120,
+      description: 'Água mineral natural gaseificada refrescante de 500ml.',
+    },
+    {
+      cat: 'Água',
+      name: 'Água Mineral Sem Gás 1,5L',
+      brand: 'Bonafont',
+      price: '4.50',
+      volume_ml: 1500,
+      stock: 80,
+      description: 'Garrafa familiar de água mineral leve sem gás 1,5 litro.',
+    },
+    {
+      cat: 'Água',
+      name: 'Água Tônica Tradicional Lata 350ml',
+      brand: 'Antarctica',
+      price: '4.50',
+      volume_ml: 350,
+      stock: 60,
+      description: 'Água tônica gaseificada não alcoólica com quinino.',
+    },
 
-    // Sem Álcool
-    { name: 'Heineken Zero (Sem Álcool)', price: 9.00 },
-    { name: 'Corona Zero (Sem Álcool)', price: 9.00 },
+    // Sucos
+    {
+      cat: 'Sucos',
+      name: 'Suco Integral de Uva Tinto 1L',
+      brand: 'Aurora',
+      price: '16.90',
+      volume_ml: 1000,
+      stock: 45,
+      description: 'Suco 100% uva integral sem adição de açúcares ou conservantes.',
+    },
+    {
+      cat: 'Sucos',
+      name: 'Suco Integral de Laranja 1L',
+      brand: 'Natural One',
+      price: '14.50',
+      volume_ml: 1000,
+      stock: 50,
+      description: 'Suco de laranja 100% natural espremido e pasteurizado.',
+    },
+    {
+      cat: 'Sucos',
+      name: 'Néctar de Pêssego 1L',
+      brand: 'Del Valle',
+      price: '8.50',
+      volume_ml: 1000,
+      stock: 65,
+      description: 'Bebida de fruta sabor pêssego pronta para consumo.',
+    },
+    {
+      cat: 'Sucos',
+      name: 'Suco de Maçã Integral 300ml',
+      brand: 'Natural One',
+      price: '6.00',
+      volume_ml: 300,
+      stock: 40,
+      description: 'Suco 100% maçã sem adição de açúcar em embalagem individual.',
+    },
 
-    // Shots
-    { name: 'Shot Heineken', price: 6.00 },
-    { name: 'Shot Corona', price: 6.00 },
+    // Refrigerantes
+    {
+      cat: 'Refrigerantes',
+      name: 'Coca-Cola Original Lata 350ml',
+      brand: 'Coca-Cola',
+      price: '4.50',
+      volume_ml: 350,
+      stock: 200,
+      description: 'Refrigerante de cola tradicional em lata de 350ml.',
+    },
+    {
+      cat: 'Refrigerantes',
+      name: 'Coca-Cola Original PET 2L',
+      brand: 'Coca-Cola',
+      price: '11.00',
+      volume_ml: 2000,
+      stock: 90,
+      description: 'Refrigerante de cola tradicional em embalagem familiar de 2 litros.',
+    },
+    {
+      cat: 'Refrigerantes',
+      name: 'Guaraná Antarctica Lata 350ml',
+      brand: 'Antarctica',
+      price: '4.00',
+      volume_ml: 350,
+      stock: 180,
+      description: 'O autêntico refrigerante de guaraná brasileiro em lata de 350ml.',
+    },
+    {
+      cat: 'Refrigerantes',
+      name: 'Guaraná Antarctica PET 2L',
+      brand: 'Antarctica',
+      price: '9.50',
+      volume_ml: 2000,
+      stock: 75,
+      description: 'Refrigerante de guaraná em garrafa de 2 litros.',
+    },
+    {
+      cat: 'Refrigerantes',
+      name: 'Sprite Limão Sem Açúcar Lata 350ml',
+      brand: 'Sprite',
+      price: '4.20',
+      volume_ml: 350,
+      stock: 0,
+      description: 'Refrigerante sabor limão zero açúcar (item demonstrativo sem estoque).',
+    },
 
-    // Litrões
-    { name: 'Brahma Litrão 1L', price: 14.00 },
-    { name: 'Antarctica Litrão 1L', price: 14.00 },
+    // Chás
+    {
+      cat: 'Chás',
+      name: 'Chá Mate Tostado Com Limão 450ml',
+      brand: 'Matte Leão',
+      price: '5.50',
+      volume_ml: 450,
+      stock: 70,
+      description: 'Chá mate natural com toque de limão, pronto para beber.',
+    },
+    {
+      cat: 'Chás',
+      name: 'Chá Preto Gelado Sabor Pêssego 1,5L',
+      brand: 'Fuze Tea',
+      price: '9.90',
+      volume_ml: 1500,
+      stock: 40,
+      description: 'Chá preto gelado sabor pêssego em garrafa de 1,5 litro.',
+    },
+    {
+      cat: 'Chás',
+      name: 'Chá Verde Com Hortelã e Limão Lata 290ml',
+      brand: 'Feel Good',
+      price: '6.50',
+      volume_ml: 290,
+      stock: 55,
+      description: 'Chá verde zero calorias rico em antioxidantes.',
+    },
   ];
 
-  for (const item of itemsTabacaria) {
-    const exists = await prisma.product.findFirst({ where: { name: item.name } });
+  for (const item of catalogItems) {
+    const category_id = categoryMap.get(item.cat)!;
+    const exists = await prisma.product.findFirst({
+      where: { name: item.name, brand: item.brand },
+    });
     if (!exists) {
       await prisma.product.create({
         data: {
           name: item.name,
-          category_id: catTabacaria.id,
+          brand: item.brand,
+          category_id,
           price: item.price,
-          brand: 'Adega Express',
-          volume_ml: 0,
+          volume_ml: item.volume_ml,
           abv_percent: 0,
-          stock_quantity: 100,
-          active: true
-        }
+          stock_quantity: item.stock,
+          description: item.description,
+          active: true,
+        },
       });
-      console.log(`Criado Tabacaria: ${item.name} - R$ ${item.price}`);
+      console.log(`Criado: ${item.name} (${item.cat})`);
     } else {
-        await prisma.product.update({
-            where: { id: exists.id },
-            data: { price: item.price }
-        });
-    }
-  }
-
-  for (const item of itemsCervejas) {
-    const exists = await prisma.product.findFirst({ where: { name: item.name } });
-    if (!exists) {
-      await prisma.product.create({
+      await prisma.product.update({
+        where: { id: exists.id },
         data: {
-          name: item.name,
-          category_id: catCervejas.id,
+          category_id,
           price: item.price,
-          brand: 'Diversas',
-          volume_ml: item.name.includes('350ml') ? 350 : item.name.includes('330ml') ? 330 : item.name.includes('Litrão') ? 1000 : 0,
-          abv_percent: 5.0,
-          stock_quantity: 100,
-          active: true
-        }
+          volume_ml: item.volume_ml,
+          abv_percent: 0,
+          description: item.description,
+          active: true,
+        },
       });
-      console.log(`Criado Cerveja: ${item.name} - R$ ${item.price}`);
-    } else {
-        await prisma.product.update({
-            where: { id: exists.id },
-            data: { price: item.price }
-        });
     }
   }
 
-  console.log('Todos os itens solicitados foram inseridos ou atualizados no catálogo!');
+  console.log('Catálogo não alcoólico atualizado com sucesso!');
 }
 
-main().catch(console.error).finally(() => prisma.$disconnect());
+main()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

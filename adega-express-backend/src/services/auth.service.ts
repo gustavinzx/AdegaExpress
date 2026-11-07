@@ -5,7 +5,6 @@ import { Role } from '@prisma/client';
 import prisma from './prisma.service';
 import { config } from '../config';
 import { AppError } from '../lib/errors';
-import { isAdult } from '../lib/business';
 import * as schemas from '../schemas';
 
 export const userSelect = {
@@ -20,13 +19,17 @@ export const userSelect = {
 export type RegisterInput = z.infer<typeof schemas.register>;
 export type LoginInput = z.infer<typeof schemas.login>;
 export async function register(input: RegisterInput, role: Role = 'CLIENTE') {
-  const birthDate = new Date(input.birth_date + 'T00:00:00Z');
-  if (!isAdult(birthDate)) {
-    throw new AppError(400, 'É necessário ter 18 anos ou mais.');
-  }
+  const birthDate = input.birth_date ? new Date(input.birth_date + 'T00:00:00Z') : null;
   const password_hash = await bcrypt.hash(input.password, 12);
   const user = await prisma.user.create({
-    data: { name: input.name, email: input.email, password_hash, birth_date: birthDate, role, cpf: input.cpf },
+    data: {
+      name: input.name,
+      email: input.email,
+      password_hash,
+      birth_date: birthDate,
+      role,
+      cpf: input.cpf,
+    },
     select: userSelect,
   });
   if (role !== 'CLIENTE') {

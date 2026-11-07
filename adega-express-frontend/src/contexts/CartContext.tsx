@@ -3,6 +3,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Product } from '../types';
+import toast from 'react-hot-toast';
 
 export interface CartItem {
   product: Product;
@@ -11,7 +12,7 @@ export interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number) => void;
+  addItem: (product: Product, quantity?: number) => boolean;
   removeItem: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
@@ -26,13 +27,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('cart');
-    if (stored) {
-      try {
-        setItems(JSON.parse(stored));
-      } catch (e) {}
-    }
-    setIsLoaded(true);
+    const loadStoredCart = async () => {
+      await Promise.resolve();
+      const stored = localStorage.getItem('cart');
+      if (stored) {
+        try {
+          const parsed: CartItem[] = JSON.parse(stored);
+          setItems(
+            parsed.filter(
+              (i) => i.product && i.product.stock_quantity > 0 && i.quantity > 0,
+            ),
+          );
+        } catch {
+          setItems([]);
+        }
+      }
+      setIsLoaded(true);
+    };
+    void loadStoredCart();
   }, []);
 
   useEffect(() => {
@@ -41,18 +53,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  const addItem = (product: Product, quantity = 1) => {
+  const addItem = (product: Product, quantity = 1): boolean => {
+    if (!product.in_stock || product.stock_quantity <= 0) {
+      toast.error('Este produto está em falta e não pode ser adicionado ao carrinho.');
+      return false;
+    }
+    if (quantity <= 0 || !Number.isInteger(quantity)) {
+      toast.error('Informe uma quantidade inteira positiva.');
+      return false;
+    }
+
+    let added = false;
     setItems((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
+      const currentQty = existing ? existing.quantity : 0;
+      const targetQty = currentQty + quantity;
+
+      if (targetQty > product.stock_quantity) {
+        toast.error(
+          `Estoque insuficiente para ${product.name}. Disponível: ${product.stock_quantity} un.`,
+        );
+        return prev;
+      }
+
+      added = true;
       if (existing) {
         return prev.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
+          item.product.id === product.id ? { ...item, product, quantity: targetQty } : item,
         );
       }
       return [...prev, { product, quantity }];
     });
+    return added;
   };
 
   const removeItem = (productId: number) => {
@@ -64,10 +96,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem(productId);
       return;
     }
+    if (!Number.isInteger(quantity)) {
+      return;
+    }
     setItems((prev) =>
-      prev.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
-      )
+      prev.map((item) => {
+        if (item.product.id !== productId) return item;
+        if (quantity > item.product.stock_quantity) {
+          toast.error(
+            `Quantidade máxima disponível em estoque: ${item.product.stock_quantity} un.`,
+          );
+          return { ...item, quantity: item.product.stock_quantity };
+        }
+        return { ...item, quantity };
+      }),
     );
   };
 
@@ -75,11 +117,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems([]);
   };
 
-  const total = items.reduce((acc, item) => acc + (parseFloat(item.product.price) * item.quantity), 0);
+  const total = items.reduce(
+    (acc, item) => acc + parseFloat(item.product.price) * item.quantity,
+    0,
+  );
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, total, itemCount }}>
+    <CartContext.Provider
+      value={{ items, addItem, removeItem, updateQuantity, clearCart, total, itemCount }}
+    >
       {children}
     </CartContext.Provider>
   );

@@ -3,12 +3,13 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User } from '../types';
+import { api } from '../lib/api';
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (token: string, user: User) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -21,19 +22,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    let active = true;
+    const initAuth = async () => {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
 
-    if (storedToken && storedUser) {
-      try {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+      if (storedToken && storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser) as User;
+          if (active) {
+            setToken(storedToken);
+            setUser(parsedUser);
+          }
+        } catch {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
       }
-    }
-    setIsLoading(false);
+
+      if (storedToken) {
+        try {
+          const freshUser = await api.get<User>('/auth/me');
+          if (active) {
+            setUser(freshUser);
+            localStorage.setItem('user', JSON.stringify(freshUser));
+          }
+        } catch {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          if (active) {
+            setToken(null);
+            setUser(null);
+          }
+        }
+      }
+
+      if (active) {
+        setIsLoading(false);
+      }
+    };
+
+    void initAuth();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const login = (newToken: string, newUser: User) => {
@@ -43,11 +75,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(newUser);
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setToken(null);
-    setUser(null);
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout', {});
+    } catch {
+      // Ignore network/token errors during logout
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setToken(null);
+      setUser(null);
+    }
   };
 
   return (
