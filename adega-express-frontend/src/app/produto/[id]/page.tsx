@@ -7,7 +7,16 @@ import ProductArtwork from '@/components/ProductArtwork';
 import { api } from '@/lib/api';
 import { Product } from '@/types';
 import { useCart } from '@/contexts/CartContext';
-import { ShoppingCart, ArrowLeft, Plus, Minus } from 'lucide-react';
+import {
+  ShoppingBag,
+  ArrowLeft,
+  ShieldCheck,
+  Truck,
+  Sparkles,
+  Plus,
+  Minus,
+  PackageCheck,
+} from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
@@ -35,10 +44,16 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white">
+      <div className="min-h-screen bg-[#0e0c0a] text-[#f4efe6]">
         <Navbar />
-        <div className="max-w-5xl mx-auto px-4 py-16 text-center text-xs font-bold uppercase tracking-widest text-zinc-400">
-          Carregando produto...
+        <div className="max-w-6xl mx-auto px-4 py-16 grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-6 h-[480px] rounded-3xl bg-[#161310] border border-[#c9a256]/15 animate-pulse" />
+          <div className="lg:col-span-6 space-y-6 py-6">
+            <div className="h-4 w-32 bg-[#161310] rounded animate-pulse" />
+            <div className="h-12 w-3/4 bg-[#161310] rounded animate-pulse" />
+            <div className="h-24 w-full bg-[#161310] rounded animate-pulse" />
+            <div className="h-16 w-48 bg-[#161310] rounded animate-pulse" />
+          </div>
         </div>
       </div>
     );
@@ -46,15 +61,18 @@ export default function ProductDetail() {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white">
+      <div className="min-h-screen bg-[#0e0c0a] text-[#f4efe6]">
         <Navbar />
-        <div className="max-w-3xl mx-auto px-4 py-24 text-center space-y-4">
-          <h1 className="text-2xl font-bold">Produto não encontrado</h1>
+        <div className="max-w-3xl mx-auto px-4 py-24 text-center space-y-6">
+          <h1 className="font-serif text-4xl font-semibold">Rótulo não encontrado</h1>
+          <p className="text-sm text-[#9e9589]">
+            O produto solicitado não está disponível no catálogo ativo.
+          </p>
           <Link
             href="/#catalogo"
-            className="inline-flex items-center gap-2 h-10 px-6 rounded bg-amber-600 text-black font-bold text-xs uppercase tracking-wider"
+            className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-[#c9a256] text-[#0e0c0a] font-semibold text-xs uppercase tracking-[0.16em]"
           >
-            <ArrowLeft size={15} /> Voltar ao Catálogo
+            <ArrowLeft size={15} /> Voltar à Vitrine
           </Link>
         </div>
       </div>
@@ -68,25 +86,40 @@ export default function ProductDetail() {
     const safeQty = Math.min(Math.max(1, quantity), product.stock_quantity);
     const added = addItem(product, safeQty);
     if (added) {
-      toast.success(`${safeQty}x ${product.name} adicionado ao carrinho!`);
+      toast.success(`${safeQty}x ${product.name} adicionado à sacola!`);
     }
   };
 
   return (
-    <div className="bg-zinc-950 min-h-screen text-white font-sans">
+    <div className="bg-[#0e0c0a] min-h-screen text-[#f4efe6] font-sans">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-amber-500 mb-8 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#9e9589] hover:text-[#c9a256] mb-8 transition-colors cursor-pointer"
         >
-          <ArrowLeft size={15} /> Voltar
+          <ArrowLeft size={15} /> Voltar ao Catálogo
         </button>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-zinc-900 border border-zinc-800 rounded-xl p-6 sm:p-10">
-          {/* Image */}
-          <div className="rounded-lg bg-zinc-950 border border-zinc-800 p-8 flex items-center justify-center min-h-[360px] group">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+          {/* Left Studio Showcase */}
+          <div className="lg:col-span-6 rounded-3xl border border-[#c9a256]/20 bg-gradient-to-b from-[#1b1612] to-[#120f0c] p-10 flex flex-col items-center justify-center relative overflow-hidden min-h-[440px] group">
+            <div className="absolute top-5 left-5 right-5 flex items-center justify-between">
+              <span className="rounded-full border border-[#c9a256]/25 bg-[#0e0c0a]/80 px-3.5 py-1 text-xs font-mono text-[#c9a256]">
+                {product.category?.name || 'Bebida Não Alcoólica'}
+              </span>
+              {outOfStock ? (
+                <span className="rounded-full bg-red-950/90 border border-red-500/40 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-red-200">
+                  Em Falta (RN03)
+                </span>
+              ) : (
+                <span className="rounded-full bg-emerald-950/80 border border-emerald-500/30 px-3.5 py-1 text-xs font-mono text-emerald-300">
+                  {product.stock_quantity} un. disponíveis
+                </span>
+              )}
+            </div>
+
             <ProductArtwork
               name={product.name}
               brand={product.brand}
@@ -94,95 +127,149 @@ export default function ProductDetail() {
               volumeMl={product.volume_ml}
               imageUrl={product.image_url}
               size="lg"
-              className="w-full h-72"
+              className="w-full h-80 my-4"
             />
           </div>
 
-          {/* Info */}
-          <div className="flex flex-col justify-between space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-widest text-amber-500">
-                  {product.brand} • {product.volume_ml} mL
+          {/* Right Specifications & Purchase Console */}
+          <div className="lg:col-span-6 rounded-3xl border border-[#c9a256]/20 bg-[#14110e] p-8 sm:p-10 flex flex-col justify-between space-y-8">
+            <div className="space-y-5">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold uppercase tracking-[0.22em] text-[#c9a256]">
+                  {product.brand}
                 </span>
-                <span
-                  className={`text-xs font-bold px-2.5 py-0.5 rounded ${
-                    outOfStock
-                      ? 'bg-red-950 text-red-300 border border-red-700/40'
-                      : 'bg-emerald-950 text-emerald-300 border border-emerald-700/40'
-                  }`}
-                >
-                  {outOfStock ? 'Em Falta' : `${product.stock_quantity} em estoque`}
+                <span className="text-[#c9a256]/30">•</span>
+                <span className="text-xs font-mono text-[#9e9589]">
+                  {product.volume_ml} mL • 0,0% Álcool
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-serif font-black text-white">
+              <h1 className="font-serif text-3xl sm:text-5xl font-semibold text-[#f4efe6] leading-tight">
                 {product.name}
               </h1>
 
-              {product.description && (
-                <p className="text-sm text-zinc-400 leading-relaxed">{product.description}</p>
-              )}
+              <p className="text-sm sm:text-base text-[#9e9589] leading-relaxed">
+                {product.description ||
+                  'Bebida não alcoólica selecionada, conservada em temperatura ideal e pronta para consumo individual, familiar ou recepções.'}
+              </p>
 
-              <div className="pt-2">
-                <span className="block text-[10px] uppercase tracking-wider text-zinc-400">
-                  Preço Unitário
-                </span>
-                <span className="text-3xl font-black text-amber-500">
-                  R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}
-                </span>
+              {/* Price & Stock Box */}
+              <div className="rounded-2xl border border-[#c9a256]/15 bg-[#0e0c0a] p-5 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <span className="block text-[10px] uppercase tracking-[0.18em] text-[#9e9589]">
+                    Preço Unitário
+                  </span>
+                  <span className="font-mono text-3xl font-bold text-[#f4efe6]">
+                    R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="block text-[10px] uppercase tracking-[0.18em] text-[#9e9589]">
+                    Disponibilidade Imediata
+                  </span>
+                  <span
+                    className={`text-xs font-semibold ${
+                      outOfStock ? 'text-red-400' : 'text-emerald-400'
+                    }`}
+                  >
+                    {outOfStock
+                      ? 'Produto temporariamente esgotado'
+                      : `${product.stock_quantity} unidades em estoque`}
+                  </span>
+                </div>
               </div>
 
+              {/* Quantity Selector for Home or Events (RF17) */}
               {!outOfStock && (
-                <div className="pt-2">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-2">
-                    Quantidade
+                <div className="space-y-2 pt-2">
+                  <label className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9e9589]">
+                    Quantidade (Consumo Doméstico ou Eventos — RF17)
                   </label>
-                  <div className="inline-flex items-center rounded-lg border border-zinc-700 bg-zinc-950 p-1">
-                    <button
-                      type="button"
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="h-9 w-9 flex items-center justify-center text-white hover:bg-zinc-800 rounded cursor-pointer"
-                    >
-                      <Minus size={14} />
-                    </button>
-                    <input
-                      type="number"
-                      min={1}
-                      max={maxQty}
-                      value={quantity}
-                      onChange={(e) => {
-                        const v = parseInt(e.target.value, 10);
-                        if (Number.isNaN(v)) setQuantity(1);
-                        else setQuantity(Math.min(Math.max(1, v), maxQty));
-                      }}
-                      className="w-14 bg-transparent text-center text-sm font-bold text-white focus:outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
-                      className="h-9 w-9 flex items-center justify-center text-white hover:bg-zinc-800 rounded cursor-pointer"
-                    >
-                      <Plus size={14} />
-                    </button>
+                  <div className="flex items-center gap-4">
+                    <div className="inline-flex items-center rounded-full border border-[#c9a256]/25 bg-[#0e0c0a] p-1">
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        className="h-10 w-10 rounded-full flex items-center justify-center text-[#f4efe6] hover:bg-[#1c1814] cursor-pointer"
+                        aria-label="Diminuir quantidade"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <input
+                        type="number"
+                        min={1}
+                        max={maxQty}
+                        value={quantity}
+                        onChange={(e) => {
+                          const v = parseInt(e.target.value, 10);
+                          if (Number.isNaN(v)) setQuantity(1);
+                          else setQuantity(Math.min(Math.max(1, v), maxQty));
+                        }}
+                        className="w-16 bg-transparent text-center font-mono text-sm font-semibold text-[#f4efe6] focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
+                        className="h-10 w-10 rounded-full flex items-center justify-center text-[#f4efe6] hover:bg-[#1c1814] cursor-pointer"
+                        aria-label="Aumentar quantidade"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+
+                    <div className="flex gap-1.5">
+                      {[6, 12, 24]
+                        .filter((pack) => pack <= maxQty)
+                        .map((pack) => (
+                          <button
+                            key={pack}
+                            type="button"
+                            onClick={() => setQuantity(pack)}
+                            className="h-10 px-3 rounded-full border border-[#c9a256]/20 bg-[#0e0c0a] hover:border-[#c9a256] text-xs font-mono text-[#c9a256] transition-all cursor-pointer"
+                          >
+                            +{pack} un.
+                          </button>
+                        ))}
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
-            <button
-              type="button"
-              disabled={outOfStock}
-              onClick={handleAddToCart}
-              className={`w-full h-12 rounded-lg font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-colors ${
-                outOfStock
-                  ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-                  : 'bg-amber-600 hover:bg-amber-500 text-black cursor-pointer'
-              }`}
-            >
-              <ShoppingCart size={17} />
-              <span>{outOfStock ? 'Produto em Falta' : 'Adicionar ao Carrinho'}</span>
-            </button>
+            <div className="space-y-4 pt-4 border-t border-[#c9a256]/15">
+              <button
+                type="button"
+                disabled={outOfStock}
+                onClick={handleAddToCart}
+                className={`w-full h-14 rounded-full font-semibold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all ${
+                  outOfStock
+                    ? 'bg-[#1f1b18] text-[#9e9589]/50 cursor-not-allowed border border-white/5'
+                    : 'bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] cursor-pointer shadow-[0_10px_30px_rgba(201,162,86,0.28)]'
+                }`}
+              >
+                <ShoppingBag size={18} />
+                <span>
+                  {outOfStock
+                    ? 'Produto Esgotado (Indisponível)'
+                    : `Adicionar ${quantity} un. à Sacola — R$ ${(parseFloat(product.price) * quantity).toFixed(2).replace('.', ',')}`}
+                </span>
+              </button>
+
+              <div className="grid grid-cols-3 gap-3 pt-2 text-[11px] text-[#9e9589]">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={14} className="text-[#c9a256] shrink-0" />
+                  <span>100% Sem Álcool</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <PackageCheck size={14} className="text-[#c9a256] shrink-0" />
+                  <span>Reserva Imediata</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Truck size={14} className="text-[#c9a256] shrink-0" />
+                  <span>Entrega Local</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
