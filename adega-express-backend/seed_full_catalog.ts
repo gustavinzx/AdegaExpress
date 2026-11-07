@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -222,7 +223,46 @@ async function main() {
     }
   }
 
-  console.log('Catálogo não alcoólico atualizado com sucesso!');
+  // Contas de demonstração para todos os perfis (Admin, Atendente, Entregador e Cliente)
+  const passwordHash = await bcrypt.hash('Admin@123', 12);
+  const demoUsers = [
+    {
+      name: 'Administrador Adega Express',
+      email: 'admin@adegaexpress.com',
+      role: 'ADMINISTRADOR' as const,
+    },
+    {
+      name: 'Atendente Adega Express',
+      email: 'atendente@adegaexpress.com',
+      role: 'ATENDENTE' as const,
+    },
+    {
+      name: 'Entregador Adega Express',
+      email: 'entregador@adegaexpress.com',
+      role: 'ENTREGADOR' as const,
+    },
+    {
+      name: 'Cliente Demonstração',
+      email: 'cliente@adegaexpress.com',
+      role: 'CLIENTE' as const,
+    },
+  ];
+
+  for (const u of demoUsers) {
+    await prisma.user.upsert({
+      where: { email: u.email },
+      update: { role: u.role, active: true, password_hash: passwordHash },
+      create: {
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        active: true,
+        password_hash: passwordHash,
+      },
+    });
+  }
+
+  console.log('Catálogo não alcoólico e contas de demonstração atualizados com sucesso!');
 }
 
 main()
