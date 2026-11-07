@@ -37,13 +37,13 @@ function SearchInput() {
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Buscar águas, sucos integrais, chás ou refrigerantes..."
-        className="w-full h-11 bg-[#161310]/90 text-[#f4efe6] pl-4 pr-12 rounded-full border border-[#c9a256]/20 focus:outline-none focus:border-[#c9a256]/60 focus:ring-2 focus:ring-[#c9a256]/15 transition-all text-xs placeholder-[#9e9589]"
+        placeholder="Buscar águas, sucos, chás ou refrigerantes..."
+        className="w-full h-10 bg-slate-50 text-slate-900 pl-3.5 pr-10 rounded-xl border border-slate-200 focus:bg-white focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-500/15 transition-all text-xs placeholder-slate-400 font-medium"
       />
       <button
         type="submit"
         aria-label="Pesquisar no catálogo"
-        className="absolute right-1.5 top-1.5 h-8 w-8 rounded-full bg-[#c9a256]/15 hover:bg-[#c9a256] text-[#c9a256] hover:text-[#0e0c0a] flex items-center justify-center transition-all cursor-pointer"
+        className="absolute right-1 top-1 h-8 w-8 rounded-lg bg-teal-50 hover:bg-teal-600 text-teal-700 hover:text-white flex items-center justify-center transition-all cursor-pointer"
       >
         <Search size={14} />
       </button>
@@ -56,80 +56,77 @@ export default function Navbar() {
   const { itemCount } = useCart();
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#0e0c0a]/90 border-b border-[#c9a256]/15">
-      {/* Main Navigation Bar */}
+    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/95 border-b border-slate-200 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 gap-6">
-          {/* Brand Crest */}
-          <Link href="/" className="flex items-center gap-3.5 group shrink-0">
-            <div className="h-11 w-11 rounded-full border border-[#c9a256]/40 bg-gradient-to-br from-[#231d17] to-[#120f0c] flex items-center justify-center shadow-[0_0_25px_rgba(201,162,86,0.12)] group-hover:border-[#c9a256] transition-all">
-              <GlassWater size={20} className="text-[#c9a256]" />
+        <div className="flex items-center justify-between h-18 gap-4">
+          {/* Brand Logo */}
+          <Link href="/" className="flex items-center gap-3 group shrink-0">
+            <div className="h-10 w-10 rounded-xl border border-teal-200 bg-teal-50 flex items-center justify-center shadow-xs group-hover:border-teal-500 transition-all">
+              <GlassWater size={20} className="text-teal-700" />
             </div>
             <div className="flex flex-col">
-              <span className="font-serif text-2xl sm:text-[26px] font-bold tracking-[0.08em] text-[#f4efe6] leading-none">
-                ADEGA <span className="text-[#c9a256] italic font-normal">Express</span>
+              <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 leading-none">
+                ADEGA <span className="text-teal-700 font-bold">Express</span>
               </span>
-              <span className="text-[9px] uppercase tracking-[0.28em] text-[#9e9589] mt-1">
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mt-1">
                 bebidas não alcoólicas
               </span>
             </div>
           </Link>
 
-          {/* Search Console (Desktop) */}
-          <div className="hidden md:flex flex-1 max-w-md mx-4">
+          {/* Search Bar (Desktop) */}
+          <div className="hidden md:flex flex-1 max-w-md mx-2">
             <Suspense
               fallback={
-                <div className="w-full h-11 bg-[#161310] rounded-full border border-[#c9a256]/15 animate-pulse" />
+                <div className="w-full h-10 bg-slate-100 rounded-xl border border-slate-200 animate-pulse" />
               }
             >
               <SearchInput />
             </Suspense>
           </div>
 
-          {/* Right Action Cluster */}
+          {/* Right Navigation & User Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/#catalogo"
-              className="hidden lg:inline-flex items-center h-11 px-3.5 text-xs font-medium uppercase tracking-[0.14em] text-[#f4efe6]/80 hover:text-[#c9a256] transition-colors"
+              className="hidden lg:inline-flex items-center h-10 px-3 text-xs font-semibold uppercase tracking-wider text-slate-600 hover:text-teal-700 transition-colors"
             >
               Catálogo
             </Link>
 
             <Link
               href="/#ajuda"
-              className="hidden sm:inline-flex items-center gap-1.5 h-11 px-3 text-xs font-medium uppercase tracking-[0.14em] text-[#9e9589] hover:text-[#c9a256] transition-colors"
-              title="Central de Ajuda"
+              className="hidden sm:inline-flex items-center gap-1.5 h-10 px-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 hover:text-teal-700 transition-colors"
+              title="Perguntas Frequentes"
             >
               <HelpCircle size={15} />
-              <span className="hidden lg:inline">Ajuda</span>
+              <span className="hidden xl:inline">Ajuda</span>
             </Link>
 
             {/* Cart Trigger (Apenas clientes e visitantes) */}
             {(!isAuthenticated || user?.role === 'CLIENTE') && (
               <Link
                 href="/carrinho"
-                className="relative inline-flex items-center gap-2.5 h-11 px-4 rounded-full bg-[#181411] hover:bg-[#221c17] border border-[#c9a256]/25 text-[#f4efe6] transition-all"
+                className="relative inline-flex items-center gap-2 h-10 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 transition-all font-semibold"
                 title="Sacola de Compras"
               >
-                <ShoppingBag size={17} className="text-[#c9a256]" />
-                <span className="hidden sm:inline text-xs font-medium tracking-wider uppercase">
-                  Sacola
-                </span>
-                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#c9a256] text-[#0e0c0a] text-[11px] font-bold font-mono">
+                <ShoppingBag size={16} className="text-teal-700" />
+                <span className="hidden sm:inline text-xs tracking-wide">Sacola</span>
+                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-teal-700 text-white text-[11px] font-bold">
                   {itemCount}
                 </span>
               </Link>
             )}
 
             {isAuthenticated ? (
-              <div className="flex items-center gap-2 pl-2 border-l border-[#c9a256]/15">
+              <div className="flex items-center gap-1.5 sm:gap-2 pl-2 border-l border-slate-200">
                 {user?.role === 'CLIENTE' && (
                   <Link
                     href="/pedidos"
-                    className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full bg-[#161310] hover:bg-[#211c17] border border-[#c9a256]/15 text-xs font-medium tracking-wider uppercase text-[#f4efe6] hover:text-[#c9a256] transition-all"
+                    className="inline-flex items-center gap-1.5 h-10 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-semibold text-slate-700 hover:text-teal-700 transition-all"
                     title="Meus Pedidos"
                   >
-                    <Package size={15} className="text-[#c9a256]" />
+                    <Package size={15} className="text-teal-700" />
                     <span className="hidden xl:inline">Pedidos</span>
                   </Link>
                 )}
@@ -137,11 +134,11 @@ export default function Navbar() {
                 {(user?.role === 'ADMINISTRADOR' || user?.role === 'ATENDENTE') && (
                   <Link
                     href="/admin"
-                    className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full bg-[#c9a256]/15 hover:bg-[#c9a256]/25 border border-[#c9a256]/40 text-xs font-semibold tracking-wider uppercase text-[#c9a256] transition-all"
+                    className="inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-xs font-semibold text-white shadow-xs transition-all"
                   >
-                    <Shield size={15} />
+                    <Shield size={14} />
                     <span className="hidden sm:inline">
-                      {user.role === 'ADMINISTRADOR' ? 'Painel Admin' : 'Operação'}
+                      {user.role === 'ADMINISTRADOR' ? 'Painel Admin' : 'Painel Atendente'}
                     </span>
                   </Link>
                 )}
@@ -149,43 +146,43 @@ export default function Navbar() {
                 {user?.role === 'ENTREGADOR' && (
                   <Link
                     href="/entregador"
-                    className="inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-500/30 text-xs font-semibold tracking-wider uppercase text-emerald-300 transition-all"
+                    className="inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-xs font-semibold text-white shadow-xs transition-all"
                   >
-                    <Truck size={15} />
+                    <Truck size={14} />
                     <span className="hidden sm:inline">Entregas</span>
                   </Link>
                 )}
 
                 <Link
                   href="/perfil"
-                  className="inline-flex items-center gap-2 h-11 px-3.5 rounded-full bg-[#161310] hover:bg-[#211c17] border border-[#c9a256]/15 text-xs font-medium text-[#f4efe6] hover:text-[#c9a256] transition-all"
+                  className="inline-flex items-center gap-1.5 h-10 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-semibold text-slate-700 hover:text-teal-700 transition-all"
                   title="Meu Perfil"
                 >
-                  <UserIcon size={15} className="text-[#c9a256]" />
-                  <span className="hidden lg:inline max-w-[110px] truncate">
+                  <UserIcon size={14} className="text-teal-700" />
+                  <span className="hidden lg:inline max-w-[100px] truncate">
                     {user?.name?.split(' ')[0]}
                   </span>
                 </Link>
 
                 <button
                   onClick={() => void logout()}
-                  className="inline-flex items-center justify-center h-11 w-11 rounded-full bg-[#161310] hover:bg-red-950/40 border border-[#c9a256]/15 hover:border-red-500/30 text-[#9e9589] hover:text-red-400 transition-all cursor-pointer"
+                  className="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-500 hover:text-red-600 transition-all cursor-pointer"
                   title="Encerrar Sessão"
                 >
-                  <LogOut size={16} />
+                  <LogOut size={15} />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2 pl-2 border-l border-[#c9a256]/15">
+              <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
                 <Link
                   href="/login"
-                  className="inline-flex items-center justify-center h-11 px-4 rounded-full text-xs font-medium uppercase tracking-[0.14em] text-[#f4efe6] hover:text-[#c9a256] transition-colors"
+                  className="inline-flex items-center justify-center h-10 px-3 rounded-xl text-xs font-semibold text-slate-700 hover:text-teal-700 transition-colors"
                 >
                   Entrar
                 </Link>
                 <Link
                   href="/cadastro"
-                  className="inline-flex items-center justify-center h-11 px-5 rounded-full bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] font-semibold text-xs uppercase tracking-[0.14em] transition-all shadow-[0_4px_20px_rgba(201,162,86,0.25)]"
+                  className="inline-flex items-center justify-center h-10 px-4 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs tracking-wide transition-all shadow-xs"
                 >
                   Criar Conta
                 </Link>
@@ -195,10 +192,10 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Search Bar */}
-        <div className="md:hidden pb-3.5">
+        <div className="md:hidden pb-3 pt-1">
           <Suspense
             fallback={
-              <div className="w-full h-11 bg-[#161310] rounded-full border border-[#c9a256]/15 animate-pulse" />
+              <div className="w-full h-10 bg-slate-100 rounded-xl border border-slate-200 animate-pulse" />
             }
           >
             <SearchInput />

@@ -60,7 +60,6 @@ export default function Entregador() {
       return;
     }
     if (isAuthenticated && user?.role === 'ENTREGADOR') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       void fetchDeliveries();
     }
   }, [isAuthenticated, isLoading, user, router]);
@@ -71,8 +70,8 @@ export default function Entregador() {
       await api.patch(`/deliveries/${id}/status`, { status: newStatus });
       toast.success(
         newStatus === 'SAIU_PARA_ENTREGA'
-          ? 'Saída registrada! Pedido sincronizado para EM_ROTA.'
-          : 'Entrega concluída! Pedido sincronizado para ENTREGUE.',
+          ? 'Saída registrada! Pedido atualizado para EM_ROTA.'
+          : 'Entrega concluída! Pedido atualizado para ENTREGUE.',
       );
       await fetchDeliveries();
     } catch (e: unknown) {
@@ -86,28 +85,28 @@ export default function Entregador() {
   if (isLoading || !user || user.role !== 'ENTREGADOR') return null;
 
   return (
-    <div className="bg-[#0e0c0a] min-h-screen font-sans text-[#f4efe6]">
+    <div className="bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
       <Navbar />
 
-      <main className="max-w-3xl mx-auto px-4 py-10 pb-24">
-        <div className="mb-8 flex items-center justify-between border-b border-[#c9a256]/15 pb-5">
+      <main className="max-w-3xl mx-auto px-4 py-10 pb-20">
+        <div className="mb-6 flex items-center justify-between border-b border-slate-200 pb-4">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#c9a256]">
-              Console Logístico • UC03
+            <span className="text-[11px] font-bold uppercase tracking-wider text-teal-700">
+              Console Logístico
             </span>
-            <h1 className="font-serif text-3xl sm:text-4xl font-semibold text-[#f4efe6] mt-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5">
               Minhas Entregas Atribuídas
             </h1>
-            <p className="text-xs text-[#9e9589] mt-1">
-              Sincronização automática com o status do pedido (RN06 e RN09).
+            <p className="text-xs text-slate-500 mt-0.5">
+              Acompanhe e registre o status das entregas sob sua responsabilidade.
             </p>
           </div>
           <button
             type="button"
             onClick={() => void fetchDeliveries()}
-            className="inline-flex items-center gap-2 h-11 px-4 rounded-full bg-[#14110e] hover:border-[#c9a256] border border-[#c9a256]/20 text-xs font-semibold uppercase tracking-wider cursor-pointer"
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 cursor-pointer shadow-xs"
           >
-            <RefreshCw size={14} className="text-[#c9a256]" /> Atualizar
+            <RefreshCw size={13} className="text-teal-700" /> Atualizar
           </button>
         </div>
 
@@ -116,23 +115,22 @@ export default function Entregador() {
             {Array.from({ length: 2 }).map((_, i) => (
               <div
                 key={i}
-                className="h-56 rounded-3xl border border-[#c9a256]/15 bg-[#14110e] animate-pulse"
+                className="h-48 rounded-2xl border border-slate-200 bg-white animate-pulse"
               />
             ))}
           </div>
         ) : deliveries.length === 0 ? (
-          <div className="bg-[#14110e] border border-[#c9a256]/15 rounded-3xl p-12 text-center">
-            <Package className="mx-auto text-[#c9a256]/50 mb-4" size={44} />
-            <h2 className="font-serif text-2xl font-semibold text-[#f4efe6]">
+          <div className="bg-white border border-slate-200 rounded-3xl p-10 text-center shadow-xs">
+            <Package className="mx-auto text-slate-300 mb-3" size={40} />
+            <h2 className="text-lg font-bold text-slate-900">
               Nenhuma entrega atribuída no momento
             </h2>
-            <p className="text-xs text-[#9e9589] mt-2">
-              Assim que um Atendente ou Administrador atribuir um pedido separado a você, ele
-              aparecerá aqui.
+            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+              Assim que um operador atribuir um pacote a você, os detalhes aparecerão nesta tela.
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {deliveries.map((del) => {
               const addr = del.order?.address_snapshot;
               const paymentOk = del.order?.payment_status === 'PAGO';
@@ -140,38 +138,43 @@ export default function Entregador() {
               return (
                 <div
                   key={del.id}
-                  className={`p-6 rounded-3xl border transition-all ${
+                  className={`p-5 rounded-2xl border transition-all ${
                     del.status === 'ENTREGUE'
-                      ? 'bg-[#12100e]/60 border-[#c9a256]/10 opacity-65'
-                      : 'bg-[#14110e] border-[#c9a256]/30 shadow-2xl'
+                      ? 'bg-slate-50 border-slate-200 opacity-60'
+                      : 'bg-white border-slate-200 shadow-xs'
                   }`}
                 >
-                  <div className="flex flex-wrap justify-between items-start gap-3 mb-4 border-b border-[#c9a256]/12 pb-4">
+                  <div className="flex flex-wrap justify-between items-start gap-3 mb-3 border-b border-slate-100 pb-3">
                     <div>
-                      <span className="text-[10px] font-mono bg-[#c9a256]/15 text-[#c9a256] border border-[#c9a256]/30 px-2.5 py-0.5 rounded-full uppercase">
-                        Pedido #{del.order_id} (Status: {del.order?.status})
-                      </span>
-                      <h3 className="font-serif text-2xl font-semibold mt-2 text-[#f4efe6]">
+                      <div className="flex items-center gap-2">
+                        <span className="font-extrabold text-sm text-slate-900">
+                          Pedido #{del.order_id}
+                        </span>
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                          Status: {del.order?.status}
+                        </span>
+                      </div>
+                      <h3 className="font-bold text-base mt-1 text-slate-900">
                         {del.order?.user?.name || 'Cliente'}
                       </h3>
                     </div>
                     <div className="text-right">
                       <span
-                        className={`text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider block ${
+                        className={`text-xs font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider block ${
                           del.status === 'ENTREGUE'
-                            ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                             : del.status === 'SAIU_PARA_ENTREGA'
-                              ? 'bg-amber-950/70 text-amber-300 border border-amber-500/30'
-                              : 'bg-[#0e0c0a] text-[#c9a256] border border-[#c9a256]/25'
+                              ? 'bg-blue-50 text-blue-800 border border-blue-200'
+                              : 'bg-amber-50 text-amber-800 border border-amber-200'
                         }`}
                       >
                         {del.status.replace(/_/g, ' ')}
                       </span>
                       <span
-                        className={`text-[10px] font-mono mt-1.5 inline-block px-2.5 py-0.5 rounded-full ${
+                        className={`text-[10px] font-bold mt-1 inline-block px-2 py-0.5 rounded-md ${
                           paymentOk
-                            ? 'bg-emerald-950/40 text-emerald-300'
-                            : 'bg-red-950/50 text-red-300'
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : 'bg-rose-50 text-rose-700'
                         }`}
                       >
                         Pagamento ({del.order?.payment_method}): {del.order?.payment_status}
@@ -180,43 +183,43 @@ export default function Entregador() {
                   </div>
 
                   {addr && (
-                    <div className="bg-[#0e0c0a] p-4 rounded-2xl mb-5 flex items-start gap-3 border border-[#c9a256]/12">
-                      <MapPin className="text-[#c9a256] shrink-0 mt-0.5" size={18} />
-                      <div className="text-sm text-[#f4efe6]">
-                        <p className="font-semibold">
+                    <div className="bg-slate-50 p-3.5 rounded-xl mb-4 flex items-start gap-2.5 border border-slate-200">
+                      <MapPin className="text-teal-700 shrink-0 mt-0.5" size={16} />
+                      <div className="text-xs text-slate-800">
+                        <p className="font-bold">
                           {addr.street}, {addr.number}
                           {addr.complement ? ` (${addr.complement})` : ''}
                         </p>
-                        <p className="text-[#9e9589] text-xs mt-0.5">
+                        <p className="text-slate-500 text-[11px] mt-0.5">
                           {addr.neighborhood} — {addr.city}/{addr.state}
                         </p>
-                        <p className="text-[#9e9589]/70 text-xs font-mono mt-1">CEP: {addr.zip}</p>
+                        <p className="text-slate-400 text-[10px] font-mono mt-0.5">CEP: {addr.zip}</p>
                       </div>
                     </div>
                   )}
 
                   {!paymentOk && del.status !== 'ENTREGUE' && (
-                    <div className="mb-4 rounded-xl bg-amber-950/40 border border-amber-500/40 p-3 flex items-center gap-2 text-xs text-amber-200">
-                      <AlertTriangle size={16} className="text-amber-400 shrink-0" />
+                    <div className="mb-3.5 rounded-xl bg-amber-50 border border-amber-200 p-2.5 flex items-center gap-2 text-xs text-amber-800">
+                      <AlertTriangle size={15} className="text-amber-700 shrink-0" />
                       <span>
-                        <strong>RN09:</strong> A entrega só poderá ser marcada como{' '}
-                        <strong>ENTREGUE</strong> quando o pagamento demonstrativo estiver
-                        confirmado como <strong>PAGO</strong>.
+                        A entrega só pode ser concluída quando o pagamento constar como <strong>PAGO</strong>.
                       </span>
                     </div>
                   )}
 
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2.5">
                     {del.status === 'AGUARDANDO' && (
                       <button
                         disabled={updating === del.id}
                         onClick={() => void updateStatus(del.id, 'SAIU_PARA_ENTREGA')}
-                        className="w-full h-12 rounded-full bg-[#c9a256] hover:bg-[#d8b467] text-[#0e0c0a] font-semibold uppercase tracking-[0.16em] text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg"
+                        className="w-full h-11 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
                       >
-                        <Truck size={18} />
-                        {updating === del.id
-                          ? 'Registrando...'
-                          : 'Registrar Saída para Entrega (EM ROTA)'}
+                        <Truck size={16} />
+                        <span>
+                          {updating === del.id
+                            ? 'Registrando...'
+                            : 'Registrar Saída para Entrega (EM ROTA)'}
+                        </span>
                       </button>
                     )}
 
@@ -224,18 +227,20 @@ export default function Entregador() {
                       <button
                         disabled={updating === del.id || !paymentOk}
                         onClick={() => void updateStatus(del.id, 'ENTREGUE')}
-                        className={`w-full h-12 rounded-full font-semibold uppercase tracking-[0.16em] text-xs flex items-center justify-center gap-2 transition-all ${
+                        className={`w-full h-11 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition-all ${
                           paymentOk
-                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer shadow-lg'
-                            : 'bg-[#1f1b18] text-[#9e9589]/50 cursor-not-allowed'
+                            ? 'bg-emerald-700 hover:bg-emerald-800 text-white cursor-pointer shadow-xs'
+                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                         }`}
                       >
-                        <CheckCircle size={18} />
-                        {updating === del.id
-                          ? 'Concluindo...'
-                          : paymentOk
-                            ? 'Confirmar Entrega Concluída (ENTREGUE)'
-                            : 'Aguardando Pagamento PAGO (RN09)'}
+                        <CheckCircle size={16} />
+                        <span>
+                          {updating === del.id
+                            ? 'Concluindo...'
+                            : paymentOk
+                              ? 'Confirmar Entrega Concluída'
+                              : 'Aguardando Pagamento PAGO'}
+                        </span>
                       </button>
                     )}
                   </div>

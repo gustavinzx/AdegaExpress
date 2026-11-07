@@ -8,76 +8,76 @@ export default function Footer() {
   const { user, isAuthenticated } = useAuth();
 
   return (
-    <footer className="bg-[#0b0908] border-t border-[#c9a256]/15 text-[#9e9589] mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-12 border-b border-[#c9a256]/10">
-          {/* Col 1: Brand Manifesto */}
-          <div className="md:col-span-5 space-y-5">
-            <Link href="/" className="inline-flex items-center gap-3.5">
-              <div className="h-10 w-10 rounded-full border border-[#c9a256]/40 bg-[#161310] flex items-center justify-center">
-                <GlassWater size={18} className="text-[#c9a256]" />
+    <footer className="bg-white border-t border-slate-200 text-slate-500 mt-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-10 border-b border-slate-200">
+          {/* Col 1: Brand Info */}
+          <div className="md:col-span-5 space-y-4">
+            <Link href="/" className="inline-flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl border border-teal-200 bg-teal-50 flex items-center justify-center">
+                <GlassWater size={18} className="text-teal-700" />
               </div>
               <div className="flex flex-col">
-                <span className="font-serif text-2xl font-bold tracking-[0.08em] text-[#f4efe6] leading-none">
-                  ADEGA <span className="text-[#c9a256] italic font-normal">Express</span>
+                <span className="font-extrabold text-xl tracking-tight text-slate-900 leading-none">
+                  ADEGA <span className="text-teal-700 font-bold">Express</span>
                 </span>
-                <span className="text-[9px] uppercase tracking-[0.26em] text-[#9e9589] mt-1">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mt-1">
                   bebidas não alcoólicas
                 </span>
               </div>
             </Link>
-            <p className="text-sm text-[#9e9589] leading-relaxed max-w-md">
-              Curadoria especializada em águas minerais de fonte, sucos 100% integrais,
-              refrigerantes tradicionais e infusões botânicas prontas para o consumo doméstico e
-              recepções.
+            <p className="text-xs text-slate-500 leading-relaxed max-w-sm">
+              Adega Express: bebidas não alcoólicas entregues rápido. Águas minerais, sucos 100% integrais, refrigerantes e chás para sua casa ou evento.
             </p>
           </div>
 
-          {/* Col 2: Curated Categories */}
-          <div className="md:col-span-3 space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.22em] text-[#f4efe6]">
-              Coleções da Casa
+          {/* Col 2: Categories */}
+          <div className="md:col-span-3 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+              Categorias
             </h4>
-            <ul className="space-y-2.5 text-sm">
+            <ul className="space-y-2 text-xs font-medium">
               {['Água', 'Sucos', 'Refrigerantes', 'Chás'].map((cat) => (
                 <li key={cat}>
                   <Link
                     href={`/?category=${encodeURIComponent(cat)}#catalogo`}
-                    className="inline-flex items-center gap-1.5 text-[#9e9589] hover:text-[#c9a256] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-slate-600 hover:text-teal-700 transition-colors"
                   >
                     <span>{cat}</span>
-                    <ArrowUpRight size={13} className="opacity-60" />
+                    <ArrowUpRight size={12} className="opacity-50" />
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Col 3: Navigation & Support */}
-          <div className="md:col-span-4 space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.22em] text-[#f4efe6]">
-              Atendimento &amp; Acesso
+          {/* Col 3: Navigation & Help */}
+          <div className="md:col-span-4 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+              Navegação
             </h4>
-            <ul className="space-y-2.5 text-sm">
+            <ul className="space-y-2 text-xs font-medium">
               <li>
-                <Link href="/#catalogo" className="hover:text-[#c9a256] transition-colors">
-                  Explorar Catálogo Completo
+                <Link href="/#catalogo" className="text-slate-600 hover:text-teal-700 transition-colors">
+                  Catálogo Completo
                 </Link>
               </li>
+              {(!isAuthenticated || user?.role === 'CLIENTE') && (
+                <li>
+                  <Link href="/carrinho" className="text-slate-600 hover:text-teal-700 transition-colors">
+                    Sacola de Compras
+                  </Link>
+                </li>
+              )}
               <li>
-                <Link href="/carrinho" className="hover:text-[#c9a256] transition-colors">
-                  Sacola &amp; Cotação de Entrega
-                </Link>
-              </li>
-              <li>
-                <Link href="/#ajuda" className="hover:text-[#c9a256] transition-colors">
-                  Central de Ajuda &amp; Perguntas Frequentes
+                <Link href="/#ajuda" className="text-slate-600 hover:text-teal-700 transition-colors">
+                  Perguntas Frequentes
                 </Link>
               </li>
               {!isAuthenticated && (
                 <li>
-                  <Link href="/login" className="hover:text-[#c9a256] transition-colors">
-                    Acessar Conta ou Cadastrar-se
+                  <Link href="/login" className="text-slate-600 hover:text-teal-700 transition-colors">
+                    Entrar na Conta
                   </Link>
                 </li>
               )}
@@ -87,23 +87,23 @@ export default function Footer() {
               (user?.role === 'ADMINISTRADOR' ||
                 user?.role === 'ATENDENTE' ||
                 user?.role === 'ENTREGADOR') && (
-                <div className="pt-3 flex flex-wrap gap-2">
+                <div className="pt-2 flex flex-wrap gap-2">
                   {(user.role === 'ADMINISTRADOR' || user.role === 'ATENDENTE') && (
                     <Link
                       href="/admin"
-                      className="inline-flex items-center gap-2 rounded-full border border-[#c9a256]/30 bg-[#161310] px-3.5 py-2 text-xs font-medium text-[#c9a256] hover:bg-[#c9a256] hover:text-[#0e0c0a] transition-all"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-800 transition-all"
                     >
-                      <Shield size={14} />
-                      <span>Mesa Operacional ({user.role})</span>
+                      <Shield size={13} className="text-teal-700" />
+                      <span>{user.role === 'ADMINISTRADOR' ? 'Painel Admin' : 'Painel Atendente'}</span>
                     </Link>
                   )}
                   {user.role === 'ENTREGADOR' && (
                     <Link
                       href="/entregador"
-                      className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-950/30 px-3.5 py-2 text-xs font-medium text-emerald-300 hover:bg-emerald-900/50 transition-all"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-800 transition-all"
                     >
-                      <Truck size={14} />
-                      <span>Console do Entregador</span>
+                      <Truck size={13} className="text-teal-700" />
+                      <span>Painel do Entregador</span>
                     </Link>
                   )}
                 </div>
@@ -112,13 +112,12 @@ export default function Footer() {
         </div>
 
         {/* Bottom Legal & Academic Notice */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#9e9589]/80">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400">
           <p>
             &copy; {new Date().getFullYear()} Adega Express. Todos os direitos reservados.
           </p>
           <p className="text-center sm:text-right">
-            Ambiente acadêmico demonstrativo — nenhuma cobrança financeira real é realizada no
-            checkout.
+            Ambiente demonstrativo — nenhuma cobrança financeira real é realizada.
           </p>
         </div>
       </div>

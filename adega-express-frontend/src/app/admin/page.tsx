@@ -545,18 +545,18 @@ export default function AdminDashboard() {
     : products;
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col md:flex-row font-sans text-white">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row font-sans text-slate-900">
       {/* SIDEBAR */}
-      <aside className="w-full md:w-64 bg-black border-b md:border-b-0 md:border-r border-zinc-800 flex flex-col shrink-0">
-        <div className="p-5 border-b border-zinc-800 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full border border-amber-500 bg-zinc-900 flex items-center justify-center text-amber-500 shrink-0">
+      <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col shrink-0">
+        <div className="p-5 border-b border-slate-200 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl border border-teal-200 bg-teal-50 flex items-center justify-center text-teal-700 shrink-0">
             <GlassWater size={18} />
           </div>
           <div>
             <span className="font-black text-base tracking-tighter block leading-none">
-              ADEGA<span className="text-amber-500">EXPRESS</span>
+              ADEGA<span className="text-teal-700 font-extrabold">Express</span>
             </span>
-            <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">
+            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
               Painel {isAdmin ? 'Administrador' : 'Atendente'}
             </span>
           </div>
@@ -568,8 +568,8 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('PEDIDOS')}
             className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg font-bold transition-all uppercase tracking-wider text-xs whitespace-nowrap ${
               activeTab === 'PEDIDOS'
-                ? 'bg-amber-600 text-black'
-                : 'text-zinc-400 hover:bg-zinc-900 hover:text-amber-500'
+                ? 'bg-teal-700 text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <ShoppingBag size={16} /> Pedidos &amp; Entregas
@@ -582,8 +582,8 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab('CATALOGO')}
                 className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg font-bold transition-all uppercase tracking-wider text-xs whitespace-nowrap ${
                   activeTab === 'CATALOGO'
-                    ? 'bg-amber-600 text-black'
-                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-amber-500'
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 <Package size={16} /> Catálogo & Categorias
@@ -594,8 +594,8 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab('ESTOQUE')}
                 className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg font-bold transition-all uppercase tracking-wider text-xs whitespace-nowrap ${
                   activeTab === 'ESTOQUE'
-                    ? 'bg-amber-600 text-black'
-                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-amber-500'
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 <History size={16} /> Gestão de Estoque
@@ -606,8 +606,8 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab('CUPONS')}
                 className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg font-bold transition-all uppercase tracking-wider text-xs whitespace-nowrap ${
                   activeTab === 'CUPONS'
-                    ? 'bg-amber-600 text-black'
-                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-amber-500'
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 <Tag size={16} /> Cupons de Desconto
@@ -618,8 +618,8 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab('EQUIPE')}
                 className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg font-bold transition-all uppercase tracking-wider text-xs whitespace-nowrap ${
                   activeTab === 'EQUIPE'
-                    ? 'bg-amber-600 text-black'
-                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-amber-500'
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 <Users size={16} /> Equipe & Perfis
@@ -630,8 +630,8 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab('RELATORIOS')}
                 className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg font-bold transition-all uppercase tracking-wider text-xs whitespace-nowrap ${
                   activeTab === 'RELATORIOS'
-                    ? 'bg-amber-600 text-black'
-                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-amber-500'
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 <BarChart3 size={16} /> Relatórios de Vendas
@@ -640,14 +640,14 @@ export default function AdminDashboard() {
           )}
         </nav>
 
-        <div className="p-4 border-t border-zinc-800 hidden md:block">
+        <div className="p-4 border-t border-slate-200 hidden md:block">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-amber-600 text-black flex items-center justify-center font-black text-xs">
+            <div className="w-8 h-8 rounded-full bg-teal-700 text-white shadow-xs flex items-center justify-center font-black text-xs">
               {user.name.charAt(0)}
             </div>
             <div className="overflow-hidden">
-              <p className="text-xs font-bold text-white truncate">{user.name}</p>
-              <p className="text-[10px] text-amber-500 uppercase font-bold">{user.role}</p>
+              <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
+              <p className="text-[10px] text-teal-700 uppercase font-bold">{user.role}</p>
             </div>
           </div>
           <div className="space-y-2">
@@ -657,27 +657,27 @@ export default function AdminDashboard() {
                 onClick={() => void quickSwitchAccount('admin@adegaexpress.com', 'PEDIDOS')}
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-amber-600 hover:bg-amber-500 text-black rounded text-xs font-black uppercase tracking-wider transition-colors cursor-pointer"
               >
-                <Shield size={14} /> Alternar p/ Admin (T11-T14)
+                <Shield size={14} /> Alternar para Administrador
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => void quickSwitchAccount('atendente@adegaexpress.com', 'PEDIDOS')}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-zinc-900 border border-amber-500/40 text-amber-400 hover:bg-zinc-800 rounded text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-amber-500/40 text-amber-400 hover:bg-zinc-800 rounded text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
               >
-                Alternar p/ Atendente (T09)
+                Alternar para Atendente
               </button>
             )}
             <Link
               href="/"
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white rounded text-xs font-bold transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 rounded-xl text-xs font-bold transition-colors"
             >
               Voltar para a Loja
             </Link>
             <button
               type="button"
               onClick={() => void logout()}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-950/40 border border-red-500/30 text-red-300 hover:bg-red-900/50 rounded text-xs font-bold transition-colors cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
               <LogOut size={14} /> Sair da Conta
             </button>
@@ -687,14 +687,14 @@ export default function AdminDashboard() {
 
       {/* MAIN CONTENT */}
       <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 border-b border-zinc-800 flex items-center justify-between px-6 bg-zinc-950">
-          <h1 className="text-base md:text-lg font-black uppercase tracking-wider text-white">
-            {activeTab === 'PEDIDOS' && 'Mesa de Operações — Pedidos, Pagamentos & Entregas (UC08 / UC11)'}
-            {activeTab === 'CATALOGO' && 'Gerenciar Catálogo Não Alcoólico & Categorias (UC09)'}
-            {activeTab === 'ESTOQUE' && 'Controle & Movimentação Manual de Estoque (UC10)'}
-            {activeTab === 'CUPONS' && 'Gestão de Cupons de Desconto (UC06)'}
+        <header className="h-16 border-b border-slate-200 flex items-center justify-between px-6 bg-white">
+          <h1 className="text-base md:text-lg font-extrabold tracking-tight text-slate-900">
+            {activeTab === 'PEDIDOS' && 'Mesa de Operações — Pedidos, Pagamentos & Entregas'}
+            {activeTab === 'CATALOGO' && 'Gerenciar Catálogo & Categorias'}
+            {activeTab === 'ESTOQUE' && 'Controle & Movimentação de Estoque'}
+            {activeTab === 'CUPONS' && 'Gestão de Cupons de Desconto'}
             {activeTab === 'EQUIPE' && 'Gestão de Equipe Interna (Atendentes, Entregadores e Admins)'}
-            {activeTab === 'RELATORIOS' && 'Relatórios de Vendas Demonstrativas (UC12)'}
+            {activeTab === 'RELATORIOS' && 'Relatórios de Vendas Demonstrativas'}
           </h1>
           <div className="flex items-center gap-2">
             {!isAdmin && (
@@ -703,13 +703,13 @@ export default function AdminDashboard() {
                 onClick={() => void quickSwitchAccount('admin@adegaexpress.com', 'PEDIDOS')}
                 className="inline-flex items-center gap-1.5 text-xs bg-amber-600 hover:bg-amber-500 text-black px-3.5 py-2 rounded font-black uppercase tracking-wider cursor-pointer"
               >
-                <Shield size={14} /> Mudar para Admin (Ver T11, T12, T13, T14)
+                <Shield size={14} /> Alternar para Administrador
               </button>
             )}
             <button
               type="button"
               onClick={() => void fetchData()}
-              className="inline-flex items-center gap-1.5 text-xs bg-zinc-900 border border-zinc-700 px-3.5 py-2 rounded hover:bg-zinc-800 font-bold uppercase tracking-wider cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs bg-white border border-zinc-700 px-3.5 py-2 rounded hover:bg-zinc-800 font-bold uppercase tracking-wider cursor-pointer"
             >
               <RefreshCw size={14} /> Atualizar
             </button>
@@ -721,7 +721,7 @@ export default function AdminDashboard() {
           {activeTab === 'PEDIDOS' && (
             <div className="space-y-6">
               {/* Filtros de Pedido (UC11) */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-wrap items-end gap-4">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-wrap items-end gap-4">
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">
                     Filtrar por Status
@@ -729,7 +729,7 @@ export default function AdminDashboard() {
                   <select
                     value={orderStatusFilter}
                     onChange={(e) => setOrderStatusFilter(e.target.value)}
-                    className="bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                    className="bg-[#F8FAFC] border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                   >
                     <option value="">Todos os Status</option>
                     <option value="PENDENTE">PENDENTE</option>
@@ -748,7 +748,7 @@ export default function AdminDashboard() {
                     type="date"
                     value={orderFromFilter}
                     onChange={(e) => setOrderFromFilter(e.target.value)}
-                    className="bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                    className="bg-[#F8FAFC] border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                   />
                 </div>
                 <div>
@@ -759,7 +759,7 @@ export default function AdminDashboard() {
                     type="date"
                     value={orderToFilter}
                     onChange={(e) => setOrderToFilter(e.target.value)}
-                    className="bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                    className="bg-[#F8FAFC] border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                   />
                 </div>
                 <button
@@ -776,7 +776,7 @@ export default function AdminDashboard() {
                   Carregando pedidos...
                 </div>
               ) : orders.length === 0 ? (
-                <div className="text-center py-16 text-zinc-400 bg-zinc-900 rounded-xl border border-zinc-800 text-sm">
+                <div className="text-center py-16 text-zinc-400 bg-white rounded-xl border border-slate-200 text-sm">
                   Nenhum pedido encontrado para os filtros informados.
                 </div>
               ) : (
@@ -784,8 +784,8 @@ export default function AdminDashboard() {
                   {orders.map((order) => (
                     <div
                       key={order.id}
-                      className={`bg-zinc-900 border rounded-xl p-5 flex flex-col lg:flex-row gap-6 shadow-lg ${
-                        order.status === 'PENDENTE' ? 'border-amber-500/70' : 'border-zinc-800'
+                      className={`bg-white border rounded-xl p-5 flex flex-col lg:flex-row gap-6 shadow-lg ${
+                        order.status === 'PENDENTE' ? 'border-amber-500/70' : 'border-slate-200'
                       }`}
                     >
                       {/* Detalhes do Pedido */}
@@ -836,7 +836,7 @@ export default function AdminDashboard() {
                           </p>
                         )}
 
-                        <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800 mt-2">
+                        <div className="bg-[#F8FAFC] p-3 rounded-lg border border-slate-200 mt-2">
                           <p className="text-[10px] font-black uppercase text-zinc-500 mb-1">
                             Itens do Pedido
                           </p>
@@ -853,7 +853,7 @@ export default function AdminDashboard() {
                               </span>
                             </div>
                           ))}
-                          <div className="mt-2 pt-2 border-t border-zinc-800 flex justify-between font-bold text-amber-500 text-xs">
+                          <div className="mt-2 pt-2 border-t border-slate-200 flex justify-between font-bold text-amber-500 text-xs">
                             <span>TOTAL DO PEDIDO</span>
                             <span>R$ {Number(order.total).toFixed(2).replace('.', ',')}</span>
                           </div>
@@ -861,12 +861,12 @@ export default function AdminDashboard() {
                       </div>
 
                       {/* Ações Operacionais (UC08 / UC11 / RN08 / RN12) */}
-                      <div className="w-full lg:w-80 flex flex-col gap-3 justify-center border-t lg:border-t-0 lg:border-l border-zinc-800 pt-4 lg:pt-0 lg:pl-6">
+                      <div className="w-full lg:w-80 flex flex-col gap-3 justify-center border-t lg:border-t-0 lg:border-l border-slate-200 pt-4 lg:pt-0 lg:pl-6">
                         {/* Confirmação Manual de Pagamento Demonstrativo (RN12 / RF22) */}
                         {order.payment_status === 'PENDENTE' && order.status !== 'CANCELADO' && (
-                          <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800 space-y-2">
+                          <div className="bg-[#F8FAFC] p-3 rounded-lg border border-slate-200 space-y-2">
                             <label className="block text-[10px] font-black uppercase text-amber-400">
-                              1. Confirmar Pagamento Demonstrativo (RN12)
+                              1. Confirmar Pagamento Demonstrativo
                             </label>
                             <input
                               type="text"
@@ -878,7 +878,7 @@ export default function AdminDashboard() {
                                 }))
                               }
                               placeholder="Referência demonstrativa (ex.: Conferido no caixa)"
-                              className="w-full bg-zinc-900 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 outline-none"
+                              className="w-full bg-white border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 outline-none"
                             />
                             <button
                               type="button"
@@ -908,14 +908,14 @@ export default function AdminDashboard() {
                             onClick={() => void changeOrderStatus(order.id, 'CONFIRMADO')}
                             title={
                               order.payment_status !== 'PAGO'
-                                ? 'Confirme o pagamento demonstrativo antes de confirmar o pedido (RN08)'
+                                ? 'Confirme o pagamento demonstrativo antes de confirmar o pedido'
                                 : ''
                             }
                             className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-black uppercase text-xs py-2.5 rounded transition-colors"
                           >
                             {order.payment_status === 'PAGO'
                               ? '2. Avançar para CONFIRMADO'
-                              : 'Aguardando PAGO para Confirmar (RN08)'}
+                              : 'Aguardando Pagamento para Confirmar'}
                           </button>
                         )}
 
@@ -931,7 +931,7 @@ export default function AdminDashboard() {
 
                         {/* Atribuição de Entregador (UC08 A01 / UC11 A01) */}
                         {order.status === 'SEPARADO' && order.delivery && (
-                          <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800">
+                          <div className="bg-[#F8FAFC] p-3 rounded-lg border border-slate-200">
                             <label className="block text-[10px] font-black uppercase text-zinc-400 mb-1.5 flex items-center gap-1">
                               <Truck size={12} className="text-amber-500" /> Atribuir Entregador
                               (Status: {order.delivery.status}):
@@ -941,7 +941,7 @@ export default function AdminDashboard() {
                                 void assignDeliverer(order.delivery!.id, Number(e.target.value))
                               }
                               value={order.delivery.deliverer_id || ''}
-                              className="w-full bg-zinc-900 border border-zinc-700 text-white text-xs p-2 rounded focus:border-amber-500"
+                              className="w-full bg-white border border-zinc-700 text-white text-xs p-2 rounded focus:border-amber-500"
                             >
                               <option value="">-- Selecionar Entregador --</option>
                               {deliverers.map((d) => (
@@ -974,14 +974,14 @@ export default function AdminDashboard() {
           {activeTab === 'CATALOGO' && isAdmin && (
             <div className="space-y-8">
               {/* Gestão de Categorias Permitidas */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <div className="bg-white border border-slate-200 rounded-xl p-6">
                 <h2 className="text-sm font-black uppercase tracking-wider text-amber-500 mb-4">
                   Categorias do Escopo Não Alcoólico (Água, Sucos, Refrigerantes e Chás)
                 </h2>
 
                 <form
                   onSubmit={handleSaveCategory}
-                  className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6 bg-zinc-950 p-4 rounded-lg border border-zinc-800"
+                  className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6 bg-[#F8FAFC] p-4 rounded-lg border border-slate-200"
                 >
                   <div>
                     <label className="block text-[10px] font-black uppercase text-zinc-400 mb-1">
@@ -992,7 +992,7 @@ export default function AdminDashboard() {
                       onChange={(e) =>
                         setCatForm({ ...catForm, name: e.target.value as AllowedCategoryName })
                       }
-                      className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                      className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                     >
                       {ALLOWED_CATEGORY_NAMES.map((name) => (
                         <option key={name} value={name}>
@@ -1010,7 +1010,7 @@ export default function AdminDashboard() {
                       value={catForm.description}
                       onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
                       placeholder="Descrição da categoria..."
-                      className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                      className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                     />
                   </div>
                   <div className="flex items-end gap-2">
@@ -1038,7 +1038,7 @@ export default function AdminDashboard() {
                   {categories.map((c) => (
                     <div
                       key={c.id}
-                      className="bg-zinc-950 border border-zinc-800 rounded-lg p-3.5 flex flex-col justify-between"
+                      className="bg-[#F8FAFC] border border-slate-200 rounded-lg p-3.5 flex flex-col justify-between"
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-1">
@@ -1090,7 +1090,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Gestão de Produtos */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <div className="bg-white border border-slate-200 rounded-xl p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="text-base font-black uppercase tracking-wider text-white">
@@ -1129,7 +1129,7 @@ export default function AdminDashboard() {
                 {showProductForm && (
                   <form
                     onSubmit={handleSaveProduct}
-                    className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 mb-6 space-y-4"
+                    className="bg-[#F8FAFC] border border-slate-200 rounded-xl p-5 mb-6 space-y-4"
                   >
                     <h3 className="text-xs font-black uppercase tracking-widest text-amber-500">
                       {editingProductId ? 'Editar Produto' : 'Cadastrar Novo Produto Não Alcoólico'}
@@ -1145,7 +1145,7 @@ export default function AdminDashboard() {
                           value={prodForm.name}
                           onChange={(e) => setProdForm({ ...prodForm, name: e.target.value })}
                           placeholder="Ex.: Água Mineral Sem Gás 500ml"
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                          className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                         />
                       </div>
                       <div>
@@ -1158,7 +1158,7 @@ export default function AdminDashboard() {
                           value={prodForm.brand}
                           onChange={(e) => setProdForm({ ...prodForm, brand: e.target.value })}
                           placeholder="Ex.: Minalba"
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                          className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                         />
                       </div>
                       <div>
@@ -1171,7 +1171,7 @@ export default function AdminDashboard() {
                           onChange={(e) =>
                             setProdForm({ ...prodForm, category_id: e.target.value })
                           }
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                          className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                         >
                           {categories
                             .filter((c) => c.active)
@@ -1193,7 +1193,7 @@ export default function AdminDashboard() {
                           required
                           value={prodForm.price}
                           onChange={(e) => setProdForm({ ...prodForm, price: e.target.value })}
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                          className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                         />
                       </div>
                       <div>
@@ -1206,7 +1206,7 @@ export default function AdminDashboard() {
                           required
                           value={prodForm.volume_ml}
                           onChange={(e) => setProdForm({ ...prodForm, volume_ml: e.target.value })}
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                          className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                         />
                       </div>
                       {!editingProductId && (
@@ -1222,7 +1222,7 @@ export default function AdminDashboard() {
                             onChange={(e) =>
                               setProdForm({ ...prodForm, stock_quantity: e.target.value })
                             }
-                            className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                            className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                           />
                         </div>
                       )}
@@ -1236,7 +1236,7 @@ export default function AdminDashboard() {
                           onChange={(e) =>
                             setProdForm({ ...prodForm, description: e.target.value })
                           }
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                          className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                         />
                       </div>
                       <div>
@@ -1248,7 +1248,7 @@ export default function AdminDashboard() {
                           value={prodForm.image_url}
                           onChange={(e) => setProdForm({ ...prodForm, image_url: e.target.value })}
                           placeholder="https://..."
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                          className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                         />
                       </div>
                     </div>
@@ -1277,7 +1277,7 @@ export default function AdminDashboard() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-zinc-950 border-b border-zinc-800 text-[10px] uppercase tracking-widest text-zinc-400">
+                      <tr className="bg-[#F8FAFC] border-b border-slate-200 text-[10px] uppercase tracking-widest text-zinc-400">
                         <th className="p-3">Produto</th>
                         <th className="p-3">Marca</th>
                         <th className="p-3">Categoria</th>
@@ -1340,10 +1340,10 @@ export default function AdminDashboard() {
           {/* ABA 3: GESTÃO DE ESTOQUE (UC10 / RF14) */}
           {activeTab === 'ESTOQUE' && isAdmin && (
             <div className="space-y-6">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-sm font-black uppercase tracking-wider text-white">
-                    Ajuste Manual de Estoque (Reposição, Perdas e Inventário — UC10)
+                    Ajuste Manual de Estoque (Reposição, Perdas e Inventário)
                   </h2>
                   <p className="text-xs text-zinc-400">
                     Toda movimentação registra data, responsável e motivo obrigatório.
@@ -1364,16 +1364,16 @@ export default function AdminDashboard() {
                     min={0}
                     value={lowStockThreshold}
                     onChange={(e) => setLowStockThreshold(Number(e.target.value))}
-                    className="w-16 bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-xs text-white text-center"
+                    className="w-16 bg-[#F8FAFC] border border-zinc-700 rounded px-2 py-1 text-xs text-white text-center"
                   />
                   <span className="text-xs text-zinc-300">un.)</span>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl">
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xl">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-zinc-950 border-b border-zinc-800 text-[10px] uppercase tracking-widest text-zinc-400">
+                    <tr className="bg-[#F8FAFC] border-b border-slate-200 text-[10px] uppercase tracking-widest text-zinc-400">
                       <th className="p-4">Produto</th>
                       <th className="p-4">Categoria</th>
                       <th className="p-4 text-center">Saldo Atual</th>
@@ -1419,9 +1419,9 @@ export default function AdminDashboard() {
               </div>
 
               {/* Histórico Visível de Movimentações com Motivo (T13_admin_estoque) */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-xl">
+              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xl">
                 <h3 className="text-sm font-black uppercase tracking-wider text-amber-500 mb-3">
-                  Movimentações de Estoque Registradas com Motivo (UC10 / RF14)
+                  Movimentações de Estoque Registradas com Motivo
                 </h3>
                 {stockHistoryList.length === 0 ? (
                   <p className="text-xs text-zinc-400">
@@ -1432,7 +1432,7 @@ export default function AdminDashboard() {
                     {stockHistoryList.map((m) => (
                       <div
                         key={m.id}
-                        className="flex flex-wrap items-center justify-between gap-2 bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-xs"
+                        className="flex flex-wrap items-center justify-between gap-2 bg-[#F8FAFC] p-3 rounded-lg border border-slate-200 text-xs"
                       >
                         <div>
                           <span
@@ -1459,7 +1459,7 @@ export default function AdminDashboard() {
               {/* Modal de Movimentação de Estoque */}
               {stockModalProduct && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                  <div className="bg-zinc-900 border border-zinc-700 rounded-xl max-w-lg w-full p-6 shadow-2xl">
+                  <div className="bg-white border border-zinc-700 rounded-xl max-w-lg w-full p-6 shadow-2xl">
                     <h3 className="text-base font-black uppercase text-white mb-1">
                       Ajustar Estoque — {stockModalProduct.name}
                     </h3>
@@ -1484,7 +1484,7 @@ export default function AdminDashboard() {
                                 type: e.target.value as 'ENTRADA' | 'SAIDA',
                               })
                             }
-                            className="w-full bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                            className="w-full bg-[#F8FAFC] border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                           >
                             <option value="ENTRADA">ENTRADA (Reposição / Inventário)</option>
                             <option value="SAIDA">SAIDA (Perda / Avaria / Ajuste)</option>
@@ -1502,7 +1502,7 @@ export default function AdminDashboard() {
                             onChange={(e) =>
                               setStockMoveForm({ ...stockMoveForm, quantity: e.target.value })
                             }
-                            className="w-full bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                            className="w-full bg-[#F8FAFC] border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                           />
                         </div>
                       </div>
@@ -1520,7 +1520,7 @@ export default function AdminDashboard() {
                             setStockMoveForm({ ...stockMoveForm, reason: e.target.value })
                           }
                           placeholder="Ex.: Reposição de fornecedor / Avaria no transporte"
-                          className="w-full bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                          className="w-full bg-[#F8FAFC] border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                         />
                       </div>
 
@@ -1541,7 +1541,7 @@ export default function AdminDashboard() {
                       </div>
                     </form>
 
-                    <div className="border-t border-zinc-800 pt-4 max-h-48 overflow-y-auto">
+                    <div className="border-t border-slate-200 pt-4 max-h-48 overflow-y-auto">
                       <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">
                         Últimas Movimentações Registradas
                       </p>
@@ -1552,7 +1552,7 @@ export default function AdminDashboard() {
                           {stockHistoryList.map((m) => (
                             <li
                               key={m.id}
-                              className="flex justify-between bg-zinc-950 p-2 rounded border border-zinc-800"
+                              className="flex justify-between bg-[#F8FAFC] p-2 rounded border border-slate-200"
                             >
                               <span>
                                 <strong
@@ -1582,13 +1582,13 @@ export default function AdminDashboard() {
           {/* ABA 4: CUPONS DE DESCONTO (UC06) */}
           {activeTab === 'CUPONS' && isAdmin && (
             <div className="space-y-6">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <div className="bg-white border border-slate-200 rounded-xl p-6">
                 <h2 className="text-sm font-black uppercase tracking-wider text-amber-500 mb-4">
                   Cadastrar ou Editar Cupom de Desconto
                 </h2>
                 <form
                   onSubmit={handleSaveCoupon}
-                  className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-3 bg-zinc-950 p-4 rounded-lg border border-zinc-800"
+                  className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-3 bg-[#F8FAFC] p-4 rounded-lg border border-slate-200"
                 >
                   <div>
                     <label className="block text-[10px] font-black uppercase text-zinc-400 mb-1">
@@ -1602,7 +1602,7 @@ export default function AdminDashboard() {
                         setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })
                       }
                       placeholder="BEMVINDO10"
-                      className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white uppercase"
+                      className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white uppercase"
                     />
                   </div>
                   <div>
@@ -1617,7 +1617,7 @@ export default function AdminDashboard() {
                           discount_type: e.target.value as 'PERCENTUAL' | 'FIXO',
                         })
                       }
-                      className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                      className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                     >
                       <option value="PERCENTUAL">PERCENTUAL (%)</option>
                       <option value="FIXO">FIXO (R$)</option>
@@ -1636,7 +1636,7 @@ export default function AdminDashboard() {
                       onChange={(e) =>
                         setCouponForm({ ...couponForm, discount_value: e.target.value })
                       }
-                      className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                      className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                     />
                   </div>
                   <div>
@@ -1650,7 +1650,7 @@ export default function AdminDashboard() {
                       onChange={(e) =>
                         setCouponForm({ ...couponForm, valid_from: e.target.value })
                       }
-                      className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                      className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                     />
                   </div>
                   <div>
@@ -1664,7 +1664,7 @@ export default function AdminDashboard() {
                       onChange={(e) =>
                         setCouponForm({ ...couponForm, valid_until: e.target.value })
                       }
-                      className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                      className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                     />
                   </div>
                   <div className="flex items-end">
@@ -1680,7 +1680,7 @@ export default function AdminDashboard() {
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-zinc-950 border-b border-zinc-800 text-[10px] uppercase tracking-widest text-zinc-400">
+                      <tr className="bg-[#F8FAFC] border-b border-slate-200 text-[10px] uppercase tracking-widest text-zinc-400">
                         <th className="p-3">Código</th>
                         <th className="p-3">Tipo</th>
                         <th className="p-3">Desconto</th>
@@ -1724,13 +1724,13 @@ export default function AdminDashboard() {
           {/* ABA 5: EQUIPE INTERNA (Seção 3.1) */}
           {activeTab === 'EQUIPE' && isAdmin && (
             <div className="space-y-6">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <div className="bg-white border border-slate-200 rounded-xl p-6">
                 <h2 className="text-sm font-black uppercase tracking-wider text-amber-500 mb-4">
                   Cadastrar Membro da Equipe (Atendente, Entregador ou Administrador)
                 </h2>
                 <form
                   onSubmit={handleCreateStaff}
-                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 bg-zinc-950 p-4 rounded-lg border border-zinc-800"
+                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 bg-[#F8FAFC] p-4 rounded-lg border border-slate-200"
                 >
                   <div>
                     <label className="block text-[10px] font-black uppercase text-zinc-400 mb-1">
@@ -1741,7 +1741,7 @@ export default function AdminDashboard() {
                       required
                       value={staffForm.name}
                       onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                      className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                     />
                   </div>
                   <div>
@@ -1753,7 +1753,7 @@ export default function AdminDashboard() {
                       required
                       value={staffForm.email}
                       onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                      className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                     />
                   </div>
                   <div>
@@ -1766,7 +1766,7 @@ export default function AdminDashboard() {
                       minLength={8}
                       value={staffForm.password}
                       onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                      className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                     />
                   </div>
                   <div>
@@ -1781,7 +1781,7 @@ export default function AdminDashboard() {
                           role: e.target.value as 'ATENDENTE' | 'ENTREGADOR' | 'ADMINISTRADOR',
                         })
                       }
-                      className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                      className="w-full bg-white border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                     >
                       <option value="ATENDENTE">ATENDENTE</option>
                       <option value="ENTREGADOR">ENTREGADOR</option>
@@ -1801,7 +1801,7 @@ export default function AdminDashboard() {
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-zinc-950 border-b border-zinc-800 text-[10px] uppercase tracking-widest text-zinc-400">
+                      <tr className="bg-[#F8FAFC] border-b border-slate-200 text-[10px] uppercase tracking-widest text-zinc-400">
                         <th className="p-3">Nome</th>
                         <th className="p-3">E-mail</th>
                         <th className="p-3">Perfil</th>
@@ -1855,7 +1855,7 @@ export default function AdminDashboard() {
             <div className="space-y-6">
               <form
                 onSubmit={runReport}
-                className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 flex flex-wrap items-end gap-4"
+                className="bg-white border border-slate-200 rounded-xl p-5 flex flex-wrap items-end gap-4"
               >
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">
@@ -1866,7 +1866,7 @@ export default function AdminDashboard() {
                     required
                     value={reportFrom}
                     onChange={(e) => setReportFrom(e.target.value)}
-                    className="bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                    className="bg-[#F8FAFC] border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                   />
                 </div>
                 <div>
@@ -1878,12 +1878,12 @@ export default function AdminDashboard() {
                     required
                     value={reportTo}
                     onChange={(e) => setReportTo(e.target.value)}
-                    className="bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                    className="bg-[#F8FAFC] border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                   />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">
-                    Agrupar por (UC12)
+                    Agrupar por
                   </label>
                   <select
                     value={reportGroupBy}
@@ -1892,7 +1892,7 @@ export default function AdminDashboard() {
                         e.target.value as 'PRODUTO' | 'CATEGORIA' | 'PAGAMENTO',
                       )
                     }
-                    className="bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-xs text-white"
+                    className="bg-[#F8FAFC] border border-zinc-700 rounded px-3 py-2 text-xs text-white"
                   >
                     <option value="CATEGORIA">CATEGORIA</option>
                     <option value="PRODUTO">PRODUTO</option>
@@ -1911,7 +1911,7 @@ export default function AdminDashboard() {
                 <div className="space-y-6">
                   {/* KPI Cards (Apenas pedidos PAGO e não cancelados compõem receita — UC12 P03) */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                    <div className="bg-white border border-slate-200 rounded-xl p-5">
                       <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">
                         Receita Demonstrativa (Pedidos PAGOS)
                       </p>
@@ -1922,13 +1922,13 @@ export default function AdminDashboard() {
                         Exclui pedidos pendentes e cancelados
                       </p>
                     </div>
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                    <div className="bg-white border border-slate-200 rounded-xl p-5">
                       <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">
                         Quantidade de Pedidos Pagos
                       </p>
                       <p className="text-2xl font-black text-white">{reportData.paid_orders}</p>
                     </div>
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                    <div className="bg-white border border-slate-200 rounded-xl p-5">
                       <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">
                         Ticket Médio
                       </p>
@@ -1936,7 +1936,7 @@ export default function AdminDashboard() {
                         R$ {Number(reportData.average_ticket).toFixed(2).replace('.', ',')}
                       </p>
                     </div>
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                    <div className="bg-white border border-slate-200 rounded-xl p-5">
                       <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">
                         Descontos Concedidos
                       </p>
@@ -1948,7 +1948,7 @@ export default function AdminDashboard() {
 
                   {/* Agrupamento Selecionado */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                    <div className="bg-white border border-slate-200 rounded-xl p-5">
                       <h3 className="text-xs font-black uppercase tracking-widest text-amber-500 mb-4">
                         Produtos Mais Vendidos (Pedidos Pagos)
                       </h3>
@@ -1961,7 +1961,7 @@ export default function AdminDashboard() {
                           {reportData.top_products.map((tp) => (
                             <li
                               key={tp.product_id}
-                              className="flex justify-between bg-zinc-950 p-2.5 rounded border border-zinc-800"
+                              className="flex justify-between bg-[#F8FAFC] p-2.5 rounded border border-slate-200"
                             >
                               <span className="font-bold text-white">
                                 {tp.name || `Produto #${tp.product_id}`}
@@ -1975,7 +1975,7 @@ export default function AdminDashboard() {
                       )}
                     </div>
 
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                    <div className="bg-white border border-slate-200 rounded-xl p-5">
                       <h3 className="text-xs font-black uppercase tracking-widest text-amber-500 mb-4">
                         Vendas por Categoria e Forma de Pagamento
                       </h3>
@@ -1990,7 +1990,7 @@ export default function AdminDashboard() {
                               {reportData.sales_by_category.map((sc) => (
                                 <li
                                   key={sc.category}
-                                  className="flex justify-between bg-zinc-950 p-2 rounded border border-zinc-800"
+                                  className="flex justify-between bg-[#F8FAFC] p-2 rounded border border-slate-200"
                                 >
                                   <span>
                                     <strong className="text-white">{sc.category}</strong> (
@@ -2017,7 +2017,7 @@ export default function AdminDashboard() {
                               {reportData.orders_by_payment_method.map((pm) => (
                                 <li
                                   key={pm.payment_method}
-                                  className="flex justify-between bg-zinc-950 p-2 rounded border border-zinc-800"
+                                  className="flex justify-between bg-[#F8FAFC] p-2 rounded border border-slate-200"
                                 >
                                   <span>
                                     <strong className="text-white">{pm.payment_method}</strong> (
@@ -2039,7 +2039,7 @@ export default function AdminDashboard() {
 
                   {/* Alerta de Estoque Baixo */}
                   {reportData.low_stock.length > 0 && (
-                    <div className="bg-zinc-900 border border-amber-500/30 rounded-xl p-5">
+                    <div className="bg-white border border-amber-500/30 rounded-xl p-5">
                       <h3 className="text-xs font-black uppercase tracking-widest text-amber-400 mb-3 flex items-center gap-2">
                         <AlertTriangle size={15} /> Produtos Ativos com Estoque Baixo (≤ 5 un.)
                       </h3>
@@ -2047,7 +2047,7 @@ export default function AdminDashboard() {
                         {reportData.low_stock.map((ls) => (
                           <span
                             key={ls.id}
-                            className="bg-zinc-950 border border-zinc-800 px-3 py-1.5 rounded text-xs text-zinc-200"
+                            className="bg-[#F8FAFC] border border-slate-200 px-3 py-1.5 rounded text-xs text-zinc-200"
                           >
                             {ls.name}:{' '}
                             <strong className="text-amber-500">{ls.stock_quantity} un.</strong>

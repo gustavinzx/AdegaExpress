@@ -340,7 +340,7 @@ export default function ProductArtwork({
       </svg>
 
       {size !== 'sm' && (
-        <span className="mt-1 inline-flex items-center rounded-full border border-[#c9a256]/20 bg-[#151210]/85 px-2.5 py-0.5 text-[10px] font-medium tracking-[0.14em] uppercase text-[#c9a256]">
+        <span className="mt-1 inline-flex items-center rounded-full border border-teal-200 bg-teal-50 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase text-teal-800">
           {palette.badge}
         </span>
       )}
