@@ -543,10 +543,23 @@ export default function Carrinho() {
                       </button>
                     )}
                   </div>
-                  {appliedCoupon && (
+                  {appliedCoupon ? (
                     <p className="text-[11px] text-teal-700 font-semibold mt-1.5">
                       ✓ Cupom {appliedCoupon} aplicado com sucesso!
                     </p>
+                  ) : (
+                    <div className="mt-2 flex items-center gap-1.5 text-[11px] text-slate-500">
+                      <span>Dica: experimente</span>
+                      <button
+                        type="button"
+                        onClick={() => setCouponCode('BEMVINDO10')}
+                        className="font-mono font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200 hover:bg-teal-100 transition-colors cursor-pointer"
+                        title="Inserir BEMVINDO10"
+                      >
+                        BEMVINDO10
+                      </button>
+                      <span>(10% OFF)</span>
+                    </div>
                   )}
                 </div>
 

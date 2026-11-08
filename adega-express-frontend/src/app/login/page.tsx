@@ -80,19 +80,64 @@ function LoginForm() {
             </p>
           </div>
 
-          {process.env.NEXT_PUBLIC_DEMO_HINTS === 'true' && process.env.NODE_ENV !== 'production' && (
-            <div className="rounded-2xl bg-teal-900/60 border border-teal-700/60 p-4 space-y-2 text-xs text-teal-200">
-              <div className="flex items-center gap-1.5 font-bold text-amber-300">
-                <ShieldCheck size={14} />
-                <span>Contas de Demonstração</span>
+          <div className="rounded-2xl bg-teal-900/60 border border-teal-700/60 p-4 space-y-2.5 text-xs text-teal-200">
+            <div className="flex items-center justify-between font-bold text-amber-300">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck size={15} />
+                <span>Acesso Rápido (Demonstração)</span>
               </div>
-              <p className="text-[11px] leading-relaxed text-teal-100">
-                Admin: <code className="text-white font-mono">admin@adegaexpress.com</code><br />
-                Cliente: <code className="text-white font-mono">cliente@adegaexpress.com</code><br />
-                Senha: <code className="text-amber-300 font-mono font-bold">Admin@123</code>
-              </p>
+              <span className="text-[10px] text-teal-300 uppercase tracking-wider font-semibold">1-clique</span>
             </div>
-          )}
+            <p className="text-[11px] leading-relaxed text-teal-100">
+              Preencha instantaneamente as credenciais dos perfis para avaliação acadêmica:
+            </p>
+            <div className="grid grid-cols-2 gap-1.5 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('admin@adegaexpress.com');
+                  setPassword('Admin@123');
+                  toast.success('Perfil Administrador selecionado');
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-teal-800/80 hover:bg-teal-700 text-teal-100 text-[11px] font-bold text-left border border-teal-600/40 hover:border-amber-400 transition-colors cursor-pointer"
+              >
+                👑 Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('atendente@adegaexpress.com');
+                  setPassword('Admin@123');
+                  toast.success('Perfil Atendente selecionado');
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-teal-800/80 hover:bg-teal-700 text-teal-100 text-[11px] font-bold text-left border border-teal-600/40 hover:border-amber-400 transition-colors cursor-pointer"
+              >
+                📋 Atendente
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('entregador@adegaexpress.com');
+                  setPassword('Admin@123');
+                  toast.success('Perfil Entregador selecionado');
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-teal-800/80 hover:bg-teal-700 text-teal-100 text-[11px] font-bold text-left border border-teal-600/40 hover:border-amber-400 transition-colors cursor-pointer"
+              >
+                🛵 Entregador
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('cliente@adegaexpress.com');
+                  setPassword('Admin@123');
+                  toast.success('Perfil Cliente selecionado');
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-teal-800/80 hover:bg-teal-700 text-teal-100 text-[11px] font-bold text-left border border-teal-600/40 hover:border-amber-400 transition-colors cursor-pointer"
+              >
+                🛒 Cliente
+              </button>
+            </div>
+          </div>
 
           <div className="rounded-2xl bg-teal-900/40 border border-teal-700/40 p-4 space-y-1.5 text-xs text-teal-100">
             <div className="flex items-center gap-1.5 font-bold text-amber-300">
