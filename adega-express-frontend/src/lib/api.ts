@@ -1,6 +1,6 @@
 // src/lib/api.ts
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adegaexpress.onrender.com' : 'http://localhost:3001');
 
 export class ApiError extends Error {
   public status: number;
