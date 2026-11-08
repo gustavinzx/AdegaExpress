@@ -34,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${jakarta.variable} ${jetbrains.variable}`}>
-      <body className="min-h-screen flex flex-col bg-[#F8FAFC] text-[#0F172A] antialiased selection:bg-teal-600/15 selection:text-teal-900">
+      <body className="min-h-screen flex flex-col bg-[#F8FAFC] text-[#0F172A] antialiased selection:bg-teal-600/15 selection:text-teal-900 overflow-x-hidden">
         <Providers>
           <div className="flex-1 flex flex-col">{children}</div>
           <Footer />

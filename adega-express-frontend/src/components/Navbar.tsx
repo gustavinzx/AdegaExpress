@@ -57,18 +57,18 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white/95 border-b border-slate-200 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18 gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-18 gap-2 sm:gap-4">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div className="h-10 w-10 rounded-xl border border-teal-200 bg-teal-50 flex items-center justify-center shadow-xs group-hover:border-teal-500 transition-all">
-              <GlassWater size={20} className="text-teal-700" />
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0">
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl border border-teal-200 bg-teal-50 flex items-center justify-center shadow-xs group-hover:border-teal-500 transition-all">
+              <GlassWater size={18} className="text-teal-700" />
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 leading-none">
+              <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-slate-900 leading-none">
                 ADEGA <span className="text-teal-700 font-bold">Express</span>
               </span>
-              <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mt-1">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold text-slate-500 mt-0.5 sm:mt-1">
                 bebidas não alcoólicas
               </span>
             </div>
@@ -173,16 +173,16 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+              <div className="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 border-l border-slate-200">
                 <Link
                   href="/login"
-                  className="inline-flex items-center justify-center h-10 px-3 rounded-xl text-xs font-semibold text-slate-700 hover:text-teal-700 transition-colors"
+                  className="inline-flex items-center justify-center h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl text-xs font-semibold text-slate-700 hover:text-teal-700 transition-colors"
                 >
                   Entrar
                 </Link>
                 <Link
                   href="/cadastro"
-                  className="inline-flex items-center justify-center h-10 px-4 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs tracking-wide transition-all shadow-xs"
+                  className="hidden sm:inline-flex items-center justify-center h-10 px-4 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs tracking-wide transition-all shadow-xs"
                 >
                   Criar Conta
                 </Link>
