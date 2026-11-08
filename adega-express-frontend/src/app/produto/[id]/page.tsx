@@ -14,8 +14,6 @@ import {
   Truck,
   Plus,
   Minus,
-  PackageCheck,
-  Check,
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';

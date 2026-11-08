@@ -13,7 +13,6 @@ import {
   StockMovement,
   AllowedCategoryName,
 } from '@/types';
-import { useRouter } from 'next/navigation';
 import {
   ShoppingBag,
   Package,
@@ -31,8 +30,6 @@ import {
   LogOut,
   GlassWater,
   Shield,
-  Clock,
-  XCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -43,7 +40,6 @@ const ALLOWED_CATEGORY_NAMES: AllowedCategoryName[] = ['Água', 'Sucos', 'Refrig
 
 export default function AdminDashboard() {
   const { user, isAuthenticated, isLoading, login, logout } = useAuth();
-  const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<AdminTab>('PEDIDOS');
   const [loading, setLoading] = useState(true);

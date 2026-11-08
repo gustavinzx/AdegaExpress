@@ -12,11 +12,9 @@ import {
   ShoppingBag,
   Plus,
   Trash2,
-  CheckCircle,
   Edit2,
   Star,
   KeyRound,
-  Info,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 

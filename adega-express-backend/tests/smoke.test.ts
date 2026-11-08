@@ -542,3 +542,69 @@ test('8. Isolamento de Segurança e Autorização (RBAC)', async () => {
     .send({ status: 'SAIU_PARA_ENTREGA' });
   assert([403, 404].includes(hijackAttempt.status));
 });
+
+test('9. RF17 — Pedidos de grande quantidade (20 ou mais unidades totais para eventos)', async () => {
+  // Criar produto com 50 unidades em estoque para testar compra de evento
+  const eventProd = await prisma.product.create({
+    data: {
+      name: 'Suco Natural Eventos 1L',
+      brand: 'Smoke Eventos',
+      price: '10.00',
+      volume_ml: 1000,
+      abv_percent: '0.00',
+      stock_quantity: 50,
+      category_id: testCategoryId,
+      active: true,
+    },
+  });
+
+  // Criar produto 2 com 15 unidades
+  const eventProd2 = await prisma.product.create({
+    data: {
+      name: 'Água Mineral Eventos 500ml',
+      brand: 'Smoke Eventos',
+      price: '4.00',
+      volume_ml: 500,
+      abv_percent: '0.00',
+      stock_quantity: 15,
+      category_id: testCategoryId,
+      active: true,
+    },
+  });
+
+  // 9.1 Pedido de grande quantidade (soma = 12 + 10 = 22 unidades >= 20) com estoque suficiente
+  const largeOrderRes = await api
+    .post('/orders')
+    .set('Authorization', `Bearer ${clienteToken}`)
+    .send({
+      address_id: addressId,
+      payment_method: 'PIX',
+      items: [
+        { product_id: eventProd.id, quantity: 12 },
+        { product_id: eventProd2.id, quantity: 10 },
+      ],
+    });
+
+  assert.equal(largeOrderRes.status, 201, 'Pedido de 22 unidades totais deve ser aceito');
+  assert.equal(largeOrderRes.body.status, 'success');
+
+  // Conferir baixa exata do estoque
+  const p1After = await prisma.product.findUniqueOrThrow({ where: { id: eventProd.id } });
+  const p2After = await prisma.product.findUniqueOrThrow({ where: { id: eventProd2.id } });
+  assert.equal(p1After.stock_quantity, 38, 'Estoque deve ser 50 - 12 = 38');
+  assert.equal(p2After.stock_quantity, 5, 'Estoque deve ser 15 - 10 = 5');
+
+  // 9.2 Pedido de 20 unidades que excede o estoque disponível (5 restantes) deve ser recusado sem saldo negativo
+  const exceedRes = await api
+    .post('/orders')
+    .set('Authorization', `Bearer ${clienteToken}`)
+    .send({
+      address_id: addressId,
+      payment_method: 'CARTAO',
+      items: [{ product_id: eventProd2.id, quantity: 20 }],
+    });
+
+  assert.equal(exceedRes.status, 409, 'Pedido que excede o estoque disponível deve retornar 409');
+  const p2Final = await prisma.product.findUniqueOrThrow({ where: { id: eventProd2.id } });
+  assert.equal(p2Final.stock_quantity, 5, 'Estoque não pode ficar negativo');
+});
