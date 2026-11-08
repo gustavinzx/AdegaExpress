@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import ProductArtwork from '@/components/ProductArtwork';
+import CatalogProductCard from '@/components/CatalogProductCard';
 import { api } from '@/lib/api';
 import { Product, Category } from '@/types';
 import { useCart } from '@/contexts/CartContext';
@@ -541,78 +541,13 @@ function HomeContent() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product) => {
-              const isOutOfStock = product.stock_quantity <= 0 || product.in_stock === false;
-
-              return (
-                <div
-                  key={product.id}
-                  className="group bg-white rounded-2xl border border-slate-200 hover:border-teal-300 hover:shadow-md transition-all p-4 flex flex-col justify-between"
-                >
-                  <Link href={`/produto/${product.id}`} className="block">
-                    {/* Artwork Container */}
-                    <div className="relative h-48 w-full rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden mb-3.5 group-hover:bg-slate-100/60 transition-colors">
-                      <ProductArtwork
-                        name={product.name}
-                        brand={product.brand}
-                        categoryName={product.category?.name}
-                        volumeMl={product.volume_ml}
-                        imageUrl={product.image_url}
-                        size="md"
-                        className="h-full w-full"
-                      />
-
-                      {/* Out of Stock Ribbon / Badge */}
-                      {isOutOfStock && (
-                        <div className="absolute top-2.5 left-2.5 bg-rose-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs">
-                          Em Falta
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Product Meta */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500">
-                        <span>{product.brand}</span>
-                        <span>{product.volume_ml} ml</span>
-                      </div>
-                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-teal-700 transition-colors line-clamp-1">
-                        {product.name}
-                      </h3>
-                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                        {product.description || 'Bebida não alcoólica refrescante de qualidade selecionada.'}
-                      </p>
-                    </div>
-                  </Link>
-
-                  {/* Price & Action Button */}
-                  <div className="pt-3.5 mt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                    <div>
-                      <span className="text-[10px] uppercase font-semibold text-slate-400 block leading-none">
-                        Preço
-                      </span>
-                      <span className="text-base font-extrabold text-slate-900">
-                        R$ {Number(product.price).toFixed(2).replace('.', ',')}
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      disabled={isOutOfStock}
-                      onClick={(e) => handleAddToCart(product, e)}
-                      className={`h-9 px-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
-                        isOutOfStock
-                          ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
-                          : 'bg-teal-700 hover:bg-teal-800 text-white shadow-xs'
-                      }`}
-                    >
-                      <ShoppingBag size={14} />
-                      <span>{isOutOfStock ? 'Esgotado' : 'Adicionar'}</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+            {products.map((product) => (
+              <CatalogProductCard
+                key={product.id}
+                product={product}
+                onAddToCart={handleAddToCart}
+              />
+            ))}
           </div>
         )}
       </main>
