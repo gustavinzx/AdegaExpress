@@ -13,7 +13,9 @@ const schema = z.object({
       'Configure um segredo aleatório.',
     ),
   JWT_EXPIRES_IN: z.enum(['15m', '1h', '8h', '1d', '7d']).default('8h'),
-  CORS_ORIGINS: z.string().default('http://localhost:3000'),
+  CORS_ORIGINS: z
+    .string()
+    .default('http://localhost:3000,https://adega-express-six.vercel.app'),
   SHIPPING_FEE: z
     .string()
     .regex(/^\d{1,5}(\.\d{1,2})?$/)
