@@ -17,7 +17,7 @@ import {
   Minus,
   Sparkles,
   Thermometer,
-  Wine,
+  GlassWater,
   Leaf,
   Clock,
   Star,
@@ -317,7 +317,7 @@ export default function ProductDetail() {
             {/* Card 2: Perfil Sensorial */}
             <div className="rounded-3xl border border-slate-200 bg-white p-6 space-y-4 shadow-xs">
               <div className="h-10 w-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
-                <Wine size={20} />
+                <GlassWater size={20} />
               </div>
               <h3 className="font-extrabold text-base text-slate-900">Perfil Sensorial</h3>
               <div className="flex flex-wrap gap-1.5">

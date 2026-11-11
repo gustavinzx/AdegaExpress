@@ -53,12 +53,20 @@ const ORDER_STEPS = [
   { key: 'ENTREGUE', label: '5. Entregue' },
 ] as const;
 
+let cachedUserId: number | null = null;
 let cachedUserOrders: Order[] = [];
 let cachedTotalPages = 1;
 
 export default function Pedidos() {
-  const [orders, setOrders] = useState<Order[]>(cachedUserOrders);
-  const [loading, setLoading] = useState(cachedUserOrders.length === 0);
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  const [orders, setOrders] = useState<Order[]>(() => {
+    return user && cachedUserId === user.id ? cachedUserOrders : [];
+  });
+  const [loading, setLoading] = useState(() => {
+    return !(user && cachedUserId === user.id && cachedUserOrders.length > 0);
+  });
   const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
 
@@ -67,11 +75,10 @@ export default function Pedidos() {
   const [cancelReason, setCancelReason] = useState('Desistência da compra');
 
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(cachedTotalPages);
+  const [totalPages, setTotalPages] = useState(() => {
+    return user && cachedUserId === user.id ? cachedTotalPages : 1;
+  });
   const limit = 10;
-
-  const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
 
   const fetchOrders = async (targetPage = page, silent = false) => {
     if (!silent && orders.length === 0) {
@@ -80,10 +87,13 @@ export default function Pedidos() {
     try {
       const res = await api.getPaginated<Order[]>(`/orders/me?page=${targetPage}&limit=${limit}`);
       const data = res.data || [];
-      cachedUserOrders = data;
+      if (user?.id) {
+        cachedUserId = user.id;
+        cachedUserOrders = data;
+      }
       setOrders(data);
       if (res.meta) {
-        cachedTotalPages = res.meta.total_pages;
+        if (user?.id) cachedTotalPages = res.meta.total_pages;
         setTotalPages(res.meta.total_pages);
       }
     } catch {
@@ -92,6 +102,16 @@ export default function Pedidos() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user && cachedUserId !== user.id) {
+      cachedUserId = user.id;
+      cachedUserOrders = [];
+      cachedTotalPages = 1;
+      setOrders([]);
+      setLoading(true);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
