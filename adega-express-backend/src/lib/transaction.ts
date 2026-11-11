@@ -13,6 +13,17 @@ export async function transaction<T>(fn: (tx: Prisma.TransactionClient) => Promi
       });
     } catch (error) {
       if (
+        error instanceof Error &&
+        (/isolation level|serializable|not supported|unsupported|8018/i.test(error.message) ||
+          (error instanceof Prisma.PrismaClientKnownRequestError &&
+            (error.code === 'P2010' || error.code === 'P2028')))
+      ) {
+        return await prisma.$transaction(fn, {
+          maxWait: 10000,
+          timeout: 20000,
+        });
+      }
+      if (
         !(error instanceof Prisma.PrismaClientKnownRequestError) ||
         error.code !== 'P2034' ||
         attempt >= 3
