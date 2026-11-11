@@ -56,7 +56,7 @@ let cachedProducts: Product[] = [];
 
 function HomeContent() {
   const searchParams = useSearchParams();
-  const initialQuery = searchParams?.get('q') || '';
+  const initialQuery = searchParams?.get('q') || searchParams?.get('query') || '';
   const initialCategoryName = searchParams?.get('category') || '';
 
   const [categories, setCategories] = useState<Category[]>(cachedCategories);
@@ -166,6 +166,46 @@ function HomeContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchName, selectedCategoryId]);
 
+  const handleSelectCategory = (catId: string) => {
+    setSelectedCategoryId(catId);
+    setSearchName('');
+    setBrandFilter('');
+    setVolumeFilter('');
+    setMinPrice('');
+    setMaxPrice('');
+    setFilterError('');
+
+    // Instant optimistic client filter from cachedProducts if available
+    if (cachedProducts.length > 0) {
+      if (!catId) {
+        setProducts(cachedProducts);
+      } else {
+        const filtered = cachedProducts.filter(
+          (p) =>
+            String(p.category_id) === String(catId) ||
+            String(p.category?.id) === String(catId),
+        );
+        if (filtered.length > 0) {
+          setProducts(filtered);
+        }
+      }
+    }
+
+    void fetchProducts({
+      name: '',
+      category_id: catId,
+      brand: '',
+      volume_ml: '',
+      min_price: '',
+      max_price: '',
+    });
+
+    const el = document.getElementById('catalogo');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const handleApplyFilters = (e: React.FormEvent) => {
     e.preventDefault();
     void fetchProducts();
@@ -232,10 +272,7 @@ function HomeContent() {
             <div className="flex flex-wrap items-center gap-2 pt-2">
               <button
                 type="button"
-                onClick={() => {
-                  setSelectedCategoryId('');
-                  document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
-                }}
+                onClick={() => handleSelectCategory('')}
                 className={`h-9 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   selectedCategoryId === ''
                     ? 'bg-amber-400 text-slate-950 shadow-md font-extrabold'
@@ -248,10 +285,7 @@ function HomeContent() {
                 <button
                   key={cat.id}
                   type="button"
-                  onClick={() => {
-                    setSelectedCategoryId(String(cat.id));
-                    document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                  onClick={() => handleSelectCategory(String(cat.id))}
                   className={`h-9 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                     selectedCategoryId === String(cat.id)
                       ? 'bg-amber-400 text-slate-950 shadow-md font-extrabold'
@@ -537,6 +571,61 @@ function HomeContent() {
             </div>
           )}
         </section>
+
+        {/* Category Header & Inline Switcher */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-2">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              {selectedCategoryId
+                ? categories.find((c) => String(c.id) === selectedCategoryId)?.name || 'Coleção Selecionada'
+                : 'Todas as Bebidas'}
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {products.length} {products.length === 1 ? 'produto disponível' : 'produtos disponíveis'}
+              {selectedCategoryId && (
+                <>
+                  {' '}•{' '}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectCategory('')}
+                    className="text-teal-700 hover:underline font-bold cursor-pointer"
+                  >
+                    Ver todas as coleções
+                  </button>
+                </>
+              )}
+            </p>
+          </div>
+
+          {/* Inline Quick Category Pills */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => handleSelectCategory('')}
+              className={`h-8 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                selectedCategoryId === ''
+                  ? 'bg-teal-700 text-white shadow-xs'
+                  : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              Todas
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => handleSelectCategory(String(cat.id))}
+                className={`h-8 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  selectedCategoryId === String(cat.id)
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Product Grid */}
         {loading ? (
