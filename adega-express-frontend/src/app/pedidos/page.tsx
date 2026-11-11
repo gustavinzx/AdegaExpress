@@ -20,6 +20,9 @@ import {
   MapPin,
   ChevronDown,
   ChevronUp,
+  AlertTriangle,
+  Loader2,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -56,6 +59,10 @@ export default function Pedidos() {
   const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
 
+  // Cancellation modal state
+  const [modalOrder, setModalOrder] = useState<Order | null>(null);
+  const [cancelReason, setCancelReason] = useState('Desistência da compra');
+
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
@@ -63,8 +70,10 @@ export default function Pedidos() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
-  const fetchOrders = async (targetPage = page) => {
-    setLoading(true);
+  const fetchOrders = async (targetPage = page, silent = false) => {
+    if (!silent) {
+      setLoading(true);
+    }
     try {
       const res = await api.getPaginated<Order[]>(`/orders/me?page=${targetPage}&limit=${limit}`);
       setOrders(res.data || []);
@@ -74,7 +83,9 @@ export default function Pedidos() {
     } catch {
       toast.error('Erro ao consultar histórico de pedidos.');
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   };
 
@@ -91,15 +102,48 @@ export default function Pedidos() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, page]);
 
-  const handleCancelOrder = async (orderId: number) => {
-    const reason = prompt('Informe o motivo do cancelamento do pedido:', 'Desistência da compra');
-    if (!reason || !reason.trim()) return;
+  const confirmCancelOrder = async () => {
+    if (!modalOrder) return;
+    const orderId = modalOrder.id;
+    const reason = cancelReason.trim() || 'Desistência da compra';
+
+    // Optimistic UI Update: update immediately in local state
+    setModalOrder(null);
+    setCancellingId(orderId);
+    const previousOrders = [...orders];
+
+    setOrders((current) =>
+      current.map((o) =>
+        o.id === orderId
+          ? {
+              ...o,
+              status: 'CANCELADO' as Order['status'],
+              cancellation_reason: reason,
+              history: o.history
+                ? [
+                    ...o.history,
+                    {
+                      id: Date.now(),
+                      order_id: orderId,
+                      status: 'CANCELADO',
+                      actor_id: 0,
+                      reason,
+                      created_at: new Date().toISOString(),
+                    },
+                  ]
+                : undefined,
+            }
+          : o,
+      ),
+    );
+
     try {
-      setCancellingId(orderId);
-      await api.post(`/orders/${orderId}/cancel`, { reason: reason.trim() });
+      await api.post(`/orders/${orderId}/cancel`, { reason });
       toast.success('Pedido cancelado e estoque devolvido com sucesso.');
-      await fetchOrders(page);
+      // Silently refresh in background without re-rendering skeletons
+      await fetchOrders(page, true);
     } catch (e: unknown) {
+      setOrders(previousOrders);
       const msg = e instanceof Error ? e.message : 'Erro ao cancelar pedido.';
       toast.error(msg);
     } finally {
@@ -222,10 +266,20 @@ export default function Pedidos() {
                         <button
                           type="button"
                           disabled={cancellingId === order.id}
-                          onClick={() => void handleCancelOrder(order.id)}
-                          className="h-8 px-3 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                          onClick={() => {
+                            setModalOrder(order);
+                            setCancelReason('Desistência da compra');
+                          }}
+                          className="h-8 px-3 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5"
                         >
-                          {cancellingId === order.id ? 'Cancelando...' : 'Cancelar'}
+                          {cancellingId === order.id ? (
+                            <>
+                              <Loader2 size={12} className="animate-spin" />
+                              <span>Cancelando...</span>
+                            </>
+                          ) : (
+                            <span>Cancelar</span>
+                          )}
                         </button>
                       )}
                     </div>
@@ -419,6 +473,91 @@ export default function Pedidos() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Modal de Confirmação de Cancelamento com Visual Polido */}
+        {modalOrder && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cancel-modal-title"
+          >
+            <div
+              className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-5 animate-in fade-in zoom-in-95 duration-150"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+                    <AlertTriangle size={20} />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-rose-600">
+                      Ação com retorno ao estoque
+                    </span>
+                    <h2 id="cancel-modal-title" className="text-lg font-extrabold text-slate-900">
+                      Cancelar Pedido #{modalOrder.id}?
+                    </h2>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setModalOrder(null)}
+                  className="h-8 w-8 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Tem certeza de que deseja cancelar este pedido? Os itens reservados serão imediatamente devolvidos ao estoque da adega.
+              </p>
+
+              <div className="space-y-1.5">
+                <label htmlFor="cancel-reason-input" className="block text-xs font-bold text-slate-700">
+                  Motivo do Cancelamento
+                </label>
+                <input
+                  id="cancel-reason-input"
+                  type="text"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Ex: Desistência da compra"
+                  maxLength={120}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-rose-500/30 focus:border-rose-600 transition-all"
+                />
+                <span className="text-[10px] text-slate-400 block text-right">
+                  {cancelReason.length}/120 caracteres
+                </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setModalOrder(null)}
+                  className="h-10 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
+                >
+                  Voltar
+                </button>
+                <button
+                  type="button"
+                  disabled={!cancelReason.trim() || cancellingId === modalOrder.id}
+                  onClick={() => void confirmCancelOrder()}
+                  className="h-10 px-5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  {cancellingId === modalOrder.id ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      <span>Cancelando...</span>
+                    </>
+                  ) : (
+                    <span>Confirmar Cancelamento</span>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </main>

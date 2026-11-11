@@ -28,10 +28,20 @@ const detail = {
   payments: { orderBy: { id: 'asc' as const } },
 } satisfies Prisma.OrderInclude;
 
+let lastAutoExpirationCheck = 0;
+
 export async function expirePendingOrders(
   now = new Date(),
   expirationMs = config.ORDER_EXPIRATION_MINUTES * 60 * 1000,
 ): Promise<number> {
+  const isCustomTime = arguments.length > 0;
+  if (config.NODE_ENV !== 'test' && !isCustomTime && Date.now() - lastAutoExpirationCheck < 15_000) {
+    return 0;
+  }
+  if (!isCustomTime) {
+    lastAutoExpirationCheck = Date.now();
+  }
+
   const cutoff = new Date(now.getTime() - expirationMs);
   const expiredCandidates = await prisma.order.findMany({
     where: {
@@ -41,6 +51,9 @@ export async function expirePendingOrders(
     },
     select: { id: true },
   });
+  if (expiredCandidates.length === 0) {
+    return 0;
+  }
   let cancelledCount = 0;
   for (const candidate of expiredCandidates) {
     const cancelled = await transaction(async (tx) => {
@@ -335,7 +348,7 @@ export async function updateOrderStatus(
   actor: AuthPayload,
   reason?: string,
 ) {
-  await expirePendingOrders();
+  void expirePendingOrders().catch(() => {});
   return transaction(async (tx) => {
     const order = await tx.order.findUnique({ where: { id }, include: { items: true } });
     if (!order || (actor.role === 'CLIENTE' && order.user_id !== actor.sub)) {
@@ -413,7 +426,7 @@ export async function recordPayment(
   input: z.infer<typeof schemas.payment>,
   actor_id: number,
 ) {
-  await expirePendingOrders();
+  void expirePendingOrders().catch(() => {});
   return transaction(async (tx) => {
     const order = await tx.order.findUnique({ where: { id } });
     if (!order) {
