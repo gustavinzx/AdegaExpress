@@ -66,7 +66,6 @@ test('senha evita truncamento silencioso do bcrypt em UTF-8', () => {
     name: 'Cliente',
     email: 'test@example.com',
     password: 'á'.repeat(40),
-    birth_date: '2000-01-01',
   };
   assert.equal(s.register.safeParse(data).success, false);
   assert.equal(s.register.safeParse({ ...data, password: 'uma-senha-longa' }).success, true);

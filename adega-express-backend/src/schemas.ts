@@ -29,8 +29,6 @@ export const register = z
     name: text(150),
     email: z.string().trim().toLowerCase().email().max(200),
     password,
-    cpf: z.string().max(14).optional(),
-    birth_date: date.optional(),
   })
   .strict();
 export const login = z

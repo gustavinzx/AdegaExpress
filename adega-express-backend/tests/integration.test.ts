@@ -646,7 +646,6 @@ test('equipe é criada pelo administrador e não recebe token de outro perfil', 
     name: 'Novo Atendente',
     email: 'newstaff@example.com',
     password: 'Senha-Equipe-123!',
-    birth_date: '1990-01-01',
     role: 'ATENDENTE',
   };
   await api.post('/staff').set(auth('attendant')).send(input).expect(403);

@@ -19,16 +19,13 @@ export const userSelect = {
 export type RegisterInput = z.infer<typeof schemas.register>;
 export type LoginInput = z.infer<typeof schemas.login>;
 export async function register(input: RegisterInput, role: Role = 'CLIENTE') {
-  const birthDate = input.birth_date ? new Date(input.birth_date + 'T00:00:00Z') : null;
   const password_hash = await bcrypt.hash(input.password, 12);
   const user = await prisma.user.create({
     data: {
       name: input.name,
       email: input.email,
       password_hash,
-      birth_date: birthDate,
       role,
-      cpf: input.cpf,
     },
     select: userSelect,
   });

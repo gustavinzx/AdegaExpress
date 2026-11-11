@@ -39,7 +39,7 @@ const origins = config.CORS_ORIGINS.split(',').map((o) => o.trim());
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || origins.includes(origin) || origin.endsWith('.vercel.app')) {
+      if (!origin || origins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new AppError(403, 'Origem não permitida.'));
