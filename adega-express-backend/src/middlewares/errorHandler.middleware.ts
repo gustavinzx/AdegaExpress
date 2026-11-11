@@ -39,6 +39,7 @@ export function errorHandler(
     message = 'Corpo da requisição excede o limite.';
   }
   if (status >= 500) {
+    details = error instanceof Error ? error.message : String(error);
     console.error(
       JSON.stringify({
         event: 'request_failed',
