@@ -51,14 +51,17 @@ function CatalogSkeleton() {
   );
 }
 
+let cachedCategories: Category[] = [];
+let cachedProducts: Product[] = [];
+
 function HomeContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams?.get('q') || '';
   const initialCategoryName = searchParams?.get('category') || '';
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>(cachedCategories);
+  const [products, setProducts] = useState<Product[]>(cachedProducts);
+  const [loading, setLoading] = useState(cachedProducts.length === 0);
   const { addItem } = useCart();
 
   // Filtros de catálogo
@@ -73,20 +76,25 @@ function HomeContent() {
   const loadCategories = async () => {
     try {
       const res = await api.getPaginated<Category[]>('/categories?limit=50');
-      setCategories(res.data || []);
+      const cats = res.data || [];
+      cachedCategories = cats;
+      setCategories(cats);
     } catch {
       // Fallback silencioso
     }
   };
 
-  const fetchProducts = async (overrideParams?: {
-    name?: string;
-    category_id?: string;
-    brand?: string;
-    volume_ml?: string;
-    min_price?: string;
-    max_price?: string;
-  }) => {
+  const fetchProducts = async (
+    overrideParams?: {
+      name?: string;
+      category_id?: string;
+      brand?: string;
+      volume_ml?: string;
+      min_price?: string;
+      max_price?: string;
+    },
+    silent = false,
+  ) => {
     setFilterError('');
     const nameVal = overrideParams ? overrideParams.name ?? '' : searchName;
     const catVal = overrideParams ? overrideParams.category_id ?? '' : selectedCategoryId;
@@ -103,7 +111,9 @@ function HomeContent() {
       return;
     }
 
-    setLoading(true);
+    if (!silent && products.length === 0) {
+      setLoading(true);
+    }
     try {
       const params = new URLSearchParams({ limit: '100' });
       if (nameVal.trim()) params.set('name', nameVal.trim());
@@ -114,7 +124,11 @@ function HomeContent() {
       if (!isNaN(maxNum) && maxNum >= 0) params.set('max_price', maxNum.toFixed(2));
 
       const prodRes = await api.getPaginated<Product[]>(`/products?${params.toString()}`);
-      setProducts(prodRes.data || []);
+      const data = prodRes.data || [];
+      if (!nameVal && !catVal && !brandVal && !volVal && !minVal && !maxVal) {
+        cachedProducts = data;
+      }
+      setProducts(data);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Erro ao consultar catálogo.';
       setFilterError(msg);
@@ -128,7 +142,9 @@ function HomeContent() {
   }, [initialQuery]);
 
   useEffect(() => {
-    void loadCategories();
+    if (cachedCategories.length === 0) {
+      void loadCategories();
+    }
   }, []);
 
   useEffect(() => {
@@ -143,7 +159,10 @@ function HomeContent() {
   }, [initialCategoryName, categories]);
 
   useEffect(() => {
-    void fetchProducts();
+    const timer = setTimeout(() => {
+      void fetchProducts(undefined, products.length > 0);
+    }, 250);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchName, selectedCategoryId]);
 

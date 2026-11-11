@@ -33,13 +33,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (active) {
             setToken(storedToken);
             setUser(parsedUser);
+            // Liberar a interface imediatamente usando o cache local
+            setIsLoading(false);
           }
         } catch {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
+          if (active) {
+            setIsLoading(false);
+          }
+        }
+      } else {
+        if (active) {
+          setIsLoading(false);
         }
       }
 
+      // Validação silenciosa em segundo plano sem bloquear a renderização da interface
       if (storedToken) {
         try {
           const freshUser = await api.get<User>('/auth/me');
@@ -55,10 +65,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(null);
           }
         }
-      }
-
-      if (active) {
-        setIsLoading(false);
       }
     };
 

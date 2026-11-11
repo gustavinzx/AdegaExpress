@@ -53,9 +53,12 @@ const ORDER_STEPS = [
   { key: 'ENTREGUE', label: '5. Entregue' },
 ] as const;
 
+let cachedUserOrders: Order[] = [];
+let cachedTotalPages = 1;
+
 export default function Pedidos() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState<Order[]>(cachedUserOrders);
+  const [loading, setLoading] = useState(cachedUserOrders.length === 0);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
 
@@ -64,28 +67,29 @@ export default function Pedidos() {
   const [cancelReason, setCancelReason] = useState('Desistência da compra');
 
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(cachedTotalPages);
   const limit = 10;
 
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   const fetchOrders = async (targetPage = page, silent = false) => {
-    if (!silent) {
+    if (!silent && orders.length === 0) {
       setLoading(true);
     }
     try {
       const res = await api.getPaginated<Order[]>(`/orders/me?page=${targetPage}&limit=${limit}`);
-      setOrders(res.data || []);
+      const data = res.data || [];
+      cachedUserOrders = data;
+      setOrders(data);
       if (res.meta) {
+        cachedTotalPages = res.meta.total_pages;
         setTotalPages(res.meta.total_pages);
       }
     } catch {
       toast.error('Erro ao consultar histórico de pedidos.');
     } finally {
-      if (!silent) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   };
 
