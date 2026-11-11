@@ -108,6 +108,12 @@ export default function Carrinho() {
   useEffect(() => {
     if (isAuthenticated && user?.role === 'CLIENTE') {
       void fetchAddresses();
+    } else {
+      setAddresses([]);
+      setSelectedAddressId(null);
+      setAppliedCoupon('');
+      setCouponCode('');
+      setDiscount(0);
     }
   }, [isAuthenticated, user]);
 

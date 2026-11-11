@@ -79,7 +79,7 @@ const authLimit = rateLimit({
   legacyHeaders: false,
   message: limitMessage,
 });
-app.use(['/auth/login', '/auth/register'], authLimit);
+app.use(['/auth/login', '/auth/register', '/auth/password'], authLimit);
 app.get('/openapi.json', (_req, res) => {
   res.json(openapi);
 });

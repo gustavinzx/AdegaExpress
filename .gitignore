@@ -6,3 +6,6 @@ dist/
 build/
 prisma/dev.db
 *.log
+*.zip
+scratch/
+.system_generated/

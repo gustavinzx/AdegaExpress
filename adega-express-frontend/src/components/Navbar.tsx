@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 function SearchInput() {
   const router = useRouter();
@@ -52,8 +53,15 @@ function SearchInput() {
 }
 
 export default function Navbar() {
+  const router = useRouter();
   const { user, logout, isAuthenticated } = useAuth();
   const { itemCount } = useCart();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
+    toast.success('Sessão encerrada com sucesso.');
+  };
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white/95 border-b border-slate-200 shadow-xs">
@@ -165,7 +173,7 @@ export default function Navbar() {
                 </Link>
 
                 <button
-                  onClick={() => void logout()}
+                  onClick={() => void handleLogout()}
                   className="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-500 hover:text-red-600 transition-all cursor-pointer"
                   title="Encerrar Sessão"
                 >
