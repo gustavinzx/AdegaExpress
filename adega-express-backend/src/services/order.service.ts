@@ -191,7 +191,7 @@ async function priceOrder(
   };
 }
 export async function quoteOrder(user_id: number, input: schemas.CheckoutInput) {
-  return transaction((tx) => priceOrder(tx, user_id, input));
+  return priceOrder(prisma, user_id, input);
 }
 export async function createOrder(user_id: number, input: schemas.CheckoutInput, key?: string) {
   const canonical = {
