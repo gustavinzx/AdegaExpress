@@ -35,7 +35,14 @@ app.use((req, res, next) => {
   next();
 });
 app.use(helmet());
-const origins = config.CORS_ORIGINS.split(',').map((o) => o.trim());
+const configuredOrigins = config.CORS_ORIGINS.split(',').map((o) => o.trim());
+const origins = Array.from(
+  new Set([
+    ...configuredOrigins,
+    'http://localhost:3000',
+    'https://adega-express-six.vercel.app',
+  ]),
+);
 app.use(
   cors({
     origin: (origin, callback) => {
