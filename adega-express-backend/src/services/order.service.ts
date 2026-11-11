@@ -236,8 +236,8 @@ export async function createOrder(user_id: number, input: schemas.CheckoutInput,
           user_id,
           address_id: input.address_id,
           payment_method: input.payment_method,
-          idempotency_key: key,
-          request_hash: key ? hash : undefined,
+          idempotency_key: key ?? null,
+          request_hash: key ? hash : null,
           items: { create: items },
           history: { create: { status: 'PENDENTE', actor_id: user_id } },
         },
@@ -369,7 +369,7 @@ export async function updateOrderStatus(
         status,
         ...(status === 'CANCELADO'
           ? {
-              cancellation_reason: reason,
+              cancellation_reason: reason ?? null,
               payment_status:
                 order.payment_status === 'PAGO' ? 'ESTORNO_PENDENTE' : order.payment_status,
             }
@@ -402,7 +402,9 @@ export async function updateOrderStatus(
         });
       }
     }
-    await tx.orderHistory.create({ data: { order_id: id, status, actor_id: actor.sub, reason } });
+    await tx.orderHistory.create({
+      data: { order_id: id, status, actor_id: actor.sub, reason: reason ?? null },
+    });
     return tx.order.findUniqueOrThrow({ where: { id }, include: detail });
   });
 }

@@ -27,6 +27,7 @@ export async function saveAddress(user_id: number, input: z.infer<typeof address
     }
     const data = {
       ...input,
+      complement: input.complement ?? null,
       user_id,
       is_default,
       zip: input.zip.replace(/^(\d{5})(\d{3})$/, '$1-$2'),
