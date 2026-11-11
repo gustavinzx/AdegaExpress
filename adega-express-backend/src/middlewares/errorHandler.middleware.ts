@@ -39,12 +39,22 @@ export function errorHandler(
     message = 'Corpo da requisição excede o limite.';
   }
   if (status >= 500) {
+    const err = error instanceof Error ? error : null;
+    const prismaKnown = error instanceof Prisma.PrismaClientKnownRequestError ? error : null;
     console.error(
       JSON.stringify({
         event: 'request_failed',
         requestId: res.locals.requestId as string,
-        error: error instanceof Error ? error.name : 'UnknownError',
         status,
+        name: err?.name ?? 'UnknownError',
+        message: err?.message ?? String(error),
+        code:
+          prismaKnown?.code ??
+          (error && typeof error === 'object' && 'code' in error
+            ? (error as { code?: unknown }).code
+            : undefined),
+        meta: prismaKnown?.meta ?? undefined,
+        stack: err?.stack ?? undefined,
       }),
     );
   }
