@@ -25,11 +25,24 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    credentials: 'include',
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      credentials: 'include',
+      headers,
+    });
+  } catch (err: unknown) {
+    const isNetworkError =
+      err instanceof TypeError || (err instanceof Error && err.name === 'TypeError');
+    if (isNetworkError) {
+      throw new ApiError(
+        0,
+        'Não foi possível conectar ao servidor. O serviço em nuvem pode estar inicializando (cold start). Aguarde alguns instantes e tente novamente.',
+      );
+    }
+    throw new ApiError(0, err instanceof Error ? err.message : 'Erro de conexão.');
+  }
 
   if (response.status === 204) {
     return {} as T;
@@ -56,11 +69,25 @@ async function requestRaw<T>(endpoint: string, options: RequestInit = {}): Promi
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    credentials: 'include',
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      credentials: 'include',
+      headers,
+    });
+  } catch (err: unknown) {
+    const isNetworkError =
+      err instanceof TypeError || (err instanceof Error && err.name === 'TypeError');
+    if (isNetworkError) {
+      throw new ApiError(
+        0,
+        'Não foi possível conectar ao servidor. O serviço em nuvem pode estar inicializando (cold start). Aguarde alguns instantes e tente novamente.',
+      );
+    }
+    throw new ApiError(0, err instanceof Error ? err.message : 'Erro de conexão.');
+  }
+
   if (response.status === 204) return {} as T;
 
   let data;

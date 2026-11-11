@@ -36,8 +36,11 @@ export default function Cadastro() {
       toast.success('Conta criada com sucesso! Bem-vindo(a) à Adega Express.');
       router.push('/');
     } catch (err: unknown) {
-      const errorMessage =
+      let errorMessage =
         err instanceof Error ? err.message : 'Erro ao criar conta. Verifique os dados informados.';
+      if (errorMessage.includes('Registro já existente')) {
+        errorMessage = 'Este e-mail já está cadastrado. Faça login na sua conta ou utilize outro e-mail.';
+      }
       toast.error(errorMessage);
     } finally {
       setLoading(false);

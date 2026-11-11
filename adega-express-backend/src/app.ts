@@ -34,8 +34,12 @@ app.use((req, res, next) => {
   });
   next();
 });
-app.use(helmet());
-const configuredOrigins = config.CORS_ORIGINS.split(',').map((o) => o.trim());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }),
+);
+const configuredOrigins = config.CORS_ORIGINS.split(',').map((o) => o.trim().replace(/\/$/, ''));
 const origins = Array.from(
   new Set([
     ...configuredOrigins,
@@ -46,7 +50,8 @@ const origins = Array.from(
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || origins.includes(origin)) {
+      const normalized = origin ? origin.replace(/\/$/, '') : null;
+      if (!origin || (normalized && (origins.includes(normalized) || normalized.endsWith('.vercel.app')))) {
         callback(null, true);
       } else {
         callback(new AppError(403, 'Origem não permitida.'));
@@ -63,6 +68,7 @@ const limitMessage = {
   status: 'error',
   message: 'Muitas requisições. Tente novamente mais tarde.',
 };
+const skipOptions = (req: express.Request) => req.method === 'OPTIONS';
 app.use(
   rateLimit({
     windowMs: 60000,
@@ -70,6 +76,7 @@ app.use(
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     message: limitMessage,
+    skip: skipOptions,
   }),
 );
 const authLimit = rateLimit({
@@ -78,6 +85,7 @@ const authLimit = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: limitMessage,
+  skip: skipOptions,
 });
 app.use(['/auth/login', '/auth/register', '/auth/password'], authLimit);
 app.get('/openapi.json', (_req, res) => {
