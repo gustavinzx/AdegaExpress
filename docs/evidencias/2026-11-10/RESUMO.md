@@ -1,18 +1,19 @@
 # RELATÓRIO CONSOLIDADO DE EVIDÊNCIAS DE VERIFICAÇÃO EMPÍRICA — ADEGA EXPRESS
 
 **Data da Execução:** 10–12 de Novembro de 2026  
-**Commit Git:** `d107ea703183b12f9c9d81462e00df14c87c814b` (`HEAD` da branch `main`, Live no Render e Vercel)  
+**Commit Git:** `a48ec39c13dbc3894b21d050e1f1f95c92db7925` (`HEAD` da branch `main`, Live no Render e Vercel)  
 *Rastreabilidade e Relação entre Commits:*
-- `ecdc2e3`: Commit da suíte consolidada de 50 testes automatizados (12 unitários, 9 smoke e 29 integração A1 a D5).
+- `ecdc2e3`: Commit da suíte consolidada inicial de 50 testes automatizados (12 unitários, 9 smoke e 29 integração A1 a D5).
 - `b7f691f`: Sincronização e alinhamento da matriz de rastreabilidade do Documento de Visão v5.9 aos 50 testes reais e ao RF17.
 - `6e96ed2`: Atualização formal do Documento de Visão v5.9 com propriedades limpas e recálculo do sumário no Word.
-- `d107ea7`: Commit atual Live no Render (`srv-db0fsvs9v7es73e2shj0`) e na Vercel, contendo o limite de 99 unidades por item no carrinho (`schemas.ts` e `CartContext.tsx`) e a restrição estrita de CORS sem wildcard genérico, validada empiricamente via teste C8 (HTTP 403 para `https://qualquer.vercel.app` e HTTP 200 para as origens oficiais).
-- Os logs de verificação unitários, smoke e de integração foram preservados para reprodução integral a partir de `ecdc2e3`, enquanto o teste de segurança e sessão `C8_sessao_cors.log` foi reexecutado e atualizado no commit `d107ea7`.
+- `1959e15`: Implementação do limite de 99 unidades por item no carrinho (`schemas.ts` e `CartContext.tsx`) e sincronização docx/pdf.
+- `d107ea7`: Remoção do wildcard genérico `*.vercel.app` da política de CORS.
+- `a48ec39`: Commit definitivo Live no Render e na Vercel: restringe estritamente as origens permitidas ao frontend oficial (`https://adega-express-six.vercel.app`) e ao ambiente de desenvolvimento (`http://localhost:3000`), purgando qualquer domínio inexistente. Todos os testes unitários (12), smoke (9), integração (29), segurança CORS (C8) e validação em produção (D5) foram reexecutados com logs auditados neste commit.
 
 **Ambiente e Tecnologias Homologadas:**
-- **Frontend:** Next.js 16.3.4 | React 19.2.8 | Tailwind CSS 4.3.3 | Turbopack | Vercel Edge (`https://adega-express-six.vercel.app` e `https://adega-express.vercel.app`)
+- **Frontend:** Next.js 16.3.4 | React 19.2.8 | Tailwind CSS 4.3.3 | Turbopack | Vercel Edge (`https://adega-express-six.vercel.app`)
 - **Backend:** Node.js v24.11.0 | Express 4.22.3 | Prisma Client v5.22.0 | Render (`https://adegaexpress.onrender.com`)
-- **Bancos de Dados:** MySQL Server 8.0.45 local (testes de fumaça e integração A4) e TiDB Serverless / MySQL Cloud gerenciado (ambiente de produção D5 com SSL)
+- **Bancos de Dados:** MySQL Server 8.0.45 local (testes unitários, smoke A3 e integração A4 com instância descartável) e TiDB Serverless / MySQL Cloud gerenciado (ambiente de produção D5 com SSL)
 
 ---
 
@@ -146,4 +147,4 @@ docs/evidencias/2026-11-10/
 ```
 
 ---
-*Relatório de evidências gerado em conformidade estrita com o princípio da evidência verificável: código consolidado no commit ecdc2e36e7dcf55ad80411afa8c57820b794ad8f, com sincronia total em 00_ambiente.log, D5_publicado.log e banco de dados de produção.*
+*Relatório de evidências gerado em conformidade estrita com o princípio da evidência verificável: código consolidado no commit a48ec39c13dbc3894b21d050e1f1f95c92db7925, com sincronia total em 00_ambiente.log, A2_check.log, A3_smoke.log, A4_integracao.log, C8_sessao_cors.log, D5_publicado.log e banco de dados de produção.*

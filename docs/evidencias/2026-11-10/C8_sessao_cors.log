@@ -1,21 +1,24 @@
-TESTE C8: SESSÃO, COOKIES E CORS
-Data/Hora: 2026-11-12T20:31:30.191Z
+=== EVIDÊNCIA C8: SESSÃO, COOKIES E CORS ===
+Data/Hora: 2026-11-12T20:50:16.250Z
+Git Commit HEAD: a48ec39c13dbc3894b21d050e1f1f95c92db7925
+Comando: verificação automatizada de políticas de CORS e isolamento de sessão
+================================================================
 
 1. TESTE (a): POLÍTICA DE CORS E BLOQUEIO DE ORIGENS *.vercel.app:
   - GET /openapi.json com Origin "https://qualquer.vercel.app": Status 403 [APROVADO - Bloqueado com 403 Origem não permitida]
-  - Mensagem retornada: {"status":"error","statusCode":403,"message":"Origem não permitida.","request_id":"87f8814c-4c66-44bb-965a-b2e4dd29afba"}
-  - GET /openapi.json com Origin autorizada ("https://adega-express-six.vercel.app"): Status 200 [APROVADO - Permitido (200 OK)]
-  - Header Access-Control-Allow-Origin: https://adega-express-six.vercel.app
-  - GET /openapi.json com Origin autorizada ("https://adega-express.vercel.app"): Status 200 [APROVADO - Permitido (200 OK)]
-  - Header Access-Control-Allow-Origin: https://adega-express.vercel.app
-  - GET /openapi.json com Origin autorizada em CORS_ORIGINS ("http://localhost:3000"): Status 200 [APROVADO - Permitido (200 OK)]
-  - Header Access-Control-Allow-Origin: http://localhost:3000
-  - GET /openapi.json com Origin "https://site-malicioso-externo.com": Status 403 [APROVADO - Rejeitado com 403 Origem não permitida]
-  - Mensagem retornada: {"status":"error","statusCode":403,"message":"Origem não permitida.","request_id":"2a99d1ce-de58-4bbe-95e8-7c2b0b66d27a"}
+    Mensagem retornada: {"status":"error","statusCode":403,"message":"Origem não permitida.","request_id":"0e6b48a0-5338-4676-b684-65146e44822f"}
+  - GET /openapi.json com Origin oficial ("https://adega-express-six.vercel.app"): Status 200 [APROVADO - Permitido (200 OK)]
+    Header Access-Control-Allow-Origin: https://adega-express-six.vercel.app
+  - GET /openapi.json com Origin legada/não autorizada ("https://adega-express.vercel.app"): Status 403 [APROVADO - Bloqueado com 403 Origem não permitida]
+    Mensagem retornada: {"status":"error","statusCode":403,"message":"Origem não permitida.","request_id":"5bb61d6d-d148-4b46-835f-e8a9054210aa"}
+  - GET /openapi.json com Origin local em CORS_ORIGINS ("http://localhost:3000"): Status 200 [APROVADO - Permitido (200 OK)]
+    Header Access-Control-Allow-Origin: http://localhost:3000
+  - GET /openapi.json com Origin externa desconhecida ("https://site-malicioso-externo.com"): Status 403 [APROVADO - Rejeitado com 403 Origem não permitida]
+    Mensagem retornada: {"status":"error","statusCode":403,"message":"Origem não permitida.","request_id":"703a71f5-88cd-459c-879e-455efd3224cc"}
 
-2. TESTE (b): REQUISIÇÃO DE MUTAÇÃO COM COOKIE (Proteção CSRF / Origin):
-  - POST com Cookie e Origin "https://qualquer.vercel.app" (fora do CORS_ORIGINS): Status 403 [APROVADO - 403 Origem não permitida]
-  - Mensagem retornada: {"status":"error","statusCode":403,"message":"Origem não permitida.","request_id":"866c2e56-0a88-4f2a-822a-e8c2b289a527"}
+2. TESTE (b): REQUISIÇÃO DE MUTAÇÃO COM COOKIE / CSRF PROTECTION:
+  - POST /orders com Origin não autorizada "https://qualquer.vercel.app": Status 403 [APROVADO - 403 Origem não permitida]
+    Mensagem retornada: {"status":"error","statusCode":403,"message":"Origem não permitida.","request_id":"741b2a26-5874-4ad8-bff6-1609621247b6"}
 
 RESULTADO FINAL C8: APROVADO
-Conclusão: O CORS não mais aceita origens genéricas *.vercel.app, restringindo-se estritamente às origens oficiais autorizadas (https://adega-express-six.vercel.app, https://adega-express.vercel.app e http://localhost:3000); requisições de origens não autorizadas recebem HTTP 403; e mutações com cookie exigem origem estritamente autorizada.
+Conclusão: O CORS bloqueia qualquer wildcard *.vercel.app e qualquer outro domínio externo, restringindo-se com exclusividade ao frontend oficial (https://adega-express-six.vercel.app) e ao ambiente local de desenvolvimento (http://localhost:3000). Origens não cadastradas recebem HTTP 403 imediatamente.

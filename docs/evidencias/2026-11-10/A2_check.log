@@ -1,6 +1,6 @@
 ﻿=== EVIDÊNCIA A2: VERIFICAÇÃO AUTOMATIZADA COMPLETA (CHECK) ===
-Data/Hora: 2026-11-11T22:06:41.434Z
-Git Commit HEAD: ecdc2e36e7dcf55ad80411afa8c57820b794ad8f
+Data/Hora: 2026-11-12T17:43:34.671-03:00
+Git Commit HEAD: a48ec39c13dbc3894b21d050e1f1f95c92db7925
 Comando: npm run check (prisma generate + typecheck + lint + 12 unitários + build)
 ================================================================
 
@@ -11,14 +11,13 @@ Comando: npm run check (prisma generate + typecheck + lint + 12 unitários + bui
 > adega-express-backend@2.0.0 prisma:generate
 > prisma generate
 
-Environment variables loaded from .env
 Prisma schema loaded from prisma\schema.prisma
 
-✔ Generated Prisma Client (v5.22.0) to .\node_modules\@prisma\client in 111ms
+✔ Generated Prisma Client (v5.22.0) to .\node_modules\@prisma\client in 124ms
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-Tip: Want real-time updates to your database without manual polling? Discover how with Pulse: https://pris.ly/tip-0-pulse
+Tip: Curious about the SQL queries Prisma ORM generates? Optimize helps you enhance your visibility: https://pris.ly/tip-2-optimize
 
 
 > adega-express-backend@2.0.0 typecheck
@@ -32,18 +31,18 @@ Tip: Want real-time updates to your database without manual polling? Discover ho
 > adega-express-backend@2.0.0 test
 > node --import tsx --test tests/unit.test.ts
 
-✔ maioridade considera aniversário completo e data civil de São Paulo (23.9043ms)
-✔ datas impossíveis e ano inferior a 1900 são rejeitados (1.3307ms)
-✔ relatórios respeitam o fuso e o horário de verão histórico (1.2016ms)
-✔ desconto utiliza decimal, arredonda centavos e nunca fica negativo (1.595ms)
-✔ quantidades fracionárias, repetição de item e forma de pagamento desconhecida são rejeitadas (3.4386ms)
-✔ preços negativos, NaN e precisão excessiva são rejeitados (0.2775ms)
-✔ senha evita truncamento silencioso do bcrypt em UTF-8 (0.8041ms)
-✔ máquina de estados rejeita saltos e reabertura de pedidos (0.4783ms)
-✔ paginação e filtros rejeitam limites abusivos e faixas invertidas (2.6065ms)
-✔ cupom percentual tem limite e vigência coerente (1.2804ms)
-✔ escopo não alcoólico permite apenas Água, Sucos, Refrigerantes e Chás e rejeita bebidas alcoólicas/tabaco (1.8139ms)
-✔ prazo de 30 minutos para confirmação de pagamento é verificado com relógio controlável (RN07) (0.1318ms)
+✔ cálculo de data civil respeita o fuso horário de São Paulo (32.6463ms)
+✔ datas impossíveis e ano inferior a 1900 são rejeitados (1.0581ms)
+✔ relatórios respeitam o fuso e o horário de verão histórico (0.8759ms)
+✔ desconto utiliza decimal, arredonda centavos e nunca fica negativo (1.0536ms)
+✔ quantidades fracionárias, repetição de item e forma de pagamento desconhecida são rejeitadas (2.9101ms)
+✔ preços negativos, NaN e precisão excessiva são rejeitados (0.3057ms)
+✔ senha evita truncamento silencioso do bcrypt em UTF-8 (0.8687ms)
+✔ máquina de estados rejeita saltos e reabertura de pedidos (0.4988ms)
+✔ paginação e filtros rejeitam limites abusivos e faixas invertidas (2.3735ms)
+✔ cupom percentual tem limite e vigência coerente (1.0974ms)
+✔ escopo não alcoólico permite apenas Água, Sucos, Refrigerantes e Chás e rejeita bebidas alcoólicas/tabaco (2.3913ms)
+✔ prazo de 30 minutos para confirmação de pagamento é verificado com relógio controlável (RN07) (0.1431ms)
 ℹ tests 12
 ℹ suites 0
 ℹ pass 12
@@ -51,18 +50,17 @@ Tip: Want real-time updates to your database without manual polling? Discover ho
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 782.7681
+ℹ duration_ms 1267.1464
 
 > adega-express-backend@2.0.0 build
 > prisma generate && tsc
 
-Environment variables loaded from .env
 Prisma schema loaded from prisma\schema.prisma
 
-✔ Generated Prisma Client (v5.22.0) to .\node_modules\@prisma\client in 112ms
+✔ Generated Prisma Client (v5.22.0) to .\node_modules\@prisma\client in 118ms
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-Help us improve the Prisma ORM for everyone. Share your feedback in a short 2-min survey: https://pris.ly/orm/survey/release-5-22
+Tip: Want to react to database changes in your app as they happen? Discover how with Pulse: https://pris.ly/tip-1-pulse
 
 

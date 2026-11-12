@@ -1,28 +1,27 @@
-﻿=== EVIDÊNCIA A4: TESTES DE INTEGRAÇÃO EM BANCO DESCARTÁVEL (29 TESTES) ===
-Data/Hora: 2026-11-11T22:07:55.238Z
-Git Commit HEAD: ecdc2e36e7dcf55ad80411afa8c57820b794ad8f
-Comando: npm run test:integration (node scripts/test-integration.mjs)
-===========================================================================
+﻿=== EVIDÊNCIA A4: TESTES DE INTEGRAÇÃO (29 TESTES) ===
+Data/Hora: 2026-11-12T17:45:42.585-03:00
+Git Commit HEAD: a48ec39c13dbc3894b21d050e1f1f95c92db7925
+Comando: npm run test:integration (29 testes com MySQL isolado descartável)
+================================================================
 
 > adega-express-backend@2.0.0 test:integration
 > node scripts/test-integration.mjs
 
 Inicializando MySQL descartável, sem usar o banco do .env...
-node.exe : 2026-11-11T22:07:56.415505Z 0 [System] [MY-013169] [Server] C:\Program Files\MySQL\MySQL Server 
-8.0\bin\mysqld.exe (mysqld 8.0.45) initializing of server in progress as process 11132
+node.exe : 2026-11-12T20:45:43.623170Z 0 [System] [MY-013169] [Server] C:\Program Files\MySQL\MySQL Server 
+8.0\bin\mysqld.exe (mysqld 8.0.45) initializing of server in progress as process 13680
 No linha:1 caractere:1
 + & "C:\Program Files\nodejs/node.exe" "C:\Users\gsds0\AppData\Roaming\ ...
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (2026-11-11T22:0...s process 11132:String) [], RemoteException
+    + CategoryInfo          : NotSpecified: (2026-11-12T20:4...s process 13680:String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
-2026-11-11T22:07:56.476384Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
-2026-11-11T22:07:56.821490Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
-2026-11-11T22:08:03.870488Z 5 [Warning] [MY-010453] [Server] root@localhost is created with an empty password ! Please 
+2026-11-12T20:45:43.700437Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+2026-11-12T20:45:51.949306Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+2026-11-12T20:45:58.182011Z 5 [Warning] [MY-010453] [Server] root@localhost is created with an empty password ! Please 
 consider switching off the --initialize-insecure option.
-Environment variables loaded from .env
-Prisma schema loaded from ..\..\..\AppData\Local\Temp\adega-migration-test-gbn2mo\schema.prisma
-Datasource "db": MySQL database "adega_test_integration" at "127.0.0.1:61932"
+Prisma schema loaded from ..\..\..\AppData\Local\Temp\adega-migration-test-TgwA3d\schema.prisma
+Datasource "db": MySQL database "adega_test_integration" at "127.0.0.1:64728"
 
 2 migrations found in prisma/migrations
 
@@ -38,9 +37,8 @@ migrations/
     └─ migration.sql
       
 All migrations have been successfully applied.
-Environment variables loaded from .env
 Prisma schema loaded from prisma\schema.prisma
-Datasource "db": MySQL database "adega_test_integration" at "127.0.0.1:61932"
+Datasource "db": MySQL database "adega_test_integration" at "127.0.0.1:64728"
 
 4 migrations found in prisma/migrations
 
@@ -58,35 +56,35 @@ migrations/
 All migrations have been successfully applied.
 Administrador inicial criado. Use as credenciais configuradas no .env.
 Administrador já cadastrado. Senha e dados existentes preservados.
-✔ saúde, OpenAPI e documentação estão disponíveis (1982.8107ms)
-✔ migração preserva pedidos antigos e não presume pagamento (5.4992ms)
-✔ seeds podem ser repetidos sem duplicar contas ou repor estoque (4.7077ms)
-✔ JSON inválido, rota inexistente e CORS retornam erros controlados (14.5187ms)
-✔ cadastro cria conta de cliente com cookie HttpOnly e não permite escalar perfil (714.4156ms)
-✔ permissões protegem catálogo, relatórios e pedidos (23.5759ms)
-✔ endereços pertencem ao cliente e mantêm exatamente um padrão (40.856ms)
-✔ catálogo pagina, filtra por volume e mantém apenas escopo não alcoólico público (60.0447ms)
-✔ movimentações registram entrada e impedem estoque negativo (37.6529ms)
-✔ cotação calcula frete e cupom válido até o fim do dia sem consumir estoque (51.5845ms)
-✔ cupom inválido faz rollback de pedido e estoque (22.9181ms)
-✔ checkout rejeita endereço de outro cliente e região não atendida (43.0813ms)
-✔ RN07 e RN08: pedido pendente sem pagamento não avança para CONFIRMADO e expira em 30 minutos com devolução idempotente (54.6949ms)
-✔ snapshot preserva endereço e nome do produto após edições (79.8026ms)
-✔ Idempotency-Key impede duplicação e rejeita reutilização com outro conteúdo (53.4518ms)
-✔ compras simultâneas não vendem além do estoque (39.7658ms)
-✔ mesma chave simultânea produz apenas um pedido e uma baixa (67.085ms)
-✔ cancelamento repetido devolve estoque uma única vez e impede reabertura (62.8432ms)
-✔ pedido com item indisponível não debita os demais itens (38.4228ms)
-✔ entrega cancelada não pode sair e entregador ocupado não pode ser desativado (132.0839ms)
-✔ fluxo operacional sincroniza pedido e entrega e exige pagamento para concluir (146.9849ms)
-✔ cancelar pedido pago exige estorno explícito e guarda registro (69.9614ms)
-✔ relatório distingue receitas pagas de pedidos pendentes e valida período (22.1006ms)
-✔ categoria vinculada não é apagada e produto desativado não pode ser comprado (41.3206ms)
-✔ desativação revoga acesso imediatamente e logout invalida o token (26.2568ms)
-✔ troca de senha exige senha atual e revoga sessões anteriores (1197.2703ms)
-✔ equipe é criada pelo administrador e não recebe token de outro perfil (252.5418ms)
-✔ desativações concorrentes preservam ao menos um administrador ativo (64.2695ms)
-✔ limite de autenticação bloqueia tentativas repetidas (92.4862ms)
+✔ saúde, OpenAPI e documentação estão disponíveis (1940.1262ms)
+✔ migração preserva pedidos antigos e não presume pagamento (5.2982ms)
+✔ seeds podem ser repetidos sem duplicar contas ou repor estoque (4.4166ms)
+✔ JSON inválido, rota inexistente e CORS retornam erros controlados (13.0467ms)
+✔ cadastro cria conta de cliente com cookie HttpOnly e não permite escalar perfil (717.9756ms)
+✔ permissões protegem catálogo, relatórios e pedidos (27.5553ms)
+✔ endereços pertencem ao cliente e mantêm exatamente um padrão (55.9812ms)
+✔ catálogo pagina, filtra por volume e mantém apenas escopo não alcoólico público (73.068ms)
+✔ movimentações registram entrada e impedem estoque negativo (44.7613ms)
+✔ cotação calcula frete e cupom válido até o fim do dia sem consumir estoque (59.3102ms)
+✔ cupom inválido faz rollback de pedido e estoque (24.6197ms)
+✔ checkout rejeita endereço de outro cliente e região não atendida (45.0377ms)
+✔ RN07 e RN08: pedido pendente sem pagamento não avança para CONFIRMADO e expira em 30 minutos com devolução idempotente (64.5726ms)
+✔ snapshot preserva endereço e nome do produto após edições (93.8409ms)
+✔ Idempotency-Key impede duplicação e rejeita reutilização com outro conteúdo (47.8736ms)
+✔ compras simultâneas não vendem além do estoque (70.5813ms)
+✔ mesma chave simultânea produz apenas um pedido e uma baixa (60.9647ms)
+✔ cancelamento repetido devolve estoque uma única vez e impede reabertura (47.5743ms)
+✔ pedido com item indisponível não debita os demais itens (26.4944ms)
+✔ entrega cancelada não pode sair e entregador ocupado não pode ser desativado (101.6665ms)
+✔ fluxo operacional sincroniza pedido e entrega e exige pagamento para concluir (130.193ms)
+✔ cancelar pedido pago exige estorno explícito e guarda registro (71.058ms)
+✔ relatório distingue receitas pagas de pedidos pendentes e valida período (24.9432ms)
+✔ categoria vinculada não é apagada e produto desativado não pode ser comprado (44.6781ms)
+✔ desativação revoga acesso imediatamente e logout invalida o token (30.3176ms)
+✔ troca de senha exige senha atual e revoga sessões anteriores (1168.7251ms)
+✔ equipe é criada pelo administrador e não recebe token de outro perfil (238.1711ms)
+✔ desativações concorrentes preservam ao menos um administrador ativo (52.2459ms)
+✔ limite de autenticação bloqueia tentativas repetidas (76.9617ms)
 ℹ tests 29
 ℹ suites 0
 ℹ pass 29
@@ -94,7 +92,7 @@ Administrador já cadastrado. Senha e dados existentes preservados.
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 7493.2457
+ℹ duration_ms 7461.111
 No difference detected.
 
 

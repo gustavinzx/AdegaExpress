@@ -1,56 +1,56 @@
 ﻿=== EVIDÊNCIA A3: TESTES SMOKE PONTUAIS (9 SMOKE) ===
-Data/Hora: 2026-11-11T22:07:29.833Z
-Git Commit HEAD: ecdc2e36e7dcf55ad80411afa8c57820b794ad8f
+Data/Hora: 2026-11-12T17:49:09.096-03:00
+Git Commit HEAD: a48ec39c13dbc3894b21d050e1f1f95c92db7925
 Comando: npm run test:smoke (node --import tsx --test tests/smoke.test.ts)
 =====================================================
 
 > adega-express-backend@2.0.0 test:smoke
 > node --import tsx --test tests/smoke.test.ts
 
-{"requestId":"8e5eed71-cfa1-4a70-803a-11cfcb913b2d","method":"POST","path":"/auth/register","status":201,"duration_ms":265}
-{"requestId":"85f52b3b-37f6-42c3-9bc6-07b943eaae9d","method":"POST","path":"/auth/login","status":200,"duration_ms":22}
-{"requestId":"df6a8bbe-a377-4c57-9105-a8c7d95e62f9","method":"POST","path":"/auth/login","status":200,"duration_ms":20}
-{"requestId":"dcfa3fc1-670a-4c13-91a9-82f5c39d37e2","method":"POST","path":"/auth/login","status":200,"duration_ms":17}
-{"requestId":"ba4f04ab-c3c1-40a7-b3c1-4e1754b51a52","method":"POST","path":"/auth/login","status":200,"duration_ms":18}
-{"requestId":"14d4b959-c9d7-4c06-8a96-230f29130e9b","method":"POST","path":"/auth/login","status":200,"duration_ms":17}
-{"requestId":"aaa7eb08-3c52-43c2-88e1-54c6e0d5f4e4","method":"POST","path":"/auth/login","status":200,"duration_ms":17}
-{"requestId":"56a228f6-5506-4cab-9d5d-d23fd623ca73","method":"POST","path":"/auth/logout","status":204,"duration_ms":6}
-{"requestId":"07eff738-34e6-45cb-8d44-3bb34e7e4d38","method":"GET","path":"/auth/me","status":401,"duration_ms":3}
-✔ 1. Cadastro, Login e Logout (496.1868ms)
-{"requestId":"21177a62-ed67-4a52-95fb-14d655ef43ed","method":"GET","path":"/products","status":200,"duration_ms":8}
-✔ 2. Catálogo e Filtros (11.1331ms)
-{"requestId":"e75328b2-0285-493f-a37e-95941b22790a","method":"POST","path":"/orders","status":409,"duration_ms":9}
-✔ 3. Produto sem estoque recusado via API no checkout (12.339ms)
-{"requestId":"c2af7100-cf10-4c1e-9cb6-98761464e56b","method":"POST","path":"/orders/quote","status":200,"duration_ms":24}
-{"requestId":"c0f419f1-0a9e-4695-a40e-a27f885cace5","method":"POST","path":"/orders/quote","status":400,"duration_ms":6}
-{"requestId":"97dfdebd-196d-4da7-88f4-f617efd087ca","method":"POST","path":"/orders/quote","status":400,"duration_ms":5}
-✔ 4. Cupons: Válido, Inválido e Expirado (42.3183ms)
-{"requestId":"0d1e32ec-efeb-470a-a7a1-7c7526db3c8f","method":"POST","path":"/orders","status":201,"duration_ms":13}
-{"requestId":"2d66ca0c-3c7e-4c3d-aa6f-001f92397270","method":"PATCH","path":"/orders/155/payment","status":200,"duration_ms":10}
-{"requestId":"55807fc1-a919-445c-a3b6-1cb204648818","method":"PATCH","path":"/orders/155/status","status":200,"duration_ms":9}
-{"requestId":"fe316ae1-8925-4892-839e-39e3a611fbab","method":"PATCH","path":"/orders/155/status","status":200,"duration_ms":9}
-{"requestId":"f9688c25-72aa-499c-8cbe-3c02b4d804e3","method":"PATCH","path":"/deliveries/56/assign","status":200,"duration_ms":10}
-{"requestId":"54120674-b7b0-4780-aa01-22d8d1fc86ab","method":"PATCH","path":"/deliveries/56/status","status":200,"duration_ms":11}
-{"requestId":"23fd2c48-379e-4f5c-b151-b7e599777183","method":"PATCH","path":"/deliveries/56/status","status":200,"duration_ms":10}
-✔ 5. Fluxo Completo: Checkout -> Confirmação -> Separação -> Entrega (91.5515ms)
-{"requestId":"c5b60e4d-08bc-4147-9ed1-8e0ab617534a","method":"POST","path":"/orders","status":201,"duration_ms":11}
-✔ 6. Expiração de Pedido com Relógio Controlável (30 minutos) (27.5043ms)
-{"requestId":"13f548dd-0151-4e20-9c7e-70f9cfb6abd9","method":"POST","path":"/orders","status":201,"duration_ms":17}
-{"requestId":"c5406614-618d-4803-88b9-f3b9c7f174a5","method":"POST","path":"/orders","status":409,"duration_ms":47}
-✔ 7. Concorrência de Estoque (Não permite vender além do saldo) (54.0863ms)
-{"requestId":"1a25fe08-8773-4fa5-a162-73ed08a239ca","method":"GET","path":"/admin/products","status":403,"duration_ms":2}
-{"requestId":"6bcd842c-c9bd-4278-8164-21693d7aec0b","method":"POST","path":"/orders","status":201,"duration_ms":11}
-{"requestId":"c762ad69-7ceb-4e5b-b8d9-176c1438cf1f","method":"GET","path":"/orders/158","status":404,"duration_ms":3}
-{"requestId":"fe864ac2-e76e-4143-95b0-4a155232d6c2","method":"POST","path":"/orders","status":201,"duration_ms":10}
-{"requestId":"89acb1a5-391e-46b7-b4e7-e603a158445a","method":"PATCH","path":"/orders/159/payment","status":200,"duration_ms":9}
-{"requestId":"f8f88308-7f31-444b-8a6f-c12432ef94bf","method":"PATCH","path":"/orders/159/status","status":200,"duration_ms":8}
-{"requestId":"f5477104-c0a5-4468-b3e2-de608fdbc6be","method":"PATCH","path":"/orders/159/status","status":200,"duration_ms":10}
-{"requestId":"ad664bbc-1dde-4f33-95c2-24ce8eaaf833","method":"PATCH","path":"/deliveries/57/assign","status":200,"duration_ms":7}
-{"requestId":"a899a73a-c218-44cf-abbe-4b2248a8efd4","method":"PATCH","path":"/deliveries/57/status","status":404,"duration_ms":3}
-✔ 8. Isolamento de Segurança e Autorização (RBAC) (82.3159ms)
-{"requestId":"23bb9dff-6a1d-4ac5-8b73-679f39a2b02a","method":"POST","path":"/orders","status":201,"duration_ms":13}
-{"requestId":"690f8763-93fc-4628-b461-9c22e821641a","method":"POST","path":"/orders","status":409,"duration_ms":5}
-✔ 9. RF17 — Pedidos de grande quantidade (20 ou mais unidades totais para eventos) (30.7845ms)
+{"requestId":"771bd6ae-383c-466b-8acc-f59837170f37","method":"POST","path":"/auth/register","status":201,"duration_ms":261}
+{"requestId":"69879714-f4af-478a-a785-4cc1dd9f007f","method":"POST","path":"/auth/login","status":200,"duration_ms":20}
+{"requestId":"05548f70-c398-4aeb-9f22-0daa2e3d8b50","method":"POST","path":"/auth/login","status":200,"duration_ms":18}
+{"requestId":"c6333d35-7723-4761-b2eb-221b1e5b1760","method":"POST","path":"/auth/login","status":200,"duration_ms":18}
+{"requestId":"a14d88db-80f9-4cf2-952d-e6400d521fe8","method":"POST","path":"/auth/login","status":200,"duration_ms":18}
+{"requestId":"a5b16b26-ac5b-4f90-ab9e-b91deeabc440","method":"POST","path":"/auth/login","status":200,"duration_ms":18}
+{"requestId":"053ac47f-dec7-4521-aff5-bc75ec25157b","method":"POST","path":"/auth/login","status":200,"duration_ms":19}
+{"requestId":"187fbd90-1c5c-4ffb-a4d8-f343754781a6","method":"POST","path":"/auth/logout","status":204,"duration_ms":8}
+{"requestId":"2eeced72-6be8-447f-bdce-8b0ed6bd7e06","method":"GET","path":"/auth/me","status":401,"duration_ms":2}
+✔ 1. Cadastro, Login e Logout (496.7399ms)
+{"requestId":"b29e68f9-9053-4ccf-9448-cc212f5f5a42","method":"GET","path":"/products","status":200,"duration_ms":7}
+✔ 2. Catálogo e Filtros (10.8367ms)
+{"requestId":"e3e70eae-6e98-4c71-9e61-c8ffc2562a7a","method":"POST","path":"/orders","status":409,"duration_ms":9}
+✔ 3. Produto sem estoque recusado via API no checkout (11.9106ms)
+{"requestId":"9f8ce6e7-c1fd-4255-91cc-3077c9299560","method":"POST","path":"/orders/quote","status":200,"duration_ms":42}
+{"requestId":"8cb2c655-4d44-49bc-bce2-a3a652fda72a","method":"POST","path":"/orders/quote","status":400,"duration_ms":11}
+{"requestId":"6c0cb642-2e6c-4ed6-ba2b-3b18eabaa7b2","method":"POST","path":"/orders/quote","status":400,"duration_ms":5}
+✔ 4. Cupons: Válido, Inválido e Expirado (65.4571ms)
+{"requestId":"1af4fd4b-dbbb-4b58-b521-160b8a2c9f6c","method":"POST","path":"/orders","status":201,"duration_ms":17}
+{"requestId":"ed91746a-11e5-40f5-ab17-3d4134f40aaf","method":"PATCH","path":"/orders/163/payment","status":200,"duration_ms":14}
+{"requestId":"a21474aa-b25a-4e28-990f-7401a5d9e5cd","method":"PATCH","path":"/orders/163/status","status":200,"duration_ms":14}
+{"requestId":"ab2eca38-f53f-41a6-a0f9-3cb6b8c8f968","method":"PATCH","path":"/orders/163/status","status":200,"duration_ms":14}
+{"requestId":"ecf8060f-3ed2-4ec3-a0a7-24587f97139a","method":"PATCH","path":"/deliveries/58/assign","status":200,"duration_ms":11}
+{"requestId":"43bcf87c-c638-46d4-b8b6-67948149f780","method":"PATCH","path":"/deliveries/58/status","status":200,"duration_ms":13}
+{"requestId":"5e5c4ce9-5936-4e7a-9d56-4c3f3cc40be2","method":"PATCH","path":"/deliveries/58/status","status":200,"duration_ms":12}
+✔ 5. Fluxo Completo: Checkout -> Confirmação -> Separação -> Entrega (119.3666ms)
+{"requestId":"ed83e11f-2f41-416f-959f-cf29463730af","method":"POST","path":"/orders","status":201,"duration_ms":14}
+✔ 6. Expiração de Pedido com Relógio Controlável (30 minutos) (49.5526ms)
+{"requestId":"e6c2319d-0c94-4830-9e4b-574b3d644010","method":"POST","path":"/orders","status":201,"duration_ms":16}
+{"requestId":"1a1fa15b-09a1-4c38-926b-96935f3795e7","method":"POST","path":"/orders","status":409,"duration_ms":52}
+✔ 7. Concorrência de Estoque (Não permite vender além do saldo) (60.5252ms)
+{"requestId":"e1e8b477-1c87-4d57-8831-8383648b0970","method":"GET","path":"/admin/products","status":403,"duration_ms":1}
+{"requestId":"65fec8e1-b0b1-48cb-bb1f-42f0851dcec0","method":"POST","path":"/orders","status":201,"duration_ms":11}
+{"requestId":"93717141-fda9-4796-b716-ea8c8622f69f","method":"GET","path":"/orders/166","status":404,"duration_ms":4}
+{"requestId":"00f9a8fe-2724-4729-bb42-e480d69284b3","method":"POST","path":"/orders","status":201,"duration_ms":12}
+{"requestId":"bd745c6c-bbc8-4d37-b906-0e5d59d2adbc","method":"PATCH","path":"/orders/167/payment","status":200,"duration_ms":10}
+{"requestId":"c61114a8-8c3c-4bbe-bd61-afadd3d287ee","method":"PATCH","path":"/orders/167/status","status":200,"duration_ms":12}
+{"requestId":"55cc42b5-c2f7-4b6a-b43c-fc05b1091424","method":"PATCH","path":"/orders/167/status","status":200,"duration_ms":15}
+{"requestId":"46900074-fa5e-40a1-9735-b8af7fa5a700","method":"PATCH","path":"/deliveries/59/assign","status":200,"duration_ms":10}
+{"requestId":"fe7172ed-56a3-4df5-ab99-a70066114126","method":"PATCH","path":"/deliveries/59/status","status":404,"duration_ms":5}
+✔ 8. Isolamento de Segurança e Autorização (RBAC) (104.19ms)
+{"requestId":"ec6dd8b9-2b48-43bb-a2eb-aa378492760d","method":"POST","path":"/orders","status":201,"duration_ms":15}
+{"requestId":"9b2af9bf-0233-4e38-bfdb-96b753be8c7a","method":"POST","path":"/orders","status":409,"duration_ms":4}
+✔ 9. RF17 — Pedidos de grande quantidade (20 ou mais unidades totais para eventos) (31.7958ms)
 ℹ tests 9
 ℹ suites 0
 ℹ pass 9
@@ -58,5 +58,5 @@ Comando: npm run test:smoke (node --import tsx --test tests/smoke.test.ts)
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 3173.1203
+ℹ duration_ms 2055.2462
 
