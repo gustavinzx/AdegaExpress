@@ -45,13 +45,14 @@ const origins = Array.from(
     ...configuredOrigins,
     'http://localhost:3000',
     'https://adega-express-six.vercel.app',
+    'https://adega-express.vercel.app',
   ]),
 );
 app.use(
   cors({
     origin: (origin, callback) => {
       const normalized = origin ? origin.replace(/\/$/, '') : null;
-      if (!origin || (normalized && (origins.includes(normalized) || normalized.endsWith('.vercel.app')))) {
+      if (!origin || (normalized && origins.includes(normalized))) {
         callback(null, true);
       } else {
         callback(new AppError(403, 'Origem não permitida.'));
