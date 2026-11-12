@@ -1,0 +1,20 @@
+TESTE C7: GUARDIÃO DE ESCOPO DO CATÁLOGO (Bebidas Não Alcoólicas)
+Data/Hora: 2026-11-10T03:35:40.440Z
+
+1. TENTATIVA DE CRIAR PRODUTO COM TEOR ALCOÓLICO (abv_percent > 0):
+  - POST /products com abv_percent = 5.0: Status 400 [APROVADO - Rejeitado com 400]
+  - Mensagem retornada: {"status":"error","statusCode":400,"message":"Dados inválidos.","details":[{"field":"abv_percent","message":"Apenas bebidas não alcoólicas (0% de teor alcoólico) são permitidas."}],"request_id":"baf2920a-1888-412c-8306-f6d4968d6e5f"}
+
+2. TENTATIVAS DE CRIAR PRODUTOS COM TERMOS PROIBIDOS NO NOME OU DESCRIÇÃO (regex FORBIDDEN_PRODUCT_TERMS):
+  - Tentativa com nome "Cerveja Pilsen Lata": Status 400 [APROVADO - Rejeitado com 400]
+  - Tentativa com nome "Vinho Tinto Seco": Status 400 [APROVADO - Rejeitado com 400]
+  - Tentativa com nome "Vodka Importada": Status 400 [APROVADO - Rejeitado com 400]
+  - Tentativa com nome "Whisky 12 Anos": Status 400 [APROVADO - Rejeitado com 400]
+  - Tentativa com nome "Cigarro Filtro Vermelho": Status 400 [APROVADO - Rejeitado com 400]
+  - Tentativa com nome "Seda para Fumo": Status 400 [APROVADO - Rejeitado com 400]
+
+3. PRODUTO VÁLIDO DENTRO DO ESCOPO (Suco / Água / Refri com abv = 0):
+  - Criação de produto legítimo não alcoólico: Status 201 [APROVADO - 201 Created]
+
+RESULTADO FINAL C7: APROVADO
+Conclusão: O guardião de escopo rejeita qualquer abv_percent > 0 e aplica validação rigorosa por expressões regulares contra nomes e descrições relacionados a bebidas alcoólicas e tabacaria, preservando estritamente o escopo acadêmico não alcoólico.

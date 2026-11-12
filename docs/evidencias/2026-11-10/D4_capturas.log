@@ -1,0 +1,30 @@
+TESTE D4: RECAPTURAS REAIS DO PROTÓTIPO COM DADOS DEMO CONSISTENTES
+Data/Hora: 2026-11-10T10:42:51.210Z
+Ambiente: http://localhost:3000 (Local - Frontend Next.js + Backend Express/Prisma/MySQL)
+Critérios de Validação ABNT/Acadêmica (2.1 a 2.4):
+- 2.1 Unicidade de Hash MD5 em todas as 15 telas: APROVADO (15 hashes únicos)
+- 2.2 Ausência de textos proibidos / estados vazios espúrios em T05–T15: APROVADO
+- 2.3 Ausência de skeletons (.animate-pulse): APROVADO
+- 2.4 Correspondência estrita de perfis autenticados nos cabeçalhos: APROVADO
+
+| ID | Rota | Perfil | Entidade / Dados em Foco | Hash MD5 | Validação DOM | Skeletons | Perfil Header | Status |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---:|
+| **T01** | `/` | Visitante | Catálogo ativo com 16 bebidas não alcoólicas | `1f96cd32e9a0...` | OK | 0 skeletons | Visitante (Entrar visível) | **APROVADO** |
+| **T02** | `/produto/222` | Visitante | Produto #222 (Água Mineral Sem Gás 500ml, R$ 3,50, 80 un) | `0c1e39c0cc8d...` | OK | 0 skeletons | Visitante (Entrar visível) | **APROVADO** |
+| **T03** | `/cadastro` | Visitante | Formulário de cadastro de cliente (nome completo, e-mail e senha) | `f0e647b2d46b...` | OK | 0 skeletons | Visitante (Entrar visível) | **APROVADO** |
+| **T04** | `/login` | Visitante | Console de login com botões de 1-clique para demonstração | `e42d8c1cc0e3...` | OK | 0 skeletons | Visitante (Entrar visível) | **APROVADO** |
+| **T05** | `/carrinho` | Cliente | Sacola com 2 itens (#222 Água Sem Gás e #226 Suco Uva), subtotal e frete | `e30813920b49...` | OK | 0 skeletons | Cliente (Pedidos e Nome no header) | **APROVADO** |
+| **T06** | `/carrinho` | Cliente | Checkout com endereço padrão #38, PIX selecionado, cupom BEMVINDO10 e resumo com total | `3503b55f59c3...` | OK | 0 skeletons | Cliente (Pedidos e Nome no header) | **APROVADO** |
+| **T07** | `/perfil?tab=ENDERECOS` | Cliente | Aba Meus Endereços com endereço padrão #38 (Brasília/DF) cadastrado | `36feb4e05974...` | OK | 0 skeletons | Cliente (Pedidos e Nome no header) | **APROVADO** |
+| **T08** | `/pedidos` | Cliente | Lista com os pedidos do cliente nos status PENDENTE, CONFIRMADO, SEPARADO, EM_ROTA, ENTREGUE, CANCELADO | `b141d77d9054...` | OK | 0 skeletons | Cliente (Pedidos e Nome no header) | **APROVADO** |
+| **T15** | `/pedidos/111` | Cliente | Detalhe do Pedido #111 com stepper em 5 estágios, endereço, itens e histórico | `81c2b4bab93a...` | OK | 0 skeletons | Cliente (Pedidos e Nome no header) | **APROVADO** |
+| **T09** | `/admin` | Atendente | Console operacional da Adega Express com fila de pedidos e filtros operacionais | `ccb86ef46b6e...` | OK | 0 skeletons | Atendente (Painel Atendente visível) | **APROVADO** |
+| **T10** | `/entregador` | Entregador | As 2 entregas atribuídas: Entrega #41 (AGUARDANDO) e Entrega #40 (SAIU_PARA_ENTREGA) | `ca60762b33d0...` | OK | 0 skeletons | Entregador (Entregas visível) | **APROVADO** |
+| **T11** | `/admin` | Administrador | Aba Pedidos & Entregas com Pedido #111 (PENDENTE) e box de confirmação manual de pagamento | `694395633945...` | OK | 0 skeletons | Administrador (Painel Admin/Administrador visível) | **APROVADO** |
+| **T12** | `/admin#catalogo` | Administrador | Aba Catálogo & Categorias com produtos ativos, marcas, preços e botões de edição | `9bb8458f8ff7...` | OK | 0 skeletons | Administrador (Painel Admin/Administrador visível) | **APROVADO** |
+| **T13** | `/admin#estoque` | Administrador | Aba Gestão de Estoque com saldos positivos, alertas de nível e histórico | `a12fcdf1da66...` | OK | 0 skeletons | Administrador (Painel Admin/Administrador visível) | **APROVADO** |
+| **T14** | `/admin#relatorios` | Administrador | Aba Relatórios de Vendas com KPI cards de receita demonstrativa e volume de pedidos | `d01910a18576...` | OK | 0 skeletons | Administrador (Painel Admin/Administrador visível) | **APROVADO** |
+
+TOTAL DE CAPTURAS: 15 de 15 homologadas.
+STATUS FINAL DA ETAPA: APROVADO
+Conclusão: Todas as 15 telas do Documento de Visão foram recapturadas com dados reais e consistentes da Adega Express, livres de placeholders ou dados de teste sintéticos, e plenamente validadas quanto à integridade visual e funcional.

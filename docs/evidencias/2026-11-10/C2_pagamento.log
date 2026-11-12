@@ -1,0 +1,20 @@
+TESTE C2: VALIDAÇÃO DE PAGAMENTO (PATCH /orders/:id/payment)
+Data/Hora: 2026-11-10T03:35:39.454Z
+
+1. ANÁLISE DOS ENUMS NO SCHEMA PRISMA:
+  - PaymentStatus: PENDENTE, PAGO, ESTORNO_PENDENTE, ESTORNADO (4 estados verificados no schema.prisma).
+  - Schema de entrada (schemas.payment): z.object({ status: z.enum(['PAGO', 'ESTORNADO']), reference: text(150) }).strict()
+
+2. TESTE DE TAMANHO DO CAMPO REFERENCE:
+  - Referência de 150 caracteres: Status 200 [APROVADO - Aceito]
+  - Referência de 151 caracteres: Status 400 [APROVADO - Rejeitado com 400] (Corpo: {"status":"error","statusCode":400,"message":"Dados inválidos.","details":[{"field":"reference","message":"Too big: expected string to have <=150 characters"}],"request_id":"52c563b5-4e75-48c1-b2a4-c4d88fc57492"})
+
+3. TENTATIVA DE PAGAR PEDIDO CANCELADO:
+  - Pagamento em pedido CANCELADO: Status 409 [APROVADO - 409 Conflict] (Mensagem: {"status":"error","statusCode":409,"message":"Pagamento não pode ser confirmado nesta situação.","request_id":"442adaea-87aa-4b47-ae34-3df2db783132"})
+
+4. TENTATIVA DE PAGAR PEDIDO JÁ PAGO (Idempotência sem duplicação de registro):
+  - Reenvio de PATCH payment em pedido já PAGO: Status 200
+  - Registros de pagamento antes: 1, depois: 1 [APROVADO - Não duplicou registro]
+
+RESULTADO FINAL C2: APROVADO
+Conclusão: Limite de 150 caracteres respeitado estritamente; 4 estados suportados pelo modelo; tentativa de pagar pedido cancelado gera 409 Conflict; repetição de pagamento já confirmado é idempotente sem duplicação de audit record.

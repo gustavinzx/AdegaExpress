@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { Prisma } from '@prisma/client';
 import {
   businessDate,
-  isAdult,
   isAllowedCategoryName,
   isNonAlcoholicProductName,
   isOrderPaymentExpired,
@@ -14,12 +13,9 @@ import {
 } from '../src/lib/business';
 import * as s from '../src/schemas';
 
-test('maioridade considera aniversário completo e data civil de São Paulo', () => {
-  const now = new Date('2026-09-21T15:00:00Z');
-  assert.equal(isAdult(new Date('2008-09-21'), now), true);
-  assert.equal(isAdult(new Date('2008-09-22'), now), false);
+test('cálculo de data civil respeita o fuso horário de São Paulo', () => {
   assert.equal(businessDate(new Date('2026-09-21T01:00:00Z')), '2026-09-20');
-  assert.equal(isAdult(new Date('2008-09-21'), new Date('2026-09-21T01:00:00Z')), false);
+  assert.equal(businessDate(new Date('2026-09-21T15:00:00Z')), '2026-09-21');
 });
 test('datas impossíveis e ano inferior a 1900 são rejeitados', () => {
   for (const date of ['2025-02-29', '2026-04-31', '0000-01-01', '21/09/2000']) {

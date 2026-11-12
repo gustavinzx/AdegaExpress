@@ -1,0 +1,12 @@
+TESTE C9: CUSTO DO HASH BCRYPT
+Data/Hora: 2026-11-10T03:35:40.753Z
+
+1. INSPEÇÃO DE HASH GERADO PELO SISTEMA:
+  - Email do usuário inspecionado: cliente.rn02.739732@teste.com
+  - Formato do hash armazenado: $2b$12$qDXO9GOhr6gwwcOTlglgy....
+  - Algoritmo (identificador bcrypt): "$2b$"
+  - Fator de custo (rounds): 12
+  - Confirmação de custo = 12 rounds: [APROVADO]
+
+RESULTADO FINAL C9: APROVADO
+Conclusão: As senhas utilizam o algoritmo bcrypt variante 2b com fator de trabalho (work factor / cost) configurado exatamente em 12 rounds, garantindo alta resistência contra ataques de força bruta offline.

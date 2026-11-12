@@ -1,0 +1,38 @@
+TESTE C1: PERMISSÕES DE PAPEL (RBAC)
+Data/Hora: 2026-11-10T03:35:39.257Z
+Alvo: Controle de Acesso Baseado em Papéis (ADMINISTRADOR vs ATENDENTE)
+
+1. ROTAS RESTRITAS AO ADMINISTRADOR TESTADAS COM ATENDENTE (Expectativa: 403 Forbidden):
+  [APROVADO] POST /products -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] PUT /products/168 -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] DELETE /products/168 -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] GET /admin/products -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] POST /products/168/stock -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] GET /products/168/stock -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] GET /admin/categories -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] POST /categories -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] PUT /categories/25 -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] DELETE /categories/25 -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] GET /coupons -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] POST /coupons -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] GET /staff -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] POST /staff -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] PATCH /users/42/active -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+  [APROVADO] GET /reports/sales?from=2026-01-01&to=2026-11-10 -> Status: 403 (Mensagem: {"status":"error","message":"Acesso negado: permissao insuficiente."})
+
+2. ROTAS PERMITIDAS AO ATENDENTE (Expectativa: 200 OK / 204 No Content):
+  [APROVADO] GET /orders -> Status: 200
+  [APROVADO] GET /deliveries -> Status: 200
+  [APROVADO] GET /staff/deliverers -> Status: 200
+
+3. ROTAS TESTADAS COM ADMINISTRADOR (Expectativa: Acesso total permitido):
+  [APROVADO] GET /admin/products -> Status: 200
+  [APROVADO] GET /admin/categories -> Status: 200
+  [APROVADO] GET /coupons -> Status: 200
+  [APROVADO] GET /staff -> Status: 200
+  [APROVADO] GET /reports/sales?from=2026-01-01&to=2026-11-10 -> Status: 200
+  [APROVADO] GET /orders -> Status: 200
+  [APROVADO] GET /deliveries -> Status: 200
+
+RESULTADO FINAL C1: APROVADO
+Conclusão: O perfil ATENDENTE tem isolamento estrito contra configurações administrativas, catálogo, cupons, equipe e relatórios, retendo apenas acesso à operação de pedidos e entregas. O ADMINISTRADOR possui privilégios plenos.

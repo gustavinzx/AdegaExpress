@@ -1,0 +1,21 @@
+TESTE D3: COMPATIBILIDADE CROSS-BROWSER (RNF09)
+Data/Hora: 2026-11-10T03:40:28.515Z
+Alvo: https://adega-express-six.vercel.app
+Fluxo testado: Catálogo -> Adicionar produto ao carrinho -> Abrir carrinho -> Exibir resumo e botão de finalizar compra.
+
+  - [APROVADO] Chromium:
+    * Catálogo carregado com sucesso.
+    * Navegação para /carrinho concluída: SIM.
+  - [APROVADO] Mozilla Firefox:
+    * Catálogo carregado com sucesso.
+    * Navegação para /carrinho concluída: SIM.
+  - [APROVADO] WebKit (Safari engine):
+    * Catálogo carregado com sucesso.
+    * Navegação para /carrinho concluída: SIM.
+  - [APROVADO] Microsoft Edge (Canal msedge):
+    * Catálogo carregado com sucesso.
+    * Navegação para /carrinho concluída: SIM.
+
+RESULTADO FINAL D3: APROVADO
+Total de navegadores homologados: 4 de 4.
+Conclusão: O sistema apresenta compatibilidade plena com os motores Chromium, Gecko (Firefox), WebKit e Edge, atendendo aos requisitos de portabilidade e renderização cross-browser (RNF09).

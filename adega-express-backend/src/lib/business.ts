@@ -33,15 +33,7 @@ export function businessDate(now = new Date()): string {
   const value = (type: string) => parts.find((p) => p.type === type)!.value;
   return `${value('year')}-${value('month')}-${value('day')}`;
 }
-export function isAdult(date: Date, now = new Date()): boolean {
-  const birth = date.toISOString().slice(0, 10);
-  const today = businessDate(now);
-  let age = Number(today.slice(0, 4)) - Number(birth.slice(0, 4));
-  if (today.slice(5) < birth.slice(5)) {
-    age--;
-  }
-  return age >= 18 && birth <= today;
-}
+
 export function startBusinessDay(value: string): Date {
   // Resolve local midnight using timezone data rather than assuming a fixed UTC offset.
   const target = new Date(value + 'T00:00:00Z').getTime();

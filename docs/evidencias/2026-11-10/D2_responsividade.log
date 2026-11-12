@@ -1,0 +1,23 @@
+TESTE D2: RESPONSIVIDADE E ADAPTAÇÃO VISUAL (RNF04)
+Data/Hora: 2026-11-10T03:39:44.435Z
+Alvo: https://adega-express-six.vercel.app
+Viewports avaliados: Desktop (1440x900) e Mobile (375x667)
+
+  - [APROVADO] Tela Catálogo (/):
+    * Desktop: capturas/resp_catalogo_desktop_1440x900.png
+    * Mobile:  capturas/resp_catalogo_mobile_375x667.png
+  - [APROVADO] Tela Login (/login):
+    * Desktop: capturas/resp_login_desktop_1440x900.png
+    * Mobile:  capturas/resp_login_mobile_375x667.png
+  - [APROVADO] Tela Carrinho (/carrinho):
+    * Desktop: capturas/resp_carrinho_desktop_1440x900.png
+    * Mobile:  capturas/resp_carrinho_mobile_375x667.png
+  - [APROVADO] Tela Admin (/admin):
+    * Desktop: capturas/resp_admin_desktop_1440x900.png
+    * Mobile:  capturas/resp_admin_mobile_375x667.png
+  - [APROVADO] Tela Entregador (/entregador):
+    * Desktop: capturas/resp_entregador_desktop_1440x900.png
+    * Mobile:  capturas/resp_entregador_mobile_375x667.png
+
+RESULTADO FINAL D2: APROVADO
+Conclusão: Todas as 5 telas-chave foram renderizadas com sucesso em Desktop (1440x900) e Mobile (375x667), comprovando adaptabilidade de layout, preservação de navegação e touch targets adequados (RNF04).

@@ -1,0 +1,19 @@
+TESTE C6: CADASTRO E UNICIDADE (RN02 / POST /auth/register)
+Data/Hora: 2026-11-11T05:04:55.080Z
+
+1. TESTE DE NÃO ACEITAÇÃO E NÃO PERSISTÊNCIA DE CPF E BIRTH_DATE:
+  - Requisição POST /auth/register com CPF e birth_date: Status 400 [APROVADO - Rejeitado com 400 Bad Request por schema Zod estrito]
+  - Resposta da API: {"status":"error","statusCode":400,"message":"Dados inválidos.","details":[{"field":"","message":"Unrecognized keys: \"cpf\", \"birth_date\""}],"request_id":"7f4366e6-78e1-4638-bb92-6e2d2cb450c1"}
+  - Requisição POST /auth/register sem CPF nem birth_date (apenas name, email, password): Status 201 [APROVADO - 201 Created]
+  - Resposta da API: {"status":"success","data":{"user":{"id":66,"name":"Cliente Auditoria RN02","email":"cliente.rn02.495080@teste.com","role":"CLIENTE","birth_date":null,"active":true,"created_at":"2026-11-11T05:04:55.376Z"},"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY2LCJyb2xlIjoiQ0xJRU5URSIsInZlciI6MCwiaWF0IjoxNzk0MzczNDk1LCJleHAiOjE3OTQ5NzgyOTV9.DrTN-fEejkH07chFGYKLcvClq-jU3MkETeVv3afiuzc"}}
+  - Verificação no banco de dados (tabela users):
+    * CPF persistido: null [SIM - Não aceito e não persistido (coluna mantida null)]
+    * birth_date persistido: null [SIM - Não aceito e não persistido (coluna mantida null)]
+
+2. TESTE DE EMAIL DUPLICADO (Conflito Global de Email):
+  - Tentativa de cadastrar usuário com email já existente: Status 409 [APROVADO - 409 Conflict]
+  - Mensagem de erro: {"status":"error","statusCode":409,"message":"Registro já existente.","request_id":"2194ca11-779d-4c16-970a-7a0d14e8469c"}
+  - Tentativa de cadastrar membro de equipe (staff) com mesmo email: Status 409 [APROVADO - 409 Conflict]
+
+RESULTADO FINAL C6: APROVADO
+Conclusão: A rota POST /auth/register agora rejeita rigidamente campos de CPF e birth_date com HTTP 400 (Zod strict), persistindo novos clientes apenas com name, email e password_hash (com cpf e birth_date nulos no MySQL sem migração). A unicidade global de email permanece integralmente resguardada com HTTP 409 Conflict.

@@ -12,7 +12,6 @@ export const userSelect = {
   name: true,
   email: true,
   role: true,
-  birth_date: true,
   active: true,
   created_at: true,
 } as const;

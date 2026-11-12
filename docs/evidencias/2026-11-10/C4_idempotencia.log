@@ -1,0 +1,17 @@
+TESTE C4: IDEMPOTÊNCIA DE CHECKOUT (Idempotency-Key)
+Data/Hora: 2026-11-10T03:35:39.589Z
+
+1. TESTE COM DUAS REQUISIÇÕES IDÊNTICAS USANDO A MESMA Idempotency-Key:
+  - 1ª Requisição: Status 201, Idempotency-Replayed: false, Pedido ID: #104
+  - Estoque: antes=88, depois=87 (decréscimo de 1 un)
+  - 2ª Requisição (idêntica): Status 200, Idempotency-Replayed: true, Pedido ID: #104
+  - Estoque após 2ª requisição: 87 (inalterado)
+  - Pedidos idênticos retornados: SIM [APROVADO]
+  - Cabeçalho Idempotency-Replayed correto (false depois true): [APROVADO]
+  - Estoque baixado apenas uma vez: [APROVADO]
+
+2. TESTE COM PAYLOAD DIFERENTE USANDO A MESMA CHAVE:
+  - Reutilização da chave com payload distinto: Status 409 [APROVADO - 409 Conflict] (Mensagem: {"status":"error","statusCode":409,"message":"Idempotency-Key já utilizada com outro pedido.","request_id":"7f81fb23-218f-47e1-a81f-281220cb9c19"})
+
+RESULTADO FINAL C4: APROVADO
+Conclusão: O mecanismo de idempotência impede criação de pedidos duplicados e duplicidade de baixa de estoque em caso de reenvio de rede, além de acusar 409 Conflict se a chave for reutilizada com corpo diferente.

@@ -1,0 +1,100 @@
+================================================================================
+   TESTE D5: VALIDAÇÃO DO FLUXO COMPLETO NO AMBIENTE PUBLICADO (EVIDÊNCIA D5)   
+   Data/Hora: 2026-11-11T22:20:28.887Z
+   Git Commit HEAD: ecdc2e36e7dcf55ad80411afa8c57820b794ad8f
+   Frontend: https://adega-express-six.vercel.app (Vercel)
+   Backend:  https://adegaexpress.onrender.com (Render - Plano Free, us-east Ohio)
+================================================================================
+
+5. INFORMAÇÕES DE AMBIENTE E ISOLAMENTO:
+   - Commit Publicado: ecdc2e36e7dcf55ad80411afa8c57820b794ad8f
+   - Isolamento de Transação Efetivo:
+     Em produção na nuvem (config.NODE_ENV === "production" || process.env.RENDER),
+     a API utiliza o isolamento nativo gerenciado do provedor MySQL/TiDB (REPEATABLE READ)
+     com bloqueio em nível de linha nos decrementos atômicos (stock_quantity >= quantity),
+     parametrizado com maxWait: 10000ms e timeout: 20000ms para evitar sobrecarga ou travamento.
+     O isolamento Serializable local possui fallback automático para este modo gerenciado.
+
+--------------------------------------------------------------------------------
+PASSO 1: Login de Cliente e Cadastro de Novo Endereço
+--------------------------------------------------------------------------------
+[HTTP] POST /auth/login -> Status: 200
+Login efetuado com sucesso. URL atual: https://adega-express-six.vercel.app/
+[HTTP] POST /addresses -> Status: 201
+✅ Novo endereço de entrega cadastrado com sucesso!
+
+--------------------------------------------------------------------------------
+PASSO 2: Montagem de Pedido com 2 Itens e Aplicação de Cupom BEMVINDO10
+--------------------------------------------------------------------------------
+✅ 2 unidades adicionadas à sacola.
+📸 Captura T05 realizada: a358b47fba28bc96127778bf435c1a08
+[HTTP] POST /orders/quote -> Status: 200
+✅ Cupom BEMVINDO10 aplicado com desconto de 10% calculado pelo backend.
+✅ Endereço de entrega selecionado no checkout.
+✅ Forma de pagamento PIX selecionada.
+📸 Captura T06 realizada: 6ec26574566be1a51cabe331fa7c2f83
+Enviando pedido via interface...
+[HTTP] POST /orders -> Status: 201
+Pedido finalizado! URL atual: https://adega-express-six.vercel.app/pedidos
+✅ Pedido criado com sucesso: ID #120002
+
+--------------------------------------------------------------------------------
+PASSO 3: Login como Atendente, Confirmação de Pagamento e Avanço para CONFIRMADO e SEPARADO
+--------------------------------------------------------------------------------
+[HTTP] POST /auth/login (Atendente) -> Status: 200
+📸 Captura T09 realizada: caf0480fa010044d4c79981caeca56ba
+[HTTP] PATCH /orders/120002/payment -> Status: 200
+✅ Pagamento demonstrativo do Pedido #120002 registrado como PAGO.
+[HTTP] PATCH /orders/120002/status (CONFIRMADO) -> Status: 200
+✅ Status do Pedido #120002 avançado para CONFIRMADO.
+[HTTP] PATCH /orders/120002/status (SEPARADO) -> Status: 200
+✅ Status do Pedido #120002 avançado para SEPARADO (Entrega gerada).
+[HTTP] PATCH /deliveries/2/assign (Entregador #9) -> Status: 200
+✅ Entrega #2 atribuída com sucesso ao Entregador Adega Express.
+
+--------------------------------------------------------------------------------
+PASSO 4: Login como Entregador e Captura T10 com Entrega Atribuída
+--------------------------------------------------------------------------------
+[HTTP] POST /auth/login (Entregador) -> Status: 200
+📸 Captura T10 realizada: 64bdf0d638a4b5666d166fa2c55fda1b (com entrega atribuída ao vivo)
+
+--------------------------------------------------------------------------------
+PASSO 5: Login Cliente, Capturas T15 (Sem Skeleton) e T08 (Meus Pedidos)
+--------------------------------------------------------------------------------
+📸 Captura T15 realizada: a746265e4c3a6efa9938de2874f2756d (conteúdo carregado, sem skeleton)
+📸 Captura T08 realizada: 9414220954349c71ed03567ad0170434
+
+--------------------------------------------------------------------------------
+PASSO 6: Teste de Consistência de Cancelamento com Retorno ao Estoque (HTTP 200)
+--------------------------------------------------------------------------------
+Estoque inicial do produto #30163 (Água de Coco 100% Integral 1L): 60 un.
+[HTTP] POST /orders (Pedido Pendente de Teste) -> Status: 201, ID #120003
+Estoque após criação do pedido: 59 un. (decrementou 1 un. corretamente ✅)
+[HTTP] POST /orders/120003/cancel -> Status: 200
+Estoque após cancelamento: 60 un.
+Consistência de estoque: RESTAURADO COM SUCESSO (ATÔMICO) ✅
+
+--------------------------------------------------------------------------------
+PASSO 7: Limpeza Operacional de Pedidos e Endereços de Teste
+--------------------------------------------------------------------------------
+Cancelando pedido operacional #120002 como Atendente para limpeza...
+[HTTP] PATCH /orders/120002/status (CANCELADO Limpeza) -> Status: 200
+[HTTP] DELETE /addresses/120019 (Setor de Autarquias Sul Quadra 5) -> Status: 204 (Limpeza concluída)
+[HTTP] DELETE /addresses/120020 (Setor de Autarquias Sul Quadra 5) -> Status: 204 (Limpeza concluída)
+[HTTP] DELETE /addresses/120021 (Setor de Autarquias Sul Quadra 5) -> Status: 204 (Limpeza concluída)
+[HTTP] DELETE /addresses/120022 (Setor de Autarquias Sul Quadra 5) -> Status: 204 (Limpeza concluída)
+
+================================================================================
+TABELA DE EVIDÊNCIAS DE CAPTURA DO AMBIENTE PUBLICADO:
+================================================================================
+| ID | Rota | Perfil | Descrição / Dados em Foco | Hash MD5 | Status |
+|:---|:---|:---|:---|:---|:---:|
+| **T05** | T05.png | Produção (Live) | Sacola com 2 itens, subtotal e frete no site publicado | `a358b47fba28bc96127778bf435c1a08` | **APROVADO** |
+| **T06** | T06.png | Produção (Live) | Checkout com endereço, PIX, cupom BEMVINDO10 e total | `6ec26574566be1a51cabe331fa7c2f83` | **APROVADO** |
+| **T09** | T09.png | Produção (Live) | Console operacional de atendimento (/admin) | `caf0480fa010044d4c79981caeca56ba` | **APROVADO** |
+| **T10** | T10.png | Produção (Live) | Painel de Entregas atribuídas (/entregador) com entrega real | `64bdf0d638a4b5666d166fa2c55fda1b` | **APROVADO** |
+| **T15** | T15.png | Produção (Live) | Detalhes do Pedido #120002 com stepper completo e sem skeleton | `a746265e4c3a6efa9938de2874f2756d` | **APROVADO** |
+| **T08** | T08.png | Produção (Live) | Lista de Meus Pedidos do cliente (/pedidos) | `9414220954349c71ed03567ad0170434` | **APROVADO** |
+
+STATUS GERAL: APROVADO COM 100% DE SUCESSO NO AMBIENTE PUBLICADO
+================================================================================

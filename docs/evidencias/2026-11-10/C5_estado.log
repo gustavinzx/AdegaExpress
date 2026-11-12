@@ -1,0 +1,21 @@
+TESTE C5: TRANSIÇÃO DE ESTADOS E REGRAS DE NEGÓCIO
+Data/Hora: 2026-11-10T03:35:39.630Z
+
+1. CRIANDO PEDIDO PENDENTE (NÃO PAGO):
+  - Pedido #105 criado com status=PENDENTE e payment_status=PENDENTE.
+
+2. TENTATIVA DE AVANÇAR PEDIDO PARA 'ENTREGUE' DIRETAMENTE VIA /orders/:id/status:
+  - Tentativa de PATCH status=ENTREGUE no pedido: Status 409 [APROVADO - 409 Conflict]
+  - Mensagem retornada: {"status":"error","statusCode":409,"message":"Transição de PENDENTE para ENTREGUE não permitida.","request_id":"c7ba5dab-bb3b-4c84-b0b2-360d8c612760"}
+
+3. TENTATIVA DE CONFIRMAR OU SEPARAR PEDIDO COM PAGAMENTO PENDENTE (RN08):
+  - Tentativa de confirmar sem pagamento: Status 409 [APROVADO - 409 Conflict]
+  - Mensagem retornada: {"status":"error","statusCode":409,"message":"O pagamento demonstrativo deve ser confirmado como PAGO antes de confirmar ou separar o pedido (RN08).","request_id":"f7a5e670-83d6-4c14-abdd-2c5172078446"}
+
+4. FLUXO NORMAL VÁLIDO ATÉ SEPARAÇÃO E TESTE DE CONCLUSÃO DE ENTREGA:
+  - Pedido pago, confirmado e separado. Entrega #38 gerada com sucesso.
+  - Entrega finalizada pelo entregador: Status 200 [APROVADO]
+  - Status sincronizado no pedido: ENTREGUE [APROVADO]
+
+RESULTADO FINAL C5: APROVADO
+Conclusão: A máquina de estados bloqueia avanços arbitrários para ENTREGUE fora do módulo de entregas, bloqueia confirmação/separação antes de status PAGO (RN08) e sincroniza a entrega perfeitamente quando as pré-condições são satisfeitas.

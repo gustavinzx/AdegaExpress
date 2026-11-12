@@ -1,0 +1,22 @@
+TESTE D4c: RECAPTURA T13b — GESTÃO DE ESTOQUE (MODAL SINCRONIZADO)
+Data/Hora: 2026-11-11T03:20:17.931Z
+Ambiente: http://localhost:3000 (Local - Frontend Next.js + Backend Express/Prisma/MySQL)
+Produto Alvo: Água Mineral Com Gás 500ml (#223)
+
+CRITÉRIOS DE AUDITORIA E VALIDAÇÃO:
+- Saldo Atual Exibido no Modal: 75 unidades
+- Movimentações Listadas:
+  * +10 unidades ("Reposição de estoque")
+  * +65 unidades ("Lote de estoque inicial de abastecimento")
+- Soma das Movimentações do Histórico: 75 unidades
+- Validação Matemática (Saldo Exibido == Soma do Histórico): APROVADO (75 == 75)
+- Campo Quantidade Visível e Preenchido: APROVADO (10 un.)
+- Campo Motivo Obrigatório Preenchido: APROVADO ("Reposição de estoque")
+- Ausência de Skeletons / Erros: APROVADO (0 skeletons)
+- Perfil no Cabeçalho: APROVADO (Administrador)
+
+| ID | Rota | Perfil | Produto / Dados em Foco | Hash MD5 | Saldo Exibido | Soma Histórico | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|:---:|
+| **T13b** | `/admin#estoque` | Administrador | Água Mineral Com Gás 500ml — Modal com histórico de 75 un. (+65 e +10) | `b3d3e9c408700cbb8ef6f70346b0b9bb` | 75 un. | 75 un. | **APROVADO** |
+
+Conclusão: A captura T13b reflete com 100% de precisão matemática a equivalência entre o saldo atual do estoque e a soma de todas as movimentações reais registradas no banco e exibidas no modal.

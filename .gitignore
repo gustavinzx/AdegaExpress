@@ -6,6 +6,13 @@ dist/
 build/
 prisma/dev.db
 *.log
+!docs/**/*.log
 *.zip
 scratch/
 .system_generated/
+.vscode/
+.codex-review/
+*.tsbuildinfo
+~$*
+.DS_Store
+entrega_final_v5_9/

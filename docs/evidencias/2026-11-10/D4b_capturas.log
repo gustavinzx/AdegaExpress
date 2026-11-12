@@ -1,0 +1,18 @@
+TESTE D4b: CAPTURAS COMPLEMENTARES DO PROTÓTIPO COM DADOS REAIS
+Data/Hora: 2026-11-10T22:28:21.692Z
+Ambiente: http://localhost:3000 (Local - Frontend Next.js + Backend Express/Prisma/MySQL)
+Critérios de Validação ABNT/Acadêmica (2.1 a 2.4):
+- 2.1 Unicidade de Hash MD5: APROVADO (3 hashes únicos entre si e distintos de T01..T15)
+- 2.2 Ausência de textos proibidos / estados vazios espúrios: APROVADO
+- 2.3 Validação de elementos específicos por tela: APROVADO (T08b: 4 status / T13b: motivo e histórico / T01c: produto em falta)
+- 2.4 Correspondência estrita de perfis autenticados nos cabeçalhos: APROVADO
+
+| ID | Rota | Perfil | Pedidos / Produtos Usados | Hash MD5 | Validação DOM | Skeletons | Perfil Header | Validação Específica | Status |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---:|
+| **T08b** | `/pedidos` | Cliente | Pedidos #109 (CONFIRMADO), #108 (SEPARADO), #107 (EM_ROTA) e #106 (ENTREGUE) | `713c4fdf844f...` | OK | 0 skeletons | Cliente (Pedidos e Nome no header) | 4 status visíveis (#109 CONFIRMADO, #108 SEPARADO, #107 EM_ROTA, #106 ENTREGUE) | **APROVADO** |
+| **T13b** | `/admin#estoque` | Administrador | Modal de Estoque — Água Mineral Com Gás com saldo de 75 un. igual à soma do histórico (+65 e +10) | `811de8ec1340...` | OK | 0 skeletons | Administrador (Painel Admin/Administrador visível) | Saldo exibido (75 un.) rigorosamente igual à soma das movimentações (+65 e +10) | **APROVADO** |
+| **T01c** | `/#catalogo` | Visitante | Catálogo com Produto #225 em falta (estoque 0) e produtos #222, #223, #224 disponíveis | `035f59b11beb...` | OK | 0 skeletons | Visitante (Entrar visível) | Produto #225 (Água Tônica Citrus) exibindo badge e botão "Esgotado" ao lado de produtos disponíveis ("Comprar") | **APROVADO** |
+
+TOTAL DE CAPTURAS COMPLEMENTARES: 3 de 3 homologadas.
+STATUS FINAL DA ETAPA D4b: APROVADO
+Conclusão: As 3 capturas complementares foram geradas e validadas com sucesso, atendendo integralmente aos critérios de unicidade de hash, dados de demonstração reais, ausência de skeletons e estrita fidelidade funcional.

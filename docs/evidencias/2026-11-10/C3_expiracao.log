@@ -1,0 +1,21 @@
+TESTE C3: EXPIRAÇÃO AUTOMÁTICA DE PEDIDOS PENDENTES (RN07 / RF18)
+Data/Hora: 2026-11-10T03:35:39.555Z
+
+1. CRIAÇÃO DE PEDIDO COM DATA RETROATIVA (> 30 MINUTOS):
+  - Pedido #103 criado com 2 unidades.
+  - Estoque inicial: 88, após checkout: 86 (decréscimo correto de 2 un).
+  - Data criada_at ajustada para 2026-11-10T03:00:39.571Z (> 30 min atrás).
+
+2. EXECUÇÃO 1 DA ROTINA expirePendingOrders():
+  - Pedidos expirados e cancelados nesta execução: 1
+  - Status do pedido: CANCELADO [APROVADO]
+  - Motivo do cancelamento: "Pagamento demonstrativo não confirmado no prazo de 30 minutos (RN07)."
+  - Estoque após expiração: 88 [APROVADO - 2 un devolvidas ao estoque]
+  - Movimentação de estoque ENTRADA registrada: SIM (Qtd: 2) [APROVADO]
+
+3. EXECUÇÃO 2 DA ROTINA expirePendingOrders() (Teste de Idempotência):
+  - Pedidos cancelados na 2ª execução: 0
+  - Estoque após 2ª execução: 88 [APROVADO - Sem incremento duplicado de estoque]
+
+RESULTADO FINAL C3: APROVADO
+Conclusão: A rotina expirePendingOrders cancela pontualmente pedidos pendentes criados há mais de 30 minutos, devolve os itens ao estoque de forma atômica e é estritamente idempotente em chamadas repetidas.

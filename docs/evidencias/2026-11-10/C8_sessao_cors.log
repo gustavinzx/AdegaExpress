@@ -1,0 +1,25 @@
+TESTE C8: SESSÃO, COOKIES E CORS
+Data/Hora: 2026-11-11T05:04:55.080Z
+
+1. TESTE (a): POLÍTICA DE CORS E BLOQUEIO DE ORIGENS *.vercel.app:
+  - GET /products com Origin "https://qualquer.vercel.app": Status 403 [APROVADO - Bloqueado com 403 Origem não permitida]
+  - Mensagem retornada: {"status":"error","statusCode":403,"message":"Origem não permitida.","request_id":"6b9068e1-e6e0-47eb-ba95-2534d6a448f8"}
+  - GET /products com Origin autorizada em CORS_ORIGINS ("http://localhost:3000"): Status 200 [APROVADO - Permitido (200 OK)]
+  - Header Access-Control-Allow-Origin: http://localhost:3000
+  - GET /products com Origin "https://site-malicioso-externo.com": Status 403 [APROVADO - Rejeitado com 403 Origem não permitida]
+  - Mensagem retornada: {"status":"error","statusCode":403,"message":"Origem não permitida.","request_id":"76bcdbf5-1c51-4c1f-8b42-7207f5b920b9"}
+
+2. TESTE (b): REQUISIÇÃO DE MUTAÇÃO COM COOKIE (Proteção CSRF / Origin):
+  - POST com Cookie e Origin "https://qualquer.vercel.app" (fora do CORS_ORIGINS): Status 403 [APROVADO - 403 Origem não permitida]
+  - Mensagem retornada: {"status":"error","statusCode":403,"message":"Origem não permitida.","request_id":"b423fd45-8b43-4118-8e38-6b2a96a8f62b"}
+  - POST com Cookie sem Origin (cliente direto/app): Status 201 [APROVADO - Permitido (201 Created)]
+
+3. TESTE (c): LOGOUT INCREMENTA token_version E INVALIDA O TOKEN JWT:
+  - Usuário autenticado. token_version inicial no banco: 0
+  - POST /auth/logout: Status 204 [APROVADO - 204 No Content]
+  - token_version no banco após logout: 1 (incremento de 1: SIM) [APROVADO]
+  - GET /auth/me usando o token antigo: Status 401 [APROVADO - Rejeitado com 401]
+  - Mensagem retornada: {"status":"error","statusCode":401,"message":"Sessão encerrada. Entre novamente.","request_id":"80bd4d66-7879-4593-9bbb-cc1521be3b07"}
+
+RESULTADO FINAL C8: APROVADO
+Conclusão: O CORS não mais aceita origens *.vercel.app, restringindo-se estritamente às origens configuradas em CORS_ORIGINS (mantendo http://localhost:3000 para desenvolvimento local); mutações com cookie exigem origem estritamente autorizada; e a revogação de sessão via logout incrementa token_version, invalidando imediatamente todos os tokens JWT emitidos anteriormente.

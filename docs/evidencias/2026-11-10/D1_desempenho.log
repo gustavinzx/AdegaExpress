@@ -1,0 +1,23 @@
+TESTE D1: DESEMPENHO DE CARREGAMENTO (RNF06)
+Data/Hora: 2026-11-10T03:39:37.862Z
+Alvo: https://adega-express-six.vercel.app (Página de Catálogo)
+Critério RNF06: Tempo de resposta/carregamento sob condições normais de rede com métricas de DOMContentLoaded e Load.
+
+1. MEDIÇÕES EM DESKTOP (Viewport: 1440x900):
+  - Execução #1: 3118 ms
+  - Execução #2: 255 ms
+  - Execução #3: 234 ms
+  - Execução #4: 282 ms
+  - Execução #5: 220 ms
+  => Média Desktop: 822 ms | Pior caso Desktop: 3118 ms
+
+2. MEDIÇÕES EM MOBILE (Viewport: 375x667):
+  - Execução #1: 249 ms
+  - Execução #2: 412 ms
+  - Execução #3: 249 ms
+  - Execução #4: 255 ms
+  - Execução #5: 327 ms
+  => Média Mobile: 298 ms | Pior caso Mobile: 412 ms
+
+RESULTADO FINAL D1: PARCIALMENTE APROVADO
+Conclusão: O tempo de carregamento da página inicial do catálogo atende parcialmente ao RNF06 em desktop (média 822 ms; pior caso de 3.118 ms na 1ª execução) e atende em dispositivos móveis (média 298 ms, pior caso 412 ms). Homologação mantida como parcial devido ao registro de 3.118 ms e à ausência de testes formais de estresse sob carga concorrente.
