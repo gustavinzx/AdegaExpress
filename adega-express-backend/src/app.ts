@@ -45,7 +45,6 @@ const origins = Array.from(
     ...configuredOrigins,
     'http://localhost:3000',
     'https://adega-express-six.vercel.app',
-    'https://adega-express.vercel.app',
   ]),
 );
 app.use(

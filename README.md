@@ -27,7 +27,7 @@ Os documentos formais de especificação e padrões de projeto estão centraliza
 
 ## 🌐 Ambientes Publicados (Demonstração)
 
-- **Frontend (Loja & Painel):** [https://adega-express.vercel.app](https://adega-express.vercel.app)
+- **Frontend (Loja & Painel):** [https://adega-express-six.vercel.app](https://adega-express-six.vercel.app)
 - **Backend (API REST):** [https://adegaexpress.onrender.com/health](https://adegaexpress.onrender.com/health)
 
 ---
