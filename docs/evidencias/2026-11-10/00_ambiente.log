@@ -1,6 +1,6 @@
-﻿=== INFORMAÇÕES DO AMBIENTE (2026-11-11) ===
-Data/Hora Local: 2026-11-11 19:07:00 -03:00
-Git Commit HEAD: ecdc2e36e7dcf55ad80411afa8c57820b794ad8f
+﻿=== INFORMAÇÕES DO AMBIENTE (2026-11-12) ===
+Data/Hora Local: 2026-11-12 17:34:00 -03:00
+Git Commit HEAD: d107ea703183b12f9c9d81462e00df14c87c814b (Live no Render e Vercel)
 Node Version: v24.11.0
 NPM Version: 11.6.2
 MySQL Version: C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe  Ver 8.0.45 for Win64 on x86_64 (MySQL Community Server - GPL)

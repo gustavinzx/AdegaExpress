@@ -1,16 +1,17 @@
 # RELATÓRIO CONSOLIDADO DE EVIDÊNCIAS DE VERIFICAÇÃO EMPÍRICA — ADEGA EXPRESS
 
-**Data da Execução:** 10–11 de Novembro de 2026  
-**Commit Git:** `ecdc2e36e7dcf55ad80411afa8c57820b794ad8f` (`HEAD` da branch `main`)  
+**Data da Execução:** 10–12 de Novembro de 2026  
+**Commit Git:** `d107ea703183b12f9c9d81462e00df14c87c814b` (`HEAD` da branch `main`, Live no Render e Vercel)  
 *Rastreabilidade e Relação entre Commits:*
-- `f489229`: Commit inicial de estabilização onde a restrição de CORS para a origem pública foi aplicada e os testes C6 e C8 foram executados.
-- `a4c861b`: Commit com ajustes de resiliência e rate limit, sendo a última alteração que tocou o backend (`adega-express-backend`). É a versão atualmente ativa e **Live** no Render Web Service (`srv-db0fsvs9v7es73e2shj0`).
-- `ecdc2e3`: Commit `HEAD` de `main` e publicado na Vercel (frontend), contendo melhorias de interface e otimizações de catálogo. O comando `git diff a4c861b ecdc2e3 --stat -- adega-express-backend` retorna rigorosamente **vazio**, comprovando que o código do backend é 100% idêntico entre `a4c861b` e `ecdc2e3`.
-- Os logs de verificação (`00_ambiente.log`, `A2_check.log`, `A3_smoke.log`, `A4_integracao.log` e `D5_publicado.log`) foram todos gerados a partir do repositório no `HEAD` `ecdc2e3`.
+- `ecdc2e3`: Commit da suíte consolidada de 50 testes automatizados (12 unitários, 9 smoke e 29 integração A1 a D5).
+- `b7f691f`: Sincronização e alinhamento da matriz de rastreabilidade do Documento de Visão v5.9 aos 50 testes reais e ao RF17.
+- `6e96ed2`: Atualização formal do Documento de Visão v5.9 com propriedades limpas e recálculo do sumário no Word.
+- `d107ea7`: Commit atual Live no Render (`srv-db0fsvs9v7es73e2shj0`) e na Vercel, contendo o limite de 99 unidades por item no carrinho (`schemas.ts` e `CartContext.tsx`) e a restrição estrita de CORS sem wildcard genérico, validada empiricamente via teste C8 (HTTP 403 para `https://qualquer.vercel.app` e HTTP 200 para as origens oficiais).
+- Os logs de verificação unitários, smoke e de integração foram preservados para reprodução integral a partir de `ecdc2e3`, enquanto o teste de segurança e sessão `C8_sessao_cors.log` foi reexecutado e atualizado no commit `d107ea7`.
 
 **Ambiente e Tecnologias Homologadas:**
-- **Frontend:** Next.js 16.3.4 | React 19.2.8 | Tailwind CSS 4.3.3 | Turbopack | Vercel Edge (`https://adega-express-six.vercel.app`)
-- **Backend:** Node.js v24.11.0 | Express 4.22.3 (resolvido por package-lock.json sobre ^4.19.2) | Prisma Client v5.22.0 | Render (`https://adegaexpress.onrender.com`)
+- **Frontend:** Next.js 16.3.4 | React 19.2.8 | Tailwind CSS 4.3.3 | Turbopack | Vercel Edge (`https://adega-express-six.vercel.app` e `https://adega-express.vercel.app`)
+- **Backend:** Node.js v24.11.0 | Express 4.22.3 | Prisma Client v5.22.0 | Render (`https://adegaexpress.onrender.com`)
 - **Bancos de Dados:** MySQL Server 8.0.45 local (testes de fumaça e integração A4) e TiDB Serverless / MySQL Cloud gerenciado (ambiente de produção D5 com SSL)
 
 ---
