@@ -161,15 +161,19 @@ export const coupon = z
     (v) => v.discount_type !== 'PERCENTUAL' || v.discount_value <= 100,
     'Desconto percentual não pode exceder 100.',
   );
+export const checkoutItem = z
+  .object({
+    product_id: id,
+    quantity: z.number().int().min(1).max(99),
+  })
+  .strict();
+
 export const checkout = z
   .object({
     address_id: id,
     payment_method: z.enum(['PIX', 'CARTAO']),
     coupon_code: z.string().trim().toUpperCase().min(3).max(50).optional(),
-    items: z
-      .array(z.object({ product_id: id, quantity: z.number().int().min(1).max(1000000) }).strict())
-      .min(1)
-      .max(100),
+    items: z.array(checkoutItem).min(1).max(100),
   })
   .strict()
   .refine(

@@ -23,6 +23,8 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType>({} as CartContextType);
 
+export const MAX_ITEM_QUANTITY = 99;
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
@@ -82,6 +84,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const currentQty = existing ? existing.quantity : 0;
       const targetQty = currentQty + quantity;
 
+      if (targetQty > MAX_ITEM_QUANTITY) {
+        toast.error(`Limite máximo de ${MAX_ITEM_QUANTITY} unidades por item no carrinho.`);
+        return prev;
+      }
+
       if (targetQty > product.stock_quantity) {
         toast.error(
           `Estoque insuficiente para ${product.name}. Disponível: ${product.stock_quantity} un.`,
@@ -115,6 +122,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) =>
       prev.map((item) => {
         if (item.product.id !== productId) return item;
+        if (quantity > MAX_ITEM_QUANTITY) {
+          toast.error(`Limite máximo de ${MAX_ITEM_QUANTITY} unidades por item no carrinho.`);
+          return { ...item, quantity: MAX_ITEM_QUANTITY };
+        }
         if (quantity > item.product.stock_quantity) {
           toast.error(
             `Quantidade máxima disponível em estoque: ${item.product.stock_quantity} un.`,
