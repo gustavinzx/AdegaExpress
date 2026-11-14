@@ -1,0 +1,81 @@
+=== EVIDÊNCIA D7b: DESEMPENHO LOGADO, COM SACOLA CHEIA E ATÉ O CONTEÚDO APARECER (RNF06) ===
+Data/Hora início: 2026-11-14T08:35:07.170Z
+Data/Hora fim:    2026-11-14T08:39:32.977Z
+Git Commit HEAD:  2da14740b37c19fac2d7510593adee745efc1694
+Site medido:      https://adega-express-six.vercel.app  (API: https://adegaexpress.onrender.com)
+Ferramenta:       Playwright + Chromium headless
+Complementa:      D7_desempenho.log (rotas anônimas, carrinho vazio, só DOMContentLoaded e load).
+Metodologia:      aquecimento antes; por viewport, 1 login real como cliente e 1 item (/produto/164) na sacola; o estado de sessão é reutilizado
+                  em contexto novo a cada carga (sem cache do navegador). Por rota: 1 carga de descarte + 20 medidas. Nenhum pedido é criado.
+                  Além de DOMContentLoaded e load, mede o tempo (ms desde o início da navegação) até o conteúdo que depende da API aparecer.
+                  Espera máxima por marco: 20000 ms; estouro é registrado como 21000 ms e contado em "timeouts".
+Limitação:        único computador, rede residencial, sem throttling; backend gratuito já aquecido (a 1ª chamada a frio pode superar 3 s: 3118 ms em D1).
+Meta RNF06:       < 3000 ms
+=====================================================================
+
+##### Desktop 1440x900 #####
+
+[Catálogo logado (/)] 20 cargas
+                                                    média mediana   p95  pior  melhor  >3000ms  timeouts
+  DOMContentLoaded                               185   168   277   288   130      0/20   0
+  load                                           265   261   288   339   234      0/20   0
+  produtos visíveis (1º card de produto)        1931  1963  2205  2219  1635      0/20   0
+  valores "DOMContentLoaded" (ms): 161, 134, 159, 150, 277, 249, 182, 160, 185, 206, 193, 258, 288, 172, 181, 142, 153, 163, 130, 148
+  valores "load" (ms): 234, 264, 250, 271, 277, 339, 258, 265, 265, 253, 257, 258, 288, 281, 275, 257, 251, 279, 244, 243
+  valores "produtos visíveis (1º card de produto)" (ms): 2159, 1715, 1635, 2171, 2187, 1781, 1698, 1653, 1654, 2171, 1637, 1653, 2219, 2205, 1707, 1670, 2172, 2200, 2145, 2195
+
+[Sacola logada, com 1 item (/carrinho)] 20 cargas
+                                                    média mediana   p95  pior  melhor  >3000ms  timeouts
+  DOMContentLoaded                               179   163   284   311   127      0/20   0
+  load                                           257   257   312   318   211      0/20   0
+  item da sacola visível                         346   341   408   419   311      0/20   0
+  endereços carregados da API                   1232  1162  1646  1673  1116      0/20   0
+  cotação do servidor exibida (frete em R$)     1248  1181  1661  1689  1129      0/20   0
+  valores "DOMContentLoaded" (ms): 149, 278, 131, 163, 311, 228, 127, 167, 162, 284, 175, 179, 160, 152, 145, 150, 139, 146, 177, 169
+  valores "load" (ms): 266, 278, 253, 274, 312, 284, 247, 248, 227, 285, 216, 318, 242, 260, 215, 263, 246, 239, 262, 211
+  valores "item da sacola visível" (ms): 360, 370, 350, 369, 419, 367, 319, 320, 342, 353, 311, 408, 326, 340, 328, 352, 333, 319, 319, 315
+  valores "endereços carregados da API" (ms): 1673, 1175, 1162, 1163, 1240, 1167, 1141, 1121, 1167, 1161, 1617, 1228, 1140, 1150, 1140, 1181, 1646, 1125, 1130, 1116
+  valores "cotação do servidor exibida (frete em R$)" (ms): 1689, 1190, 1181, 1181, 1255, 1183, 1158, 1137, 1183, 1176, 1631, 1247, 1164, 1164, 1156, 1197, 1661, 1139, 1144, 1129
+
+[Meus pedidos logado (/pedidos)] 20 cargas
+                                                    média mediana   p95  pior  melhor  >3000ms  timeouts
+  DOMContentLoaded                               165   162   193   285   123      0/20   0
+  load                                           246   238   261   324   221      0/20   0
+  lista de pedidos exibida                      2397  2409  2644  3130  2102      1/20   0
+  valores "DOMContentLoaded" (ms): 165, 156, 170, 155, 162, 123, 133, 174, 175, 166, 155, 171, 162, 193, 157, 285, 171, 139, 147, 152
+  valores "load" (ms): 248, 246, 233, 250, 236, 221, 238, 260, 249, 235, 239, 236, 233, 260, 238, 324, 261, 238, 238, 235
+  valores "lista de pedidos exibida" (ms): 3130, 2114, 2600, 2644, 2113, 2603, 2617, 2130, 2132, 2592, 2112, 2605, 2609, 2637, 2102, 2226, 2160, 2612, 2106, 2105
+
+##### Mobile 375x667 #####
+
+[Catálogo logado (/)] 20 cargas
+                                                    média mediana   p95  pior  melhor  >3000ms  timeouts
+  DOMContentLoaded                               169   160   209   256   123      0/20   0
+  load                                           245   245   264   280   222      0/20   0
+  produtos visíveis (1º card de produto)        1762  1635  2160  2174  1610      0/20   0
+  valores "DOMContentLoaded" (ms): 151, 165, 157, 181, 161, 256, 159, 123, 132, 197, 165, 153, 150, 201, 129, 151, 205, 130, 207, 209
+  valores "load" (ms): 237, 262, 244, 249, 234, 256, 223, 239, 237, 280, 255, 229, 264, 241, 222, 232, 257, 247, 249, 249
+  valores "produtos visíveis (1º card de produto)" (ms): 1613, 1677, 1630, 1650, 1626, 1642, 2146, 1610, 2129, 2174, 1618, 1633, 1638, 1630, 2160, 1658, 2150, 1617, 1616, 1616
+
+[Sacola logada, com 1 item (/carrinho)] 20 cargas
+                                                    média mediana   p95  pior  melhor  >3000ms  timeouts
+  DOMContentLoaded                               178   167   266   322   125      0/20   0
+  load                                           279   264   392   442   224      0/20   0
+  item da sacola visível                         354   344   420   469   297      0/20   0
+  endereços carregados da API                   1210  1148  1640  1689  1101      0/20   0
+  cotação do servidor exibida (frete em R$)     1225  1163  1656  1703  1119      0/20   0
+  valores "DOMContentLoaded" (ms): 125, 209, 168, 177, 266, 166, 170, 161, 147, 191, 157, 137, 322, 234, 148, 138, 141, 194, 141, 178
+  valores "load" (ms): 230, 298, 265, 261, 266, 275, 276, 272, 228, 262, 242, 442, 322, 287, 258, 224, 264, 261, 392, 248
+  valores "item da sacola visível" (ms): 297, 392, 340, 356, 347, 346, 346, 343, 302, 329, 335, 469, 391, 371, 334, 339, 333, 388, 420, 311
+  valores "endereços carregados da API" (ms): 1101, 1206, 1640, 1156, 1154, 1146, 1144, 1134, 1104, 1142, 1131, 1269, 1202, 1689, 1149, 1129, 1144, 1204, 1245, 1116
+  valores "cotação do servidor exibida (frete em R$)" (ms): 1119, 1221, 1656, 1171, 1168, 1162, 1159, 1149, 1119, 1160, 1147, 1284, 1217, 1703, 1164, 1143, 1159, 1219, 1260, 1130
+
+[Meus pedidos logado (/pedidos)] 20 cargas
+                                                    média mediana   p95  pior  melhor  >3000ms  timeouts
+  DOMContentLoaded                               184   176   263   282   135      0/20   0
+  load                                           265   261   292   292   230      0/20   0
+  lista de pedidos exibida                      2375  2208  2653  2667  2132      0/20   0
+  valores "DOMContentLoaded" (ms): 231, 152, 140, 149, 219, 150, 191, 263, 186, 173, 164, 143, 135, 195, 157, 216, 178, 167, 282, 189
+  valores "load" (ms): 275, 261, 253, 253, 256, 246, 280, 264, 274, 257, 247, 285, 230, 279, 251, 262, 257, 292, 282, 292
+  valores "lista de pedidos exibida" (ms): 2186, 2135, 2646, 2653, 2137, 2631, 2140, 2139, 2154, 2136, 2628, 2217, 2605, 2132, 2637, 2640, 2645, 2164, 2667, 2199
+

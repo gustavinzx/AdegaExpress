@@ -53,10 +53,17 @@
 | **D5** | Homologação ponta a ponta no ambiente publicado (Vercel + Render) | **APROVADO** | `D5_publicado_2026-11-11.log` e `D5_publicado.log` | Duas execuções preservadas. **11/11 (commit `ecdc2e3`, `D5_publicado_2026-11-11.log`):** fluxo completo com HTTP 200/201/204 em todas as operações: login, endereço, cotação com cupom, pedido #120002, pagamento, separação, atribuição de entrega, cancelamento com rollback do pedido #120003 (estoque 60→59→60). **12/11 (commit `a48ec39`, `D5_publicado.log`):** execução resumida após a restrição de CORS: health, catálogo com e sem origem válida (403/200), login, endereços, pedido #150002 e cancelamento (estoque 58→56→58). |
 | **D6** | Compatibilidade de navegadores no site publicado (RNF09) | **APROVADO** | `D6_navegadores.log` | Fluxo completo (login, catálogo, produto, sacola, cupom BEMVINDO10, endereço e PIX, pedido, "Meus pedidos", cancelamento) com 9/9 etapas em Chromium 153, Firefox 155 e WebKit 26.6; pedidos #180001 a #180003 cancelados pela aplicação; 3 capturas do checkout em `capturas_d6/`. Executado no commit `d91956b`. |
 | **D7** | Desempenho de carregamento com servidor aquecido (RNF06) | **APROVADO** | `D7_desempenho.log` | 20 cargas por rota e viewport (`/` e `/carrinho`; desktop 1440x900 e mobile 375x667). Pior caso: 422 ms de `load` (`/carrinho`, desktop); nenhuma carga acima de 3000 ms. Limitações: carrinho medido vazio e sem login, `load` não inclui chamadas à API posteriores, medição a partir de um único computador. A primeira chamada a frio do backend gratuito pode superar 3 s (3118 ms em D1). Executado no commit `d91956b`. |
+| **D7b** | Desempenho logado, com sacola cheia e até o conteúdo da API aparecer (RNF06) | **APROVADO COM RESSALVA** | `D7b_desempenho_logado.log` | 20 cargas por rota e viewport (`/`, `/carrinho` com 1 item e `/pedidos`, logado como cliente). `DOMContentLoaded`/`load` abaixo de 450 ms. Tempo até o conteúdo da API: catálogo ~1,9 s (pior 2219 ms); sacola com cotação ~1,2 s (pior 1703 ms); "Meus pedidos" ~2,4 s (pior 3130 ms desktop, 2667 ms mobile). **Ressalva: 1 das 120 medições (lista de pedidos, desktop) passou de 3000 ms (3130 ms).** Executado no commit `2da1474`. |
 
 ---
 
 ## 2. TOTALIZADOR GERAL DE VERIFICAÇÃO
+
+> **Notas de leitura das evidências**
+> - `A3_smoke.log` roda contra o banco local `adega_express` (não é um banco separado); os 29 testes de integração (`A4`) usam MySQL descartável.
+> - `D5_publicado_2026-11-11.log` é preservado como foi gerado. Detalhes do registro original: a seção 5 (ambiente) aparece antes do Passo 1; o Passo 2 cita "2 itens" mas adiciona 2 unidades do mesmo produto; o Passo 7 remove 4 endereços de teste (120019 a 120022) e o log mostra uma única criação (as demais são resíduos de execuções anteriores).
+> - Os tempos de D7/D7b valem com o backend gratuito já aquecido; a primeira chamada a frio chegou a 3118 ms (D1).
+> - O token de sessão permanece em `localStorage` (limitação já declarada).
 
 ### 2.1 Testes Automatizados Executados
 - **Testes Unitários:** 12 executados | **12 aprovados (100%)** | 0 falhas
@@ -118,6 +125,7 @@ docs/evidencias/2026-11-10/
 ├── D5_publicado_2026-11-11.log
 ├── D6_navegadores.log
 ├── D7_desempenho.log
+├── D7b_desempenho_logado.log
 ├── RESUMO.md
 └── capturas/
     ├── DADOS.md
