@@ -50,7 +50,9 @@
 | **D4b** | Capturas complementares do protótipo (T08b, T13b, T01c) | **APROVADO** | `D4b_capturas.log` | 3 capturas complementares homologadas (T08b: pedidos CONFIRMADO/SEPARADO/EM_ROTA/ENTREGUE; T13b: modal de estoque com motivo obrigatório e histórico real; T01c: item em falta no catálogo). |
 | **D4c** | Recaptura T13b — Gestão de estoque com modal sincronizado | **APROVADO** | `D4c_capturas.log` | Modal com saldo exibido de 75 un. rigorosamente igual à soma das movimentações do histórico (+65 e +10); MD5 `b3d3e9c408700cbb8ef6f70346b0b9bb`. |
 | **D4d** | Auditoria de consistência de estoque e atomicidade | **APROVADO** | `D4d_consistencia_estoque.log` | Comprovação empírica de atomicidade via interface administrativa (Playwright): saldo de produtos e `stock_movements` atualizados na mesma transação interativa Prisma (ENTRADA e SAÍDA validadas). |
-| **D5** | Homologação ponta a ponta no ambiente publicado (Vercel + Render) | **APROVADO** | `D5_publicado.log` | Fluxo completo do Passo 3 com HTTP 200/201 em todas as operações: login, endereço, cotação, pedido #120002, pagamento, separação, atribuição de entrega e cancelamento com rollback do pedido #120003. |
+| **D5** | Homologação ponta a ponta no ambiente publicado (Vercel + Render) | **APROVADO** | `D5_publicado_2026-11-11.log` e `D5_publicado.log` | Duas execuções preservadas. **11/11 (commit `ecdc2e3`, `D5_publicado_2026-11-11.log`):** fluxo completo com HTTP 200/201/204 em todas as operações: login, endereço, cotação com cupom, pedido #120002, pagamento, separação, atribuição de entrega, cancelamento com rollback do pedido #120003 (estoque 60→59→60). **12/11 (commit `a48ec39`, `D5_publicado.log`):** execução resumida após a restrição de CORS: health, catálogo com e sem origem válida (403/200), login, endereços, pedido #150002 e cancelamento (estoque 58→56→58). |
+| **D6** | Compatibilidade de navegadores no site publicado (RNF09) | **APROVADO** | `D6_navegadores.log` | Fluxo completo (login, catálogo, produto, sacola, cupom BEMVINDO10, endereço e PIX, pedido, "Meus pedidos", cancelamento) com 9/9 etapas em Chromium 153, Firefox 155 e WebKit 26.6; pedidos #180001 a #180003 cancelados pela aplicação; 3 capturas do checkout em `capturas_d6/`. Executado no commit `d91956b`. |
+| **D7** | Desempenho de carregamento com servidor aquecido (RNF06) | **APROVADO** | `D7_desempenho.log` | 20 cargas por rota e viewport (`/` e `/carrinho`; desktop 1440x900 e mobile 375x667). Pior caso: 422 ms de `load` (`/carrinho`, desktop); nenhuma carga acima de 3000 ms. Limitações: carrinho medido vazio e sem login, `load` não inclui chamadas à API posteriores, medição a partir de um único computador. A primeira chamada a frio do backend gratuito pode superar 3 s (3118 ms em D1). Executado no commit `d91956b`. |
 
 ---
 
@@ -113,6 +115,9 @@ docs/evidencias/2026-11-10/
 ├── D4c_capturas.log
 ├── D4d_consistencia_estoque.log
 ├── D5_publicado.log
+├── D5_publicado_2026-11-11.log
+├── D6_navegadores.log
+├── D7_desempenho.log
 ├── RESUMO.md
 └── capturas/
     ├── DADOS.md

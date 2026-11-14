@@ -1,0 +1,50 @@
+=== EVIDÊNCIA D7: DESEMPENHO DE CARREGAMENTO (RNF06) NO SITE PUBLICADO ===
+Data/Hora início: 2026-11-14T08:24:32.629Z
+Data/Hora fim:    2026-11-14T08:25:01.465Z
+Git Commit HEAD:  d91956b395b19728f030c8d0ee3984b1347223bc
+Site medido:      https://adega-express-six.vercel.app  (API: https://adegaexpress.onrender.com)
+Ferramenta:       Playwright + Chromium headless; PerformanceNavigationTiming (domContentLoadedEventEnd e loadEventEnd, em ms desde o início da navegação)
+Metodologia:      aquecimento antes (/health, /products, /, /carrinho); por rota e viewport, 1 carga extra de descarte e depois 20 cargas medidas;
+                  contexto novo a cada carga (sem cache do navegador, sem cookies); rede da máquina local sem limitação (sem throttling); nenhum valor omitido.
+Rotas:            "/" (o catálogo é a página inicial; não existe rota /catalogo) e "/carrinho" (sacola SEM login e vazia).
+                  Observação: o carrinho foi medido vazio, portanto a carga não inclui itens, endereços nem cotação do servidor.
+Limitação:        medições a partir de um único computador e rede residencial; "load" não inclui requisições feitas depois do evento load (ex.: chamadas à API pós-hidratação).
+Meta RNF06:       < 3000 ms
+=====================================================================
+
+##### Desktop 1440x900 #####
+
+[Catálogo (/)] 20 cargas, erros de navegação/HTTP: 0
+               média  mediana     p95   pior   melhor
+  DOMContentLoaded   170     162    204   267    130  (ms)
+  load               252     248    295   300    215  (ms)
+  cargas com load > 3000 ms: 0/20
+  valores DCL (ms):  182, 180, 149, 204, 169, 195, 146, 192, 151, 267, 155, 139, 171, 130, 143, 137, 152, 202, 130, 201
+  valores load (ms): 295, 255, 239, 248, 258, 238, 221, 288, 215, 271, 240, 300, 255, 241, 229, 260, 240, 251, 242, 248
+
+[Sacola (/carrinho)] 20 cargas, erros de navegação/HTTP: 0
+               média  mediana     p95   pior   melhor
+  DOMContentLoaded   174     157    284   323    128  (ms)
+  load               265     257    323   422    221  (ms)
+  cargas com load > 3000 ms: 0/20
+  valores DCL (ms):  199, 142, 160, 183, 129, 161, 155, 152, 146, 128, 151, 133, 214, 157, 156, 323, 284, 187, 150, 166
+  valores load (ms): 291, 228, 231, 281, 264, 262, 286, 251, 235, 229, 230, 221, 260, 238, 280, 323, 422, 279, 236, 254
+
+##### Mobile 375x667 #####
+
+[Catálogo (/)] 20 cargas, erros de navegação/HTTP: 0
+               média  mediana     p95   pior   melhor
+  DOMContentLoaded   170     162    248   285    125  (ms)
+  load               248     246    266   286    226  (ms)
+  cargas com load > 3000 ms: 0/20
+  valores DCL (ms):  128, 169, 162, 130, 177, 176, 248, 150, 172, 152, 285, 125, 204, 162, 215, 148, 167, 149, 136, 154
+  valores load (ms): 248, 261, 240, 236, 246, 249, 248, 226, 260, 231, 286, 266, 246, 243, 265, 232, 255, 235, 244, 237
+
+[Sacola (/carrinho)] 20 cargas, erros de navegação/HTTP: 0
+               média  mediana     p95   pior   melhor
+  DOMContentLoaded   165     156    213   267    124  (ms)
+  load               252     247    289   300    228  (ms)
+  cargas com load > 3000 ms: 0/20
+  valores DCL (ms):  153, 156, 150, 179, 152, 213, 151, 158, 124, 178, 208, 153, 147, 152, 159, 129, 267, 157, 164, 159
+  valores load (ms): 240, 247, 289, 265, 250, 300, 228, 240, 231, 264, 248, 246, 254, 235, 257, 257, 267, 241, 245, 240
+

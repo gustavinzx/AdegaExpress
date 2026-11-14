@@ -1,0 +1,56 @@
+=== EVIDÊNCIA D6: COMPATIBILIDADE DE NAVEGADORES (RNF09) NO SITE PUBLICADO ===
+Data/Hora início: 2026-11-14T08:23:07.026Z
+Data/Hora fim:    2026-11-14T08:24:21.418Z
+Git Commit HEAD:  d91956b395b19728f030c8d0ee3984b1347223bc
+Site testado:     https://adega-express-six.vercel.app (API: https://adegaexpress.onrender.com)
+Ferramenta:       Playwright (headless), viewport 1440x900, contexto novo por motor
+Conta usada:      cliente@adegaexpress.com (conta de demonstração)
+Observação:       o login é feito antes do catálogo porque o checkout exige sessão de CLIENTE.
+=====================================================================
+
+--- Chromium (versão do motor: 153.0.8010.12) ---
+  1. [PASSOU ] login do cliente (pré-requisito do checkout) (5728 ms) redirecionado para /
+  2. [PASSOU ] abrir o catálogo (3250 ms) 63 links de produto visíveis
+  3. [PASSOU ] abrir um produto (3109 ms) aberto /produto/164
+  4. [PASSOU ] adicionar à sacola (997 ms) sacola com 1 item
+  5. [PASSOU ] aplicar cupom BEMVINDO10 (3260 ms) cupom aplicado e desconto exibido
+  6. [PASSOU ] escolher endereço e PIX (1773 ms) endereço e PIX selecionados; total R$ 23,11
+  7. [PASSOU ] finalizar o pedido (4727 ms) pedido #180001 criado (HTTP 201)
+  8. [PASSOU ] ver "Meus pedidos" (2920 ms) visível: Pedido #180001 • 14/11/2026, 05:23:19 Pendente (Aguardando Validação) PIX: PENDENTE CANCELAR 1. PENDENTE 2. CONFIRMADO 3
+  9. [PASSOU ] cancelar o pedido (188 ms) pedido #180001 CANCELADO pela aplicação
+  Resultado: 9/9 etapas PASSARAM
+  Captura do checkout: capturas_d6/D6_checkout_chromium.png (md5 4710c98b5018cfc0a991ea3d95059cfc)
+  Limpeza: pedido #180001 já cancelado no passo final
+
+--- Firefox (versão do motor: 155.0) ---
+  1. [PASSOU ] login do cliente (pré-requisito do checkout) (2621 ms) redirecionado para /
+  2. [PASSOU ] abrir o catálogo (4609 ms) 63 links de produto visíveis
+  3. [PASSOU ] abrir um produto (2774 ms) aberto /produto/164
+  4. [PASSOU ] adicionar à sacola (1167 ms) sacola com 1 item
+  5. [PASSOU ] aplicar cupom BEMVINDO10 (2892 ms) cupom aplicado e desconto exibido
+  6. [PASSOU ] escolher endereço e PIX (1680 ms) endereço e PIX selecionados; total R$ 23,11
+  7. [PASSOU ] finalizar o pedido (4737 ms) pedido #180002 criado (HTTP 201)
+  8. [PASSOU ] ver "Meus pedidos" (2970 ms) visível: Pedido #180002 • 14/11/2026, 05:23:45 Pendente (Aguardando Validação) PIX: PENDENTE CANCELAR 1. PENDENTE 2. CONFIRMADO 3
+  9. [PASSOU ] cancelar o pedido (263 ms) pedido #180002 CANCELADO pela aplicação
+  Resultado: 9/9 etapas PASSARAM
+  Captura do checkout: capturas_d6/D6_checkout_firefox.png (md5 0c8e9671c0fb68687d3c613f78f22f0c)
+  Limpeza: pedido #180002 já cancelado no passo final
+
+--- WebKit (versão do motor: 26.6) ---
+  1. [PASSOU ] login do cliente (pré-requisito do checkout) (2279 ms) redirecionado para /
+  2. [PASSOU ] abrir o catálogo (2067 ms) 63 links de produto visíveis
+  3. [PASSOU ] abrir um produto (1847 ms) aberto /produto/164
+  4. [PASSOU ] adicionar à sacola (1416 ms) sacola com 1 item
+  5. [PASSOU ] aplicar cupom BEMVINDO10 (2498 ms) cupom aplicado e desconto exibido
+  6. [PASSOU ] escolher endereço e PIX (2301 ms) endereço e PIX selecionados; total R$ 23,11
+  7. [PASSOU ] finalizar o pedido (3732 ms) pedido #180003 criado (HTTP 201)
+  8. [PASSOU ] ver "Meus pedidos" (1877 ms) visível: Pedido #180003 • 14/11/2026, 05:24:07 Pendente (Aguardando Validação) PIX: PENDENTE CANCELAR 1. PENDENTE 2. CONFIRMADO 3
+  9. [PASSOU ] cancelar o pedido (662 ms) pedido #180003 CANCELADO pela aplicação
+  Resultado: 9/9 etapas PASSARAM
+  Captura do checkout: capturas_d6/D6_checkout_webkit.png (md5 4ed4e105a57faa9740fc62c1864a4ce0)
+  Limpeza: pedido #180003 já cancelado no passo final
+
+--- RESUMO ---
+  Chromium: 9/9 APROVADO
+  Firefox: 9/9 APROVADO
+  WebKit: 9/9 APROVADO
